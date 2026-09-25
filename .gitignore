@@ -47,3 +47,8 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# Salidas del knit
+*.html
+*.pdf
+*_files/
