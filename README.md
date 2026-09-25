@@ -1,1 +1,1 @@
-# Reto-Modelaci-n-Estad-stica
+# Reto-Modelacion-Estad-stica
