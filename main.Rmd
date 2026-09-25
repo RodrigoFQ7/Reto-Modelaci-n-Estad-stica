@@ -1,7 +1,15 @@
 ---
 title: "Reto Modelación Estadística"
 author: "Equipo"
-output: html_document
+output:
+  pdf_document:
+    number_sections: true
+    toc: true
+lang: es
+fontsize: 11pt
+geometry: margin=2.5cm
+header-includes:
+  - \usepackage{float}
 ---
 
 ```{r setup, include=FALSE}
