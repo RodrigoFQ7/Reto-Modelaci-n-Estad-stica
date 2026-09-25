@@ -1,0 +1,23 @@
+---
+title: "Reto Modelación Estadística"
+author: "Equipo"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+# Carguen aquí TODOS los paquetes y datos que usará el equipo
+```
+
+```{r 01_introduccion, child = "01_introduccion.Rmd"}
+```
+
+```{r 02_exploracion, child = "02_exploracion.Rmd"}
+```
+
+```{r 03_modelacion, child = "03_modelacion.Rmd"}
+```
+
+```{r 04_conclusiones, child = "04_conclusiones.Rmd"}
+```
+
