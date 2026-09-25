@@ -9,3 +9,18 @@ Escribe aquí tu sección.
 # yo muy bien, y tu?
 
 # excelente papu
+
+# LaTeX
+
+Proponemos un modelo de regresión lineal \textbf{múltiple}:
+
+$$
+y_i = \beta_0 + \beta_1 x_{i1} + \varepsilon_i, \quad \varepsilon_i \sim N(0, \sigma^2)
+$$
+
+\begin{equation}
+\hat{\beta} = (X^\top X)^{-1} X^\top y
+\label{eq:mco}
+\end{equation}
+
+Como se ve en la ecuación \eqref{eq:mco}, el estimador depende de...
