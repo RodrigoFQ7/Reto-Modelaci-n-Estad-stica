@@ -97,8 +97,6 @@ De esto se desprende la hipótesis que este proyecto pondrá a prueba. Si "ser l
 
 Para abordar el problema se utilizarán los datos del Módulo sobre Lectura (MOLEC) del INEGI correspondientes a 2022-2024, que permiten observar la autopercepción como lector, la práctica efectiva, los materiales leídos y los motivos de lectura. Los estudios citados arriba se apoyan en la ENUT 2009 y en contextos distintos, por lo que se usan como marco conceptual y no como evidencia del periodo analizado. 
 
-\newpage
-
 \subsection*{Objetivo de investigación}
 
 La pregunta que guía este trabajo es: ¿de qué manera el sexo y la condición de ocupación en el trabajo doméstico explican la brecha entre la autopercepción como lector y la práctica real de lectura en la población adulta en México entre 2022 y 2024?
