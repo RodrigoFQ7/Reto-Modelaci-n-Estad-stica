@@ -66,7 +66,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 \newpage
 
-\onehalfspacing
+\setstretch{1.45}
 
 \subsection*{Revisión bibliográfica}
 
@@ -96,6 +96,7 @@ Así pues, como el sexo y la condición de ocupación están estrechamente vincu
 De esto se desprende la hipótesis que este proyecto pondrá a prueba. Si "ser lector" se asocia con la lectura legítima (de acuerdo a la "alta cultura" de Bourdieu) y con disponer de tiempo continuo, es probable que la lectura fragmentada, propia de quienes organizan su día en torno al hogar, no se reconozca como tal.  
 
 Para abordar el problema se utilizarán los datos del Módulo sobre Lectura (MOLEC) del INEGI correspondientes a 2022-2024, que permiten observar la autopercepción como lector, la práctica efectiva, los materiales leídos y los motivos de lectura. Los estudios citados arriba se apoyan en la ENUT 2009 y en contextos distintos, por lo que se usan como marco conceptual y no como evidencia del periodo analizado. 
+
 
 \subsection*{Objetivo de investigación}
 
@@ -247,7 +248,7 @@ Los bloques de libros, revistas, periódicos e internet se incluyen bajo el supu
 \item Ocampo, A., y López, C. (2020). Transformando los espacios de lectura. Una perspectiva crítica e inclusiva de las prácticas lectoras contemporáneas. \textit{Revista Electrónica Educare, 24}(1), 1--21. \url{https://doi.org/10.15359/ree.24-1.11}
 \end{list}
 
-```{r}
+```{r limpieza, include=FALSE}
 # Limpieza de la base de datos
 
 M22 = read.csv("datos/Datos_molec_2022-1.CSV")
