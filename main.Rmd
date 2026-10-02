@@ -1,24 +1,36 @@
 ---
+documentclass: extarticle
 output:
   pdf_document:
     number_sections: true
     toc: false
 lang: es
-fontsize: 11pt
+fontsize: 12pt
 geometry: margin=2.5cm
+urlcolor: blue
+linkcolor: black
 header-includes:
+  - \usepackage{graphicx}
   - \usepackage{float}
   - \usepackage{amssymb}
   - \usepackage{caption}
   - \usepackage{esint}
+  - \usepackage{setspace}
   - \captionsetup[figure]{name=Figura,labelsep=period}
   - \captionsetup[table]{name=Tabla,labelsep=period}
-  - \usepackage{graphicx}
+  - \setlength{\parskip}{0.5em}
+  - \usepackage{array}
+  - \usepackage{ragged2e}
+  - \usepackage{longtable}
+  - \usepackage{booktabs}
+  - \newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
 ---
 
 
 \begin{titlepage}
 		\centering
+		
+		\vspace{1cm}
 		
 		\includegraphics[width=\textwidth]{imagenes/tecnologico-de-monterrey-blue.png}
 		
@@ -30,7 +42,7 @@ header-includes:
 		
 		{\LARGE\bfseries Modelación estadística para la toma de decisiones \par}
 		
-		\vspace{1.5cm}
+		\vspace{3cm}
 		
 		{\Large Fernanda Meléndez Banda A00843603\par}
 		{\Large Carlos Emilio Escobedo Castillo A00843640\par}
@@ -46,13 +58,23 @@ header-includes:
 		
 \end{titlepage}
 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
 \newpage
 
-\subsection*{Parte 1}
+\onehalfspacing
+
+\subsection*{Revisión bibliográfica}
 
 Abordar la problemática del estado de la lectura en México más allá de cifras superficiales es fundamental para el desarrollo intelectual y social del país. A través de la charla introductoria: Leer menos, rezagos mañana, impartida por el Dr. Marco Antonio Fernández Martínez, se indagó en las diferentes causas y consecuencias del rezago en la lectura en la población mexicana a nivel nacional.  
 
+
 Como punto de partida, se entiende que el hábito de leer está directamente relacionado con la calidad del pensamiento crítico, la capacidad de discernir entre información de calidad en los medios que nos rodean, una mejora en el léxico y habilidades comunicativas, entre otros beneficios.  
+
 
 De esta manera, es importante comprender las razones detrás del decaimiento en la calidad de lectura de los distintos sectores de la población mexicana para promover diversas acciones y medidas que complementen el desarrollo cognitivo de las mentes mexicanas frente a un horizonte desalentador como lo es el rezago caudado por el encierro a causa de la pandemia por COVID-19.  
 
@@ -60,31 +82,30 @@ Frente a este escenario, es necesario comprender los factores asociados al probl
 
 Para profundizar en estas dinámicas, la lectura suele observarse mediante dos indicadores que no siempre coinciden: lo que las personas dicen de sí mismas, es decir, si se consideran lectoras, y lo que en realidad hacen. La autopercepción como lector no solo depende de lo que cada uno entienda por leer, sino también de los textos que prefiere consumir y de si desea o no proyectar esa imagen ante los demás. Este proyecto parte de la hipótesis el sexo y la condición de ocupación en el trabajo doméstico influye en dicha brecha. 
 
-En la tradición de Bourdieu (1979, citado en Lahire, 2007), las prácticas culturales se ordenan en una jerarquía de legitimidad que mantiene a ciertos grupos a distancia de la "alta cultura".  
+En la tradición de Bourdieu (1979, citado en Lahire, 2007), las prácticas culturales se ordenan en una jerarquía de legitimidad que mantiene a ciertos grupos a distancia de la "alta cultura". Por ejemplo, Lahire (2007) señala que tras jornadas largas se recurre a lecturas fáciles para relajarse, aunque quien las practica las juzgue poco valiosas.  
 
-Por ejemplo, Lahire (2007) señala que tras jornadas largas se recurre a lecturas fáciles para relajarse, aunque quien las practica las juzgue poco valiosas.  
-
-Por otro lado, la lectura femenina ha sido históricamente subvalorada. Como explican Cortés y Daniel (2024), el acceso a la cultura escrita fue negado a diversos sectores, con especial énfasis en las mujeres. Esto genera una profunda desigualdad —vinculada a la diferencia de sexos— entre quienes participan de la lectura y la escritura y quienes quedan excluidos de ellas (Petrucci, 2002, citado en Cortés y Daniel, 2024). 
-
-De esto se desprende una hipótesis que este proyecto pondrá a prueba. Si "ser lector" se asocia con libros completos y tiempo continuo, es probable que la lectura fragmentada, propia de quienes organizan su día en torno al hogar, no se reconozca como tal. La brecha podría entonces adoptar dos formas: en quienes leen pero no se asumen lectoras, y quienes se perciben lectoras por "estatus", pero disponen de poco tiempo real para leer. Esta segunda posibilidad es coherente con lo que señalan García y Pacheco (2014): en las encuestas de uso del tiempo, las personas pueden responder según lo socialmente esperado.
+A esto se suma que la lectura femenina ha sido históricamente infravalorada. Como explican Cortés y Daniel (2024), el acceso a la cultura escrita fue negado a diversos sectores, con especial énfasis en las mujeres. Esto genera una profunda desigualdad —vinculada a la diferencia de sexos— entre quienes participan de la lectura y la escritura y quienes quedan excluidos de ellas (Petrucci, 2002, citado en Cortés y Daniel, 2024). 
 
 El primer elemento para entender esa variación es la desigual distribución del trabajo no remunerado. García y Pacheco (2014) recuerdan que el trabajo doméstico no se reconoce como un trabajo, ni siquiera por quienes lo realizan. Con datos de la Encuesta Nacional sobre Uso del Tiempo (ENUT) 2009, las mujeres dedicaban en promedio más del doble de tiempo que los hombres al trabajo no remunerado del hogar (García y Pacheco, 2014), y su carga total de trabajo, remunerado y no remunerado, superaba a la de los hombres en al menos 15 horas semanales.  
 
+
 Esta carga condiciona la lectura porque leer requiere tiempo propio. García Sainz (2017) retoma la idea de que el tiempo libre es lo que queda tras restar el cuidado personal, el empleo y el trabajo del hogar. Asimismo, destaca que el trabajo doméstico compromete la formación y el tiempo libre. El testimonio de una de las mujeres entrevistadas por Ramírez de Garay (2025) ejemplifica el efecto sobre la lectura: mientras que, unas cuando conseguían un momento libre para leer se quedaban dormidas debido al cansancio, otras trataban de leer, estudiar, cocinar, usar el teléfono o trasladarse al mismo tiempo. 
 
-De esto se desprende una hipótesis que este proyecto pondrá a prueba. Si "ser lector" se asocia con libros completos y tiempo continuo, es probable que la lectura fragmentada, propia de quienes organizan su día en torno al hogar, no se reconozca como tal. La brecha podría entonces adoptar dos formas: en quienes leen pero no se asumen lectoras, y quienes se perciben lectoras por "estatus", pero disponen de poco tiempo real para leer. Esta segunda posibilidad es coherente con lo que señalan García y Pacheco (2014): en las encuestas de uso del tiempo, las personas pueden responder según lo socialmente esperado. 
+Así pues, como el sexo y la condición de ocupación están estrechamente vinculados al trabajo doméstico, es necesario aislar el efecto de cada variable (García y Pacheco, 2014). Además, las condiciones de este grupo no son homogéneas: las mujeres de estratos bajos dedicadas exclusivamente al hogar enfrentan mayores dificultades para que sus parejas compartan las tareas (Rojas y Martínez, citados en García y Pacheco, 2014). 
 
-Sexo y condición de ocupación no son variables independientes. Dado que las mujeres asumen la mayor parte del trabajo doméstico (García y Pacheco, 2014), es esperable que la categoría de quehaceres del hogar esté compuesta, en una alta cantidad, por mujeres, lo que obliga a compararlas con otros grupos para distinguir el efecto de cada variable. También hay indicios de que las condiciones de este grupo no son homogéneas: las mujeres dedicadas exclusivamente al hogar, de estratos bajos y con parejas de mayor edad, enfrentan situaciones especialmente complicadas para que sus parejas compartan las tareas del hogar (Rojas y Martínez, citados en García y Pacheco, 2014). 
+De esto se desprende la hipótesis que este proyecto pondrá a prueba. Si "ser lector" se asocia con la lectura legítima (de acuerdo a la "alta cultura" de Bourdieu) y con disponer de tiempo continuo, es probable que la lectura fragmentada, propia de quienes organizan su día en torno al hogar, no se reconozca como tal.  
 
 Para abordar el problema se utilizarán los datos del Módulo sobre Lectura (MOLEC) del INEGI correspondientes a 2022-2024, que permiten observar la autopercepción como lector, la práctica efectiva, los materiales leídos y los motivos de lectura. Los estudios citados arriba se apoyan en la ENUT 2009 y en contextos distintos, por lo que se usan como marco conceptual y no como evidencia del periodo analizado. 
 
+\newpage
+
 \subsection*{Objetivo de investigación}
 
-La pregunta que guía este trabajo es: \textbf{¿de qué manera el sexo y la condición de ocupación en el trabajo doméstico explican la brecha entre la autopercepción como lector y la práctica real de lectura en la población adulta en México entre 2022 y 2024?} 
+La pregunta que guía este trabajo es: ¿de qué manera el sexo y la condición de ocupación en el trabajo doméstico explican la brecha entre la autopercepción como lector y la práctica real de lectura en la población adulta en México entre 2022 y 2024?
 
 El objetivo general es analizar cómo el sexo y la condición en el trabajo doméstico influyen en la brecha entre la autopercepción y la práctica real de lectura en la población adulta en México (2022-2024), mediante el procesamiento de datos de la MOLEC, para comprender su impacto en el consumo cultural.
 
-\textbf{Para encaminar esta investigación, se establecen las siguientes preguntas y objetivos específicos:}
+Para encaminar esta investigación, se establecen las siguientes preguntas y objetivos específicos:
 
 \textbf{Pregunta 1 (Contexto sociodemográfico)}
 
@@ -100,10 +121,115 @@ El objetivo general es analizar cómo el sexo y la condición en el trabajo dom�
   \item \textbf{Objetivo 2:} Identificar los tipos de materiales y los motivos de lectura más frecuentes en este grupo poblacional a partir de las variables de la MOLEC.
 \end{itemize}
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
-# Carguen aquí TODOS los paquetes y datos que usará el equipo
-```
+\textbf{Pregunta 3 (Evolución y género) }
+
+\begin{itemize}
+  \item \textbf{Pregunta:} ¿Cómo ha evolucionado la discrepancia lectora y las preferencias de consumo entre hombres y mujeres durante el periodo 2022-2024? 
+  \item \textbf{Objetivo 3:} Contrastar la evolución temporal de la discrepancia lectora y de las preferencias de consumo entre hombres y mujeres durante el periodo 2022-2024.
+\end{itemize}
+
+De esta manera, esta investigación es clave para evitar que las propuestas ante el problema de la lectura en México busquen tratar a todos por igual.  Por ello, a través de un análisis estadístico de la MOLEC (2022-204) se buscan soluciones que no impongan un canon hegemónico que desvalorice las prácticas de otros grupos como las trabajadoras domésticas. Siguiendo la teoría del capital cultural (Bourdieu, 1979, citado en Lahire, 2007), se busca revalorizar textos que comúnmente son minimizados.  
+
+Siguiendo esta línea, se pretende verlos como un área de oportunidad para que se siga leyendo. Así pues, se busca garantizar alternativas viables para redistribuir el derecho a la educación y a la lectura acorde con lo que cada persona y grupo social requiere (Ocampo y López, 2020). 
+
+\subsection*{Descripción de los datos}
+
+\textbf{1. Descripción de las bases de datos}
+
+El análisis se fundamenta en los datos del Módulo sobre Lectura (MOLEC) del INEGI (2025), el cual desde 2015 recopila información sobre el comportamiento lector de la población mexicana en distintos materiales como libros, revistas, periódicos y medios digitales. Para delimitar la investigación a la época postpandemia, el proyecto utiliza los registros correspondientes al periodo de 2022 a 2024 (INEGI, 2022, 2023, 2024). 
+
+Para este trabajo se aislaron exclusivamente las variables de interés, las cuales se detallarán más adelante, revisando que estuvieran completas y libres de errores o datos faltantes. Esto permitió garantizar la calidad de la información antes de estudiar los diferentes perfiles lectores y sus formas de consumo. 
+
+Finalmente, una vez limpios y seleccionados los datos, se unieron los registros de los tres años en un solo dataframe. De esta manera, se obtuvo una base de datos lista para hacer las comparaciones y cruces necesarios a lo largo del periodo analizado. 
+
+\textbf{2. Variables seleccionadas y justificación }
+
+Las variables elegidas responden a tres preguntas: quiénes son los lectores invisibles (perfil y control), qué leen y con qué motivo (libros, revistas, periódicos e internet) y cuánto tiempo dedican a leer (intensidad). La Tabla 1 presenta el resumen. 
+
+\begingroup
+\footnotesize
+\renewcommand{\arraystretch}{1.25}
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{@{}L{1.8cm} L{2.2cm} L{2.15cm} L{9cm}@{}}
+    \caption{Variables utilizadas, tipo y función en la investigación.}
+    \label{tab:variables} \\
+    \toprule
+    \textbf{Bloque} &
+    \textbf{Variables} &
+    \textbf{Tipo} &
+    \textbf{Función en la investigación y justificación} \\
+    \midrule
+    \endfirsthead
+
+    \caption[]{Variables utilizadas, tipo y función en la investigación (continuación).} \\
+    \toprule
+    \textbf{Bloque} &
+    \textbf{Variables} &
+    \textbf{Tipo} &
+    \textbf{Función en la investigación y justificación} \\
+    \midrule
+    \endhead
+
+    \midrule
+    \multicolumn{4}{r}{\textit{Continúa en la siguiente página.}} \\
+    \endfoot
+
+    \bottomrule
+    \endlastfoot
+
+    \textbf{Grupo de estudio} &
+    H\_LEC &
+    Cualitativa &
+    Clasifica a cada persona según lo que declara y lo que realmente leyó. La categoría 3 (dice no leer, pero leyó) define a los ``lectores invisibles'', el objeto central del estudio. \\
+    \addlinespace
+
+    \textbf{Perfil y control} &
+    SEXO, COND\_ACT, NIVEL, EDAD &
+    Cualitativas (EDAD: cuantitativa discreta) &
+    SEXO permite evaluar la brecha de género; COND\_ACT aísla a quienes se dedican a los quehaceres del hogar (trabajo doméstico); NIVEL y EDAD controlan la escolaridad y la generación para evitar distorsiones al comparar grupos. \\
+    \addlinespace
+
+    \textbf{Libros} &
+    P5; P6\_1 a P6\_6 &
+    Cualitativas (P6: sí/no) &
+    P5 indica el motivo principal de lectura (trabajo, estudio, cultura general, gusto, religión u otro) y P6 los tipos de libros leídos (manuales, académicos, autoayuda, literatura, cultura general u otro). Muestran qué leen y para qué. \\
+    \addlinespace
+
+    \textbf{Revistas} &
+    P11; P12\_1 a P12\_8 &
+    Cualitativas (P12: sí/no) &
+    Motivo principal de lectura de revistas y temáticas de interés (deportes, política, cocina, salud, religión, etc.). \\
+    \addlinespace
+
+    \textbf{Periódicos} &
+    P17; P18\_1 a P18\_5 &
+    Cualitativas (P18: sí/no) &
+    Motivo principal de lectura de periódicos y secciones consultadas (política, deportes, cultura, sociales, policíaca). Mide preferencias informativas en prensa escrita. \\
+    \addlinespace
+
+    \textbf{Internet} &
+    P25 &
+    Cualitativa &
+    Motivo principal de lectura de páginas de internet, foros o blogs; recoge el consumo digital, probablemente el más ``invisible''. \\
+    \addlinespace
+
+    \textbf{Intensidad} &
+    P26 &
+    Cuantitativa continua &
+    Minutos continuos dedicados a la lectura. Mide el tiempo real invertido y permite contrastar la práctica con la autopercepción. \\
+\end{longtable}
+
+\noindent
+\textit{Nota: los mnemónicos corresponden a los nombres de columna de las bases.}
+\endgroup
+
+H_LEC es indispensable porque convierte la discrepancia entre lo que la gente declara y lo que hace en una variable analizable. 
+
+Las variables de perfil (SEXO, COND_ACT, NIVEL y EDAD) permiten describir al grupo y comparar sin atribuir a un solo factor diferencias causadas por escolaridad o edad. En particular, la categoría de quehaceres del hogar en COND_ACT es clave para estudiar si el trabajo doméstico invisibiliza la práctica lectora, especialmente en mujeres. 
+
+Los bloques de libros, revistas, periódicos e internet se incluyen bajo el supuesto de que los lectores invisibles no se reconocen como tales al consumir materiales alternativos al libro. 
+
+\newpage
 
 \subsection*{Referencias bibliográficas}
 
@@ -111,19 +237,15 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 \item Cortés, A. M., y Daniel Bello, S. A. (2024). Mujeres y cultura escrita: Hacia una participación política en México. \textit{Raudem, Revista de Estudios de las Mujeres, 12}, 192--212. \url{https://doi.org/10.25115/raudem.v12i1.10001}
 \item García, B., y Pacheco, E. (2014). Reflexiones sobre el estudio del uso del tiempo. En B. García y E. Pacheco (Coords.), \textit{Uso del tiempo y trabajo no remunerado en México} (pp. 17--50). El Colegio de México, CEDUA / ONU Mujeres / Instituto Nacional de las Mujeres. \url{https://books.google.com.mx/books?id=eAsqDwAAQBAJ}
 \item García Sainz, C. (2017). El impacto de la crisis económica en la pobreza de tiempo y la desigualdad de género. \textit{Arbor, 193}(784), a382. \url{https://doi.org/10.3989/arbor.2017.784n2005}
-\item Lahire, B. (2007). Indivíduo e mistura de gêneros: Dissonâncias culturais e distinção de si. \url{https://www.scielo.br/j/dados/a/qMSXY3hGdQxwSJSgwvRCwML/?lang=pt}
+\item Instituto Nacional de Estadística y Geografía. (2022a). \textit{Módulo sobre Lectura (MOLEC) 2022: Diseño conceptual, cuestionario y diccionario de datos}. \url{https://www.inegi.org.mx/programas/molec/2022/}
+\item Instituto Nacional de Estadística y Geografía. (2022b). \textit{Módulo sobre Lectura (MOLEC) 2022: Presentación de resultados}. \url{https://www.inegi.org.mx/contenidos/saladeprensa/boletines/2022/EstSociodemo/MOLEC_2022.pdf}
+\item Instituto Nacional de Estadística y Geografía. (2023a). \textit{Módulo sobre Lectura (MOLEC) 2023: Documento metodológico y cuestionario}. \url{https://www.inegi.org.mx/rnm/index.php/catalog/860}
+\item Instituto Nacional de Estadística y Geografía. (2023b). \textit{Módulo sobre Lectura (MOLEC) 2023: Resultados oportunos y presentación ejecutiva}. \url{https://www.inegi.org.mx/contenidos/saladeprensa/boletines/2023/molec/molec2023.pdf}
+\item Instituto Nacional de Estadística y Geografía. (2024a). \textit{Módulo sobre Lectura (MOLEC) 2024: Diseño conceptual y cuestionario}. \url{https://www.inegi.org.mx/rnm/index.php/catalog/970}
+\item Instituto Nacional de Estadística y Geografía. (2024b). \textit{Módulo sobre Lectura (MOLEC) 2024: Principales resultados}. \url{https://www.inegi.org.mx/contenidos/saladeprensa/boletines/2024/molec/molec2024.pdf}
+\item Instituto Nacional de Estadística y Geografía. (2025, 18 de noviembre). \textit{Módulo sobre Lectura (MOLEC) 2025}. \url{https://www.inegi.org.mx/programas/molec/2025/}
+\item Lahire, B. (2007). Indivíduo e mistura de gêneros: Dissonâncias culturais e distinção de si (E. Abreu, Trad.). \textit{Dados, 50}(4), 795--825. \url{https://www.scielo.br/j/dados/a/qMSXY3hGdQxwSJSgwvRCwML/?lang=pt}
 \item Ocampo, A., y López, C. (2020). Transformando los espacios de lectura. Una perspectiva crítica e inclusiva de las prácticas lectoras contemporáneas. \textit{Revista Electrónica Educare, 24}(1), 1--21. \url{https://doi.org/10.15359/ree.24-1.11}
 \end{list}
 
-```{r Rodri, child = "Rodri.Rmd"}
-```
-
-```{r Eddie, child = "Eddie.Rmd"}
-```
-
-```{r Fer, child = "Fer.Rmd"}
-```
-
-```{r Kantus, child = "Kantus.Rmd"}
-```
 
