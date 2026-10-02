@@ -138,7 +138,7 @@ El análisis se fundamenta en los datos del Módulo sobre Lectura (MOLEC) del IN
 
 Para este trabajo se aislaron exclusivamente las variables de interés, las cuales se detallarán más adelante, revisando que estuvieran completas y libres de errores o datos faltantes. Esto permitió garantizar la calidad de la información antes de estudiar los diferentes perfiles lectores y sus formas de consumo. 
 
-Finalmente, una vez limpios y seleccionados los datos, se unieron los registros de los tres años en un solo dataframe. De esta manera, se obtuvo una base de datos lista para hacer las comparaciones y cruces necesarios a lo largo del periodo analizado. 
+Finalmente, una vez limpios y seleccionados los datos, se unieron los registros de los tres años en un solo dataframe (véase el archivo “main.rmd” y la carpeta “datos” en el repositorio de la investigación) (Fuentes, 2026). De esta manera, se obtuvo una base de datos lista para hacer las comparaciones y cruces necesarios a lo largo del periodo analizado.
 
 \textbf{2. Variables seleccionadas y justificación }
 
@@ -233,6 +233,7 @@ Los bloques de libros, revistas, periódicos e internet se incluyen bajo el supu
 
 \begin{list}{}{\setlength{\leftmargin}{1.27cm}\setlength{\itemindent}{-1.27cm}\setlength{\itemsep}{0.6em}}
 \item Cortés, A. M., y Daniel Bello, S. A. (2024). Mujeres y cultura escrita: Hacia una participación política en México. \textit{Raudem, Revista de Estudios de las Mujeres, 12}, 192--212. \url{https://doi.org/10.25115/raudem.v12i1.10001}
+\item Fuentes, R. [RodrigoFQ7]. (2026). \textit{Reto-Modelaci-n-Estad-stica} [Repositorio de código]. GitHub. \url{https://github.com/RodrigoFQ7/Reto-Modelaci-n-Estad-stica}
 \item García, B., y Pacheco, E. (2014). Reflexiones sobre el estudio del uso del tiempo. En B. García y E. Pacheco (Coords.), \textit{Uso del tiempo y trabajo no remunerado en México} (pp. 17--50). El Colegio de México, CEDUA / ONU Mujeres / Instituto Nacional de las Mujeres. \url{https://books.google.com.mx/books?id=eAsqDwAAQBAJ}
 \item García Sainz, C. (2017). El impacto de la crisis económica en la pobreza de tiempo y la desigualdad de género. \textit{Arbor, 193}(784), a382. \url{https://doi.org/10.3989/arbor.2017.784n2005}
 \item Instituto Nacional de Estadística y Geografía. (2022a). \textit{Módulo sobre Lectura (MOLEC) 2022: Diseño conceptual, cuestionario y diccionario de datos}. \url{https://www.inegi.org.mx/programas/molec/2022/}
@@ -246,4 +247,62 @@ Los bloques de libros, revistas, periódicos e internet se incluyen bajo el supu
 \item Ocampo, A., y López, C. (2020). Transformando los espacios de lectura. Una perspectiva crítica e inclusiva de las prácticas lectoras contemporáneas. \textit{Revista Electrónica Educare, 24}(1), 1--21. \url{https://doi.org/10.15359/ree.24-1.11}
 \end{list}
 
+```{r}
+# Limpieza de la base de datos
+
+M22 = read.csv("datos/Datos_molec_2022-1.CSV")
+M23 = read.csv("datos/Datos_molec_2023-1.CSV")
+M24 = read.csv("datos/Datos_molec_2024-1.csv")
+
+# Resumen de las bases de datos
+summary(M22)
+names(M22)
+
+summary(M23)
+names(M23)
+
+summary(M24)
+names(M24)
+
+
+# Variables de la investigación
+vars_equipo6 <- c(
+  "H_LEC", "SEXO", "NIVEL", "COND_ACT", "EDAD", "P26",
+  "P3_1", "P3_2", "P3_3", "P3_4", "P3_5", 
+  "P5", "P6_1", "P6_2", "P6_3", "P6_4", "P6_5", 
+  "P11", "P12_1", "P12_2", "P12_3", "P12_4", "P12_5", "P12_6", "P12_7", "P12_8", 
+  "P17", "P18_1", "P18_2", "P18_3", "P18_4", "P18_5", "P25"
+)
+
+
+obtener_vars <- function(df, lista) {
+  nombres_actuales <- names(df)
+  return(nombres_actuales[match(tolower(lista), tolower(nombres_actuales))])
+}
+
+# Selección de columnas por año
+M22_cols = M22[, obtener_vars(M22, vars_equipo6)]
+M23_cols = M23[, obtener_vars(M23, vars_equipo6)]
+M24_cols = M24[, obtener_vars(M24, vars_equipo6)]
+
+names(M22_cols) = vars_equipo6
+names(M23_cols) = vars_equipo6
+names(M24_cols) = vars_equipo6
+
+# Eliminar los datos faltantes
+M22selec = na.omit(M22_cols)
+M23selec = na.omit(M23_cols)
+M24selec = na.omit(M24_cols)
+
+anio = c(
+  rep("2022", nrow(M22selec)),
+  rep("2023", nrow(M23selec)),
+  rep("2024", nrow(M24selec))
+)
+
+# Dataframe
+M22_24Selec = data.frame(anio, rbind(M22selec, M23selec, M24selec))
+
+write.csv(M22_24Selec, "datos/DatosEquipo6.csv", row.names = FALSE)
+```
 
