@@ -1,7 +1,9 @@
 ---
-title: "Reto Modelación Estadística"
-author: "Equipo"
+title: ""
+author: ""
 output:
+  word_document:
+    toc: true
   pdf_document:
     number_sections: true
     toc: true
@@ -9,8 +11,41 @@ lang: es
 fontsize: 11pt
 geometry: margin=2.5cm
 header-includes:
-  - \usepackage{float}
+- \usepackage{float}
+- \usepackage{graphicx}
+- \usepackage{amssymb}
+- \usepackage{amsmath}
+- \usepackage{float}
+- \usepackage{caption}
+- \usepackage{esint}
+- \captionsetup[figure]{name=Figura,labelsep=period}
 ---
+
+
+\begin{titlepage}
+		\centering
+		
+		\vspace{2cm}
+		
+		{\LARGE\bfseries Solución a ejercicios de la Tarea 3\par}
+		
+		\vspace{0.5cm}
+		
+		{\LARGE\bfseries Análisis de métodos matemáticos para la física\par}
+		
+		\vspace{1.5cm}
+		
+		{\Large Rodrigo Fuentes Quintana\par}
+		
+		\vspace{0.5cm}
+		
+		{\Large A00843675\par}
+		
+		\vfill
+		
+		{\large \today\par}
+		
+	\end{titlepage}
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
