@@ -1,16 +1,33 @@
 ---
 title: Autopercepción lectora y práctica real de lectura de revistas, según sexo y
   quehaceres del hogar
-author: 'Equipo [N°]: [Nombre 1 (matrícula)], [Nombre 2 (matrícula)], [Nombre 3 (matrícula)].
-  Grupo [XX]'
-date: "`r Sys.Date()`"
+documentclass: extarticle
 output:
-  html_document:
-    df_print: paged
-  pdf_document: default
-  word_document: default
+  pdf_document:
+    number_sections: true
+    toc: false
+lang: es
+fontsize: 12pt
+geometry: margin=3cm
+urlcolor: blue
+linkcolor: black
 lang: es
 subtitle: "Etapa 2: Comprensión y preparación de datos. MOLEC 2022-2024"
+header-includes:
+  - \usepackage{graphicx}
+  - \usepackage{float}
+  - \usepackage{amssymb}
+  - \usepackage{caption}
+  - \usepackage{esint}
+  - \usepackage{setspace}
+  - \captionsetup[figure]{name=Figura,labelsep=period}
+  - \captionsetup[table]{name=Tabla,labelsep=period}
+  - \setlength{\parskip}{0.5em}
+  - \usepackage{array}
+  - \usepackage{ragged2e}
+  - \usepackage{longtable}
+  - \usepackage{booktabs}
+  - \newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
 ---
 
 <!--
@@ -29,6 +46,38 @@ ANTES DE ENTREGAR:
    (e) brechas de género en la participación cultural según condición de actividad.
 5. El cuerpo no debe pasar de 5 páginas. Si se pasa, mueve primero a anexos la Figura 1 y la Figura 4.
 -->
+
+\begin{titlepage}
+		\centering
+		
+		\vspace{1cm}
+		
+		\includegraphics[width=\textwidth]{imagenes/tecnologico-de-monterrey-blue.png}
+		
+		\vspace{2cm}
+		
+		{\LARGE\bfseries Etapa 2: Comprensión y preparación de datos\par}
+		
+		\vspace{0.5cm}
+		
+		{\LARGE\bfseries Modelación estadística para la toma de decisiones \par}
+		
+		\vspace{3cm}
+		
+		{\Large Fernanda Meléndez Banda A00843603\par}
+		{\Large Carlos Emilio Escobedo Castillo A00843640\par}
+		{\Large Eduardo David Vargas Herrera A00843714\par}
+		{\Large Rodrigo Fuentes Quintana A00843675\par}
+		
+		\vspace{0.5cm}
+		
+		
+		\vfill
+		
+		{\large \today\par}
+		
+\end{titlepage}
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
