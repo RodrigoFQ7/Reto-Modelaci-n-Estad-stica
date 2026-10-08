@@ -14,9 +14,9 @@ knitr::opts_chunk$set(echo = TRUE)
 # Exploración de la base de datos
 
 ```{r}
-M22 = read.csv("Datos_molec_2022-1.csv")
-M23 = read.csv("Datos_molec_2023-1.csv")
-M24 = read.csv("Datos_molec_2024-1.csv")
+M22 = read.csv("datos/Datos_molec_2022-1.CSV")
+M23 = read.csv("datos/Datos_molec_2023-1.CSV")
+M24 = read.csv("datos/Datos_molec_2024-1.csv")
 
 # Observaciones y variables de cada año
 rbind("2022" = dim(M22), "2023" = dim(M23), "2024" = dim(M24))
@@ -166,6 +166,7 @@ table(molec$anio)
 **Archivo de años juntos**
 
 ```{r}
-# Nombre distinto al archivo anterior (DatosEquipo6.csv) para no sobrescribirlo
-write.csv(molec, "DatosEquipo6_v2.csv", row.names = FALSE)
+# El archivo se guarda en la carpeta "datos" (se crea si todavía no existe)
+dir.create("datos", showWarnings = FALSE)
+write.csv(molec, "datos/DatosEquipo6_v2.csv", row.names = FALSE)
 ```
