@@ -62,22 +62,6 @@ header-includes:
 		
 \end{titlepage}
 
-<!--
-ANTES DE ENTREGAR:
-1. Llena autor, número de equipo, matrículas y grupo (YAML de arriba) y la liga al Rmd (última sección).
-2. Archivo requerido en la misma carpeta: DatosEquipo6_v2.csv
-   con las columnas anio, H_LEC, SEXO, COND_ACT, P10, P11, P26.
-3. Las interpretaciones de la sección 4 y las conclusiones se generan con las cifras del código
-   y con frases que cambian según el sentido del resultado. Después de tejer, léelas completas
-   y confirma que dicen lo que muestran las tablas.
-4. Ideas del marco teórico usadas en las interpretaciones (agrega aquí o en el texto las citas
-   exactas de tu marco): (a) autorreporte y deseabilidad social en encuestas de lectura;
-   (b) capital simbólico de la lectura en encuestas oficiales (qué cuenta como "leer");
-   (c) prácticas letradas cotidianas y modelo ideológico de alfabetización;
-   (d) género, trabajo doméstico y pobreza de tiempo;
-   (e) brechas de género en la participación cultural según condición de actividad.
-5. El cuerpo (hasta Conclusiones) no debe pasar de 5 páginas. Se mide tejiendo a PDF; el formato PDF es el que trae márgenes y letra compactos.
--->
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
@@ -137,16 +121,16 @@ datos$Cond_lbl = cut(datos$COND_ACT, breaks = c(0, 3, 5, 6, 7, 8, 10),
                                 "Jubilado o pensionado (08)", "Incapacitado u otra situación (09-10)"))
 
 # ---- Universos ----
-V = subset(datos, !is.na(H_LEC))                       # H_LEC válido
-U = subset(V, !is.na(Grupo))                           # tres grupos de comparación
-L = subset(U, H_LEC %in% c(1, 3) & !is.na(P10))        # lectores de revistas
-H = subset(V, SEXO == 1 & COND_ACT == 7)               # hombres del hogar (solo casos)
-stopifnot(!anyNA(L$P11), !anyNA(L$P26))                # P10, P11 y P26 coinciden en N
+V = subset(datos, !is.na(H_LEC))
+U = subset(V, !is.na(Grupo))
+L = subset(U, H_LEC %in% c(1, 3) & !is.na(P10))
+H = subset(V, SEXO == 1 & COND_ACT == 7)
+stopifnot(!anyNA(L$P11), !anyNA(L$P26))
 
 # COND_ACT es numérica: se compara con 6 y 8, no con "06" y "08"
-n_est   = sum(V$COND_ACT %in% 6)                       # estudiantes
-n_jub   = sum(V$COND_ACT %in% 8)                       # jubilados
-n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))            # todas las condiciones que no se comparan
+n_est   = sum(V$COND_ACT %in% 6)
+n_jub   = sum(V$COND_ACT %in% 8)
+n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))
 ```
 
 ```{r funciones}
@@ -208,7 +192,7 @@ desc_num = function(x) c(N = length(x), Media = mean(x), Mediana = median(x), DE
 \captionsetup{labelformat=empty, font=small, skip=3pt}
 ```
 
-# 1. Pregunta de investigación y objetivos
+\section*{Pregunta de investigación y objetivos}
 
 **Pregunta general.** ¿Se corresponde la autopercepción como lector (H_LEC) con la práctica real de lectura de revistas, observada en tres dimensiones: volumen (número de revistas, P10), duración (tiempo continuo de lectura, P26) y motivo principal (P11), y varía esa correspondencia según el sexo (SEXO) y la dedicación a los quehaceres del hogar (COND_ACT) en las personas adultas de la muestra de la MOLEC entre 2022 y 2024?
 
