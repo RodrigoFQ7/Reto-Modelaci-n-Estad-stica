@@ -363,9 +363,12 @@ De esta manera, en todos los grupos analizados quienes no se perciben lectores l
 
 En conjunto, `r si(p10_parecido & p11_dir, "en la muestra de la MOLEC 2022-2024 las personas que no se perciben lectores pero leen revistas leen un número de revistas similar al de quienes sí se perciben, aunque por gusto y, en general, en sesiones más breves. Esto es compatible con que parte de la práctica lectora cotidiana no se reconozca como lectura, aunque estos datos no permiten confirmarlo.", "en la muestra de la MOLEC 2022-2024 la relación entre la autopercepción lectora y la práctica de lectura de revistas no es uniforme entre dimensiones ni entre grupos, por lo que conviene estudiarla por dimensión y por condición de vida.")`
 
-\subsection*{Limitaciones} (1) Resultados sin ponderar: describen la muestra. (2) Se incluye solo a lectores de revistas y P26 se refiere a cualquier material. (3) Por construcción de H_LEC, entre lectores de revistas la distinción entre H_LEC = 1 y 3 corresponde a si la persona dice acostumbrar leer. (4) Estudiantes, jubilados y otras condiciones no se analizan, y no se ajusta por edad ni escolaridad. (5) El archivo no conserva identificadores, por lo que no se verificó si hay personas repetidas entre años. (6) Es un análisis descriptivo: describe asociaciones, no causalidad.
+\subsection*{Limitaciones}
 
-Liga al archivo R Markdown: [PEGAR LIGA]. Base preparada: `DatosEquipo6_base_limpia.csv` (se adjunta).
+
+Existen resultados sin ponderar que describen la muestra. Además, se incluye solo a lectores de revistas y P26 se refiere a cualquier material. Por construcción de H_LEC, entre lectores de revistas la distinción entre H_LEC = 1 y 3 corresponde a si la persona dice acostumbrar leer. También hay cosas como estudiantes, jubilados y otras condiciones que no se analizan, y no se ajusta por edad ni escolaridad. El archivo no conserva identificadores, por lo que no se verificó si hay personas repetidas entre años. Por último, está el hecho de que es un análisis descriptivo que describe asociaciones, no causalidad.
+
+Liga al archivo R Markdown: https://github.com/RodrigoFQ7/Reto-Modelaci-n-Estad-stica.
 
 \newpage
 
