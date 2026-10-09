@@ -134,7 +134,6 @@ n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))
 ```
 
 ```{r funciones}
-# Aviso por base pequeña (N < 30) o celda pequeña (n < 5); la columna solo aparece si hay avisos
 marcar = function(df, min_n = 30, min_cel = 5) {
   aviso = rep("", nrow(df))
   if ("N" %in% names(df)) aviso[df$N < min_n] = "N<30: no interpretar"
@@ -181,7 +180,7 @@ graf_caja = function(df, var, ylab, ymax) {
   par(op)
 }
 
-# Medidas de una variable numérica (descripción individual)
+# Medidas de una variable numérica
 desc_num = function(x) c(N = length(x), Media = mean(x), Mediana = median(x), DE = sd(x),
                          CV = 100 * sd(x) / mean(x),
                          Q1 = quantile(x, .25, names = FALSE), Q3 = quantile(x, .75, names = FALSE),
@@ -194,23 +193,33 @@ desc_num = function(x) c(N = length(x), Media = mean(x), Mediana = median(x), DE
 
 \section*{Pregunta de investigación y objetivos}
 
-**Pregunta general.** ¿Se corresponde la autopercepción como lector (H_LEC) con la práctica real de lectura de revistas, observada en tres dimensiones: volumen (número de revistas, P10), duración (tiempo continuo de lectura, P26) y motivo principal (P11), y varía esa correspondencia según el sexo (SEXO) y la dedicación a los quehaceres del hogar (COND_ACT) en las personas adultas de la muestra de la MOLEC entre 2022 y 2024?
+\textbf{Pregunta general} 
+¿Se corresponde la autopercepción como lector (H_LEC) con la práctica real de lectura de revistas, observada en tres dimensiones: volumen (número de revistas, P10), duración (tiempo continuo de lectura, P26) y motivo principal (P11), y varía esa correspondencia según el sexo (SEXO) y la dedicación a los quehaceres del hogar (COND_ACT) en las personas adultas de la muestra de la MOLEC entre 2022 y 2024?
 
-**Objetivo general.** Describir y comparar la práctica de lectura de revistas (P10, P26 y P11) entre quienes se perciben lectores y quienes no se perciben como tales pero leyeron algún material (H_LEC = 1 frente a H_LEC = 3), en tres grupos definidos por SEXO y COND_ACT (mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan). Se entenderá que hay correspondencia cuando quienes no se perciben lectores muestren menor volumen y menor duración que quienes sí; si sus valores son parecidos, se tratará de una práctica que no se reconoce como lectura.
+\textbf{Objetivo general} Describir y comparar la práctica de lectura de revistas (P10, P26 y P11) entre quienes se perciben lectores y quienes no se perciben como tales pero leyeron algún material (H_LEC = 1 frente a H_LEC = 3), en tres grupos definidos por SEXO y COND_ACT (mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan). Se entenderá que hay correspondencia cuando quienes no se perciben lectores muestren menor volumen y menor duración que quienes sí; si sus valores son parecidos, se tratará de una práctica que no se reconoce como lectura.
 
-| | Pregunta específica | Objetivo específico | Variables |
-|---|---|---|---|
-| 1 | Entre quienes leyeron revistas, ¿difiere el número de revistas leídas entre quienes se perciben lectores y quienes no, y varía según el grupo? | Comparar el número de revistas leídas según autopercepción y grupo. | P10, H_LEC, SEXO, COND_ACT |
-| 2 | ¿Difiere el tiempo continuo de lectura según H_LEC y según el grupo? | Comparar los minutos continuos de lectura según autopercepción y grupo. | P26, H_LEC, SEXO, COND_ACT |
-| 3 | ¿Difiere el motivo principal de lectura de revistas según H_LEC y según el grupo? | Comparar la proporción que lee por gusto o entretenimiento según autopercepción y grupo. | P11, H_LEC, SEXO, COND_ACT |
+\begin{table}[H]
+  \centering
+  \begin{tabular}{@{}l >{\raggedright\arraybackslash}p{5.6cm} >{\raggedright\arraybackslash}p{4.6cm} >{\raggedright\arraybackslash}p{3.2cm}@{}}
+    \toprule
+     & Pregunta específica & Objetivo específico & Variables \\
+    \midrule
+    1 & Entre quienes leyeron revistas, ¿difiere el número de revistas leídas entre quienes se perciben lectores y quienes no, y varía según el grupo? & Comparar el número de revistas leídas según autopercepción y grupo. & P10, H\_LEC, SEXO, COND\_ACT \\
+    \addlinespace
+    2 & ¿Difiere el tiempo continuo de lectura según H\_LEC y según el grupo? & Comparar los minutos continuos de lectura según autopercepción y grupo. & P26, H\_LEC, SEXO, COND\_ACT \\
+    \addlinespace
+    3 & ¿Difiere el motivo principal de lectura de revistas según H\_LEC y según el grupo? & Comparar la proporción que lee por gusto o entretenimiento según autopercepción y grupo. & P11, H\_LEC, SEXO, COND\_ACT \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-# 2. La base y su preparación
+\section*{La base y su preparación}
 
 **Base.** El archivo reúne la MOLEC de los años `r paste(sort(unique(raw$anio)), collapse = ", ")`: `r nrow(raw)` registros (cada uno es una persona de 18 años o más) y `r ncol(raw)` columnas (las seis variables de análisis y el año). Las variables se contrastaron con los diccionarios de los tres años para confirmar el mismo significado y codificación. [CONFIRMAR ANTES DE ENTREGAR Y QUITAR ESTA NOTA] Los blancos por pase (0 o NA) y el código 99 de COND_ACT no son respuestas válidas, por lo que se recodificaron como NA; en P10, P11 y P26 el vacío es un pase (quien no leyó revistas no responde) y entre los lectores de revistas no hay faltantes. P10 tiene `r fuera10` valores por encima del máximo del diccionario (25): se conservan y su efecto se revisa en el Anexo A6. El análisis es descriptivo y **sin factor de expansión**: describe a la muestra, no a la población de México. Las variables se describen en el Anexo A1 y los universos de análisis en el Anexo A8.
 
 **Grupos de comparación.** Se comparan **mujeres dedicadas al hogar** (COND_ACT = 07), **mujeres que trabajan** y **hombres que trabajan** (COND_ACT = 01-03). No se incluyen estudiantes (`r n_est`), jubilados (`r n_jub`) ni las demás condiciones (`r n_otras` personas en total), porque su edad difiere mucho de la de las mujeres del hogar y se mezclaría la edad con la ocupación. Así, mujeres del hogar frente a mujeres que trabajan contrasta la ocupación dentro de un mismo sexo, y mujeres frente a hombres que trabajan contrasta el sexo dentro de una misma ocupación; como COND_ACT registra la actividad principal de la semana pasada, las mujeres que trabajan pueden también realizar trabajo doméstico. Los hombres dedicados al hogar son `r nrow(H)` y solo se describen como casos (Anexo A7). Cada tabla trae su base (N); con N < 30 la cifra se marca y no se interpreta.
 
-# 3. Descripción individual de las variables
+\section*{Descripción individual de las variables}
 
 ```{r num}
 tab_num = rbind(desc_num(L$P10), desc_num(L$P26))
@@ -236,9 +245,9 @@ t3 = rbind(
 
 **Variables cualitativas.** En la muestra, `r ph[1]` % es lectora habitual de materiales MOLEC (H_LEC = 1), `r ph[3]` % no se percibe lectora pero leyó algún material (H_LEC = 3) y `r ph[4]` % no leyó ninguno; la categoría 2 es marginal (`r ph[2]` %). Entre quienes leyeron revistas, el motivo más frecuente es el gusto o entretenimiento (`r pp[4]` %), seguido de la cultura general (`r pp[3]` %); trabajo y estudio suman `r pct(sum(fp[1:2]), sum(fp))` %. Las frecuencias completas están en el Anexo A9 y la composición por SEXO y COND_ACT en el Anexo A2.
 
-# 4. Comparaciones según el objetivo
+\section*{Comparaciones según el objetivo}
 
-## 4.1 Condición lectora por grupo (pregunta general)
+\subsection*{Condición lectora por grupo (pregunta general)}
 
 ```{r hlec-grupo}
 tb = table(U$Grupo, U$H_LEC_lbl)
@@ -323,7 +332,7 @@ hogar_gusto = gusto[1] > max(gusto[c(3, 5)])
 
 Entre quienes se perciben lectores, leen por gusto o entretenimiento `r f(gusto[1])` % de las mujeres del hogar, `r f(gusto[3])` % de las mujeres que trabajan y `r f(gusto[5])` % de los hombres que trabajan; entre quienes no se perciben lectores, `r f(gusto[2])` %, `r f(gusto[4])` % y `r f(gusto[6])` %; la diferencia (no se percibe menos se percibe) es de `r paste(f(dg), collapse = ", ")` puntos porcentuales. Las bases de quienes no se perciben lectores son pequeñas (`r min(Q3$N[nlec])` a `r max(Q3$N[nlec])` personas), por lo que diferencias de pocos puntos no deben sobreinterpretarse. `r si(p11_dir, "En los tres grupos, quienes no se perciben lectores leen revistas por gusto o entretenimiento en mayor proporción que quienes sí se perciben.", "El sentido de la diferencia en el motivo no es el mismo en los tres grupos, por lo que no se resume en un solo patrón (Tabla 5 y Anexo A4).")` `r si(hogar_gusto, "Entre quienes se perciben lectores, las mujeres del hogar leen por gusto en mayor proporción que los otros dos grupos, en los que pesan más los motivos de trabajo, estudio o cultura general (Anexo A4).", "")`
 
-# 5. Conclusiones de la etapa
+\section*{Conclusiones de la etapa}
 
 **Patrones principales.** `r si(hab[1] < min(hab[2:3]), paste0("La lectura habitual es menos frecuente entre las mujeres del hogar (", f(hab[1]), " %) que entre las mujeres que trabajan (", f(hab[2]), " %) y los hombres que trabajan (", f(hab[3]), " %)."), paste0("La proporción de lectores habituales es de ", f(hab[1]), " %, ", f(hab[2]), " % y ", f(hab[3]), " % en mujeres del hogar, mujeres que trabajan y hombres que trabajan."))` Entre quienes leyeron revistas, `r si(p10_parecido, "el volumen es parecido sin importar la autopercepción (diferencias de mediana de una revista o menos)", "el volumen difiere según la autopercepción en al menos un grupo")`; `r si(p26_lec_mayor, "la duración continua es menor entre quienes no se perciben lectores", "la duración continua no sigue el mismo patrón en todos los grupos")`; y `r si(p11_dir, "su motivo es más recreativo", "el motivo no sigue el mismo patrón en todos los grupos")`. `r si(p10_parecido & p26_lec_mayor & p11_dir, "La correspondencia entre autopercepción y práctica parece, así, parcial: débil en volumen (P10) y más clara en duración (P26) y motivo (P11).", "Las tres dimensiones no apuntan en la misma dirección (Tablas 3 a 5), por lo que la correspondencia no es uniforme.")`
 
