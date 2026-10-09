@@ -30,6 +30,9 @@ header-includes:
 - \usepackage{longtable}
 - \usepackage{booktabs}
 - \newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+- \usepackage{etoolbox}
+- \AtBeginEnvironment{longtable}{\footnotesize}
+- \AtBeginEnvironment{table}{\footnotesize}
 ---
 
 \begin{titlepage}
@@ -138,7 +141,7 @@ n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))
 \subsection*{Pregunta general} 
 ¿En qué medida la forma en que las personas adultas se perciben como lectoras (H_LEC) se refleja en su lectura real de revistas, medida por el número de revistas leídas (P10), el tiempo continuo de lectura (P26) y el motivo principal (P11), y cómo cambia esa relación entre mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan, en la MOLEC 2022-2024?
 
-\subsection*{Objetivo general} Describir y comparar la práctica de lectura de revistas (P10, P26 y P11) entre quienes se perciben lectores y quienes no se perciben como tales pero leyeron algún material (H_LEC = 1 frente a H_LEC = 3), en tres grupos definidos por SEXO y COND_ACT (mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan). Se entenderá que hay correspondencia cuando quienes no se perciben lectores muestren menor volumen y menor duración que quienes sí; si sus valores son parecidos, se tratará de una práctica que no se reconoce como lectura.
+\subsection*{Objetivo general} Describir y comparar la práctica de lectura de revistas (P10, P26 y P11) entre quienes se perciben lectores y quienes no se perciben como tales pero leyeron algún material (H_LEC = 1 frente a H_LEC = 3), en tres grupos definidos por SEXO y COND_ACT (mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan).
 
 \begin{table}[H]
   \centering
@@ -146,7 +149,7 @@ n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))
     \toprule
      & Pregunta específica & Objetivo específico & Variables \\
     \midrule
-    1 & Entre las personas que leyeron revistas, ¿qué diferencias existen en el número de revistas leídas entre quienes se consideran lectoras y quienes no, y cómo se comportan esas diferencias en cada grupo (mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan)? & Comparar el número de revistas leídas según autopercepción y grupo. & P10, H\_LEC, SEXO, COND\_ACT \\
+    1 & Entre las personas que leyeron revistas, ¿qué diferencias existen en el número de revistas leídas entre quienes se consideran lectoras y quienes no, y cómo se comportan esas diferencias en cada grupo? & Comparar el número de revistas leídas según autopercepción y grupo. & P10, H\_LEC, SEXO, COND\_ACT \\
     \addlinespace
     2 & ¿Cuántos minutos continuos dedican a leer las personas que se consideran lectoras y las que no, y qué tan distinto es ese tiempo dentro de cada grupo? & Comparar los minutos continuos de lectura según autopercepción y grupo. & P26, H\_LEC, SEXO, COND\_ACT \\
     \addlinespace
@@ -183,11 +186,11 @@ s10 = round(tab_num[1, ], 1)
 s26 = round(tab_num[2, ], 1)
 ```
 
-\subsection*{Variables cuantitativas} 
+En la Tabla 1 (con 1146 lectores de revistas), los datos se concentran en valores bajos: la mitad lee entre 2 y 4 revistas y dedica de 30 a 60 minutos por sesión (excluyendo valores extremos mayores a 25 revistas). Al haber alta variabilidad, se prioriza la mediana sobre la media.   
 
-Entre las 1146 personas que leyeron revistas, los datos se concentran en valores bajos: la mitad leyó entre 2 y 4 revistas en tres meses (Q1 = 2, Q3 = 4) y la mitad tiene sesiones continuas de alrededor de 30 minutos (Q1 = 20, Q3 = 60). Ambas distribuciones tienen sesgo hacia la derecha (sesgo = 9.1 en P10 y 3 en P26; histogramas en la Figura A2), por lo que la media (3.3 revistas y 39.6 minutos) queda por encima de la mediana. La variabilidad es alta (CV = 142.3% y 81.2%) y hay outliers (por ejemplo, hasta 70 revistas y 300 minutos), por lo que se priorizan la mediana y los 2cuartiles.  
+En cuanto a las variables cualitativas, el 55.1% es lector habitual de materiales MOLEC, el 13.5% no se percibe lector pero leyó algún material, y el 29.2% no leyó ninguno; la categoría 2 es marginal con un 2.2%. El motivo principal de lectura es el gusto o entretenimiento (57.3%), seguido de la cultura general (21.8%), mientras que trabajo y estudio suman 13.8%.   
 
-La lectura de revistas aparece como una práctica de volumen modesto, con pocos lectores,pero muy intensos que elevan los promedios. Variables cualitativas: En la muestra, 55.1% es lectora habitual de materiales considerados por MOLEC (H_LEC = 1), 13.5% no se percibe lectora, pero leyó algún material (H_LEC = 3) y 29.2% no leyó ninguno; la categoría 2 es omitible (2.2%). Entre quienes leyeron revistas, el motivo más frecuente es el gusto o entretenimiento (57.3%), seguido de la cultura general (21.8%); trabajo y estudio suman 13.8%. Las frecuencias completas están en el Anexo A6 y la composición por SEXO y COND_ACT en el Anexo A2.
+Las frecuencias completas se encuentran en el Anexo A6 y la composición por sexo y condición de actividad en el Anexo A2.
 
 ```{r cual}
 fh = table(V$H_LEC_lbl)
@@ -201,7 +204,6 @@ t3 = rbind(
              n = as.vector(fp), "%" = pp, check.names = FALSE))
 ```
 
-\subsection*{Variables cualitativas} En la muestra, `r ph[1]` % es lectora habitual de materiales MOLEC (H_LEC = 1), `r ph[3]` % no se percibe lectora pero leyó algún material (H_LEC = 3) y `r ph[4]` % no leyó ninguno; la categoría 2 es marginal (`r ph[2]` %). Entre quienes leyeron revistas, el motivo más frecuente es el gusto o entretenimiento (`r pp[4]` %), seguido de la cultura general (`r pp[3]` %); trabajo y estudio suman `r pct(sum(fp[1:2]), sum(fp))` %. Las frecuencias completas están en el Anexo A6 y la composición por SEXO y COND_ACT en el Anexo A2.
 
 \section*{Comparaciones según el objetivo}
 
@@ -229,9 +231,9 @@ cob = cob[, c("Grupo", "Autopercepción", "N", "Leyeron revistas", "%")]
 cp = cob[["%"]]
 ```
 
-La proporción de lectores habituales es de 49.1% en mujeres dedicadas al hogar, 54.8% en mujeres que trabajan y 56.6% en hombres que trabajan; los no lectores (H_LEC = 4) son 35.8%, 28.9% y 25.9% respectivamente, y quienes no se perciben lectores, pero leyeron algún material (H_LEC = 3), 12.2%, 13.7% y 16.1% (Figura A1). La menor proporción de lectores habituales se observa en las mujeres dedicadas al hogar. Entre quienes dicen no acostumbrar leer, el porcentaje que sí leyó algún material es 25.5%, 32.1% y 38.3%, respectivamente.  
+En la Tabla 2, los hombres que trabajan presentan la mayor proporción de lectores habituales (56.6%) y el menor porcentaje de no lectores (25.9%), mientras que las mujeres dedicadas al hogar registran la menor proporción de lectura habitual (49.1%) y el mayor porcentaje de no lectores (35.8%). En cuanto a quienes leyeron sin percibirse lectores, los valores aumentan progresivamente desde las mujeres dedicadas al hogar (12.2%) hasta los hombres que trabajan (16.1%). Asimismo, entre quienes no acostumbran leer, el porcentaje que sí leyó algún material es menor en mujeres del hogar (25.5%) y mayor en hombres que trabajan (38.3%).   
 
-Estos datos muestran que las mujeres dedicadas al hogar reconocen que su nivel de lectura es bajo y no valoran o no identifican lo que leen como un acto de lectura real. Es decir, en la muestra no se observa que esta práctica no reconocida como lectura sea mayor en ellas. Entre quienes se perciben lectores: leyeron revistas 35.4%, 35.8% y 35.8%, y entre quienes no, 31.2%, 34.3% y 18.0% (Anexo A7). Los hombres que no se perciben lectores son quienes menos leyeron revistas; pudieron leer otros materiales que aquí no se miden. Como H_LEC = 3 incluye cualquier material MOLEC, la práctica de quienes no leyeron revistas puede estar en otros materiales, lo que delimita lo que la comparación puede mostrar.
+Sobre los anexos y figuras mencionados, la Figura A1 detalla la distribución de la condición lectora, y el Anexo A7 especifica la lectura de revistas entre quienes se perciben lectores (35.4%, 35.8% y 35.8%) y quienes no (31.2%, 34.3% y 18.0%).
 
 \subsection*{Pregunta 1: número de revistas (P10)}
 
@@ -271,6 +273,7 @@ p10_parecido = all(abs(dm10) <= 1)
 Entre quienes se perciben lectores: la mediana de revistas es 2 en mujeres del hogar, 2 en mujeres que trabajan y 2 en hombres que trabajan; entre quienes no se perciben lectores es 2, 2 y 2 (diferencias de 0 en las revistas). El tercer cuartil es 3, 4 y 4 en quienes se perciben lectores, frente a 2.25, 3 y 3.75 en quienes no, y las medias difieren en 1, 1, 0.5 revistas; estas últimas se ven elevadas por valores muy altos (hasta 70) y la variabilidad es mayor entre quienes se perciben lectores (desviación estándar de 4.2 a 5.6, frente a 1.2 a 2.9).  
 
 En volumen de revistas, quienes no se perciben lectores se parecen mucho a quienes sí, sobre todo en el centro de la distribución: la distancia entre autopercepción y práctica no está en cuántas revistas se leen. Entre mujeres del hogar y mujeres que trabajan que se perciben lectoras, el volumen es muy parecido (mediana de 2 y 2; media de 3.3 y 3.3).  
+
 
 \subsection*{Pregunta 2: tiempo continuo de lectura (P26)}
 
@@ -367,7 +370,6 @@ Ante esto, surgen nuevas interrogantes: ¿por qué los motivos y las duraciones 
 
 Liga al archivo R Markdown: https://github.com/RodrigoFQ7/Reto-Modelaci-n-Estad-stica.
 
-\newpage
 
 \section*{Anexos}
 
