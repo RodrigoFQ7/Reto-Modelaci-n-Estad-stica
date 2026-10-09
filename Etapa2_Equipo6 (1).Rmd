@@ -11,13 +11,12 @@ output:
     df_print: paged
 lang: es
 fontsize: 12pt
-geometry: margin=2.5cm
+geometry: margin=2.35cm
 urlcolor: blue
 linkcolor: black
 header-includes:
 - \usepackage{graphicx}
 - \usepackage{float}
-- \floatplacement{figure}{H}
 - \usepackage{amssymb}
 - \usepackage{caption}
 - \usepackage{esint}
@@ -157,12 +156,6 @@ n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))
     \bottomrule
   \end{tabular}
 \end{table}
-
-\section*{Preparación de la base de datos}
-
-La base de datos analizada integra 6,028 registros de personas de 18 años o más y 7 columnas (seis variables de análisis y el año) provenientes del MOLEC (2022-2024). Se reescribeiron como NA los valores no identificados (0, NA) y el código 99 de COND_ACT. En las variables P10, P11 y P26 los vacíos corresponden a pases metodológicos válidos, sin datos faltantes entre los lectores. El alcance es estrictamente descriptivo y limitado a la muestra, sin inferencias hacia la población mexicana; las definiciones de las variables constan en el Anexo A1 y los universos de análisis en el Anexo A7.
-
-Para el análisis, la muestra se delimitó a tres grupos de comparación: mujeres dedicadas al hogar (COND_ACT = 07), mujeres que trabajan y hombres que trabajan (COND_ACT = 01-03). Esto permite contrastar la ocupación dentro de un mismo sexo (mujeres del hogar frente a mujeres trabajadoras) y el sexo dentro de una misma ocupación (mujeres frente a hombres trabajadores), considerando que la variable COND_ACT registra la actividad principal de la semana previa y las trabajadoras pueden realizar labores domésticas. Se excluyó a estudiantes (211), jubilados (503) y otros grupos que suman 902 personas para evitar sesgos. Los hombres dedicados al hogar ($N=34$) no se tomaron en cuenta debido a su reducido tamaño muestral.
 
 \section*{Descripción individual de las variables}
 
@@ -370,6 +363,7 @@ Ante esto, surgen nuevas interrogantes: ¿por qué los motivos y las duraciones 
 
 Liga al archivo R Markdown: https://github.com/RodrigoFQ7/Reto-Modelaci-n-Estad-stica.
 
+\newpage
 
 \section*{Anexos}
 
