@@ -11,7 +11,7 @@ output:
     df_print: paged
 lang: es
 fontsize: 12pt
-geometry: margin=2.5cm
+geometry: margin=3cm
 urlcolor: blue
 linkcolor: black
 header-includes:
@@ -135,7 +135,7 @@ n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))
 \section*{Pregunta de investigación y objetivos}
 
 \subsection*{Pregunta general} 
-¿Se corresponde la autopercepción como lector (H_LEC) con la práctica real de lectura de revistas, observada en tres dimensiones: volumen (número de revistas, P10), duración (tiempo continuo de lectura, P26) y motivo principal (P11), y varía esa correspondencia según el sexo (SEXO) y la dedicación a los quehaceres del hogar (COND_ACT) en las personas adultas de la muestra de la MOLEC entre 2022 y 2024?
+¿En qué medida la forma en que las personas adultas se perciben como lectoras (H_LEC) se refleja en su lectura real de revistas, medida por el número de revistas leídas (P10), el tiempo continuo de lectura (P26) y el motivo principal (P11), y cómo cambia esa relación entre mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan, en la MOLEC 2022-2024?
 
 \subsection*{Objetivo general} Describir y comparar la práctica de lectura de revistas (P10, P26 y P11) entre quienes se perciben lectores y quienes no se perciben como tales pero leyeron algún material (H_LEC = 1 frente a H_LEC = 3), en tres grupos definidos por SEXO y COND_ACT (mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan). Se entenderá que hay correspondencia cuando quienes no se perciben lectores muestren menor volumen y menor duración que quienes sí; si sus valores son parecidos, se tratará de una práctica que no se reconoce como lectura.
 
@@ -145,11 +145,11 @@ n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))
     \toprule
      & Pregunta específica & Objetivo específico & Variables \\
     \midrule
-    1 & Entre las personas que leyeron revistas, ¿qué diferencias existen en el número de revistas leídas entre quienes se consideran lectoras y quienes no, y cómo se comportan esas diferencias en cada grupo (mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan)? & P10, H\_LEC, SEXO, COND\_ACT \\
+    1 & Entre las personas que leyeron revistas, ¿qué diferencias existen en el número de revistas leídas entre quienes se consideran lectoras y quienes no, y cómo se comportan esas diferencias en cada grupo (mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan)? & Comparar el número de revistas leídas según autopercepción y grupo. & P10, H\_LEC, SEXO, COND\_ACT \\
     \addlinespace
-    2 & ¿Cómo se compara el tiempo continuo de lectura (en minutos) entre quienes se perciben lectores y quienes no, y cómo cambia esa comparación según el grupo? & Comparar los minutos continuos de lectura según autopercepción y grupo. & P26, H\_LEC, SEXO, COND\_ACT \\
+    2 & ¿Cuántos minutos continuos dedican a leer las personas que se consideran lectoras y las que no, y qué tan distinto es ese tiempo dentro de cada grupo? & Comparar los minutos continuos de lectura según autopercepción y grupo. & P26, H\_LEC, SEXO, COND\_ACT \\
     \addlinespace
-    3 & ¿Qué proporción de quienes leen revistas lo hace por gusto o entretenimiento según se perciban lectores o no, y cómo se relaciona con el grupo? & Comparar la proporción que lee por gusto o entretenimiento según autopercepción y grupo. & P11, H\_LEC, SEXO, COND\_ACT \\
+    3 & ¿Cuál es el motivo principal por el que leen revistas las personas que se consideran lectoras y las que no, y qué tanto se reparte el gusto o entretenimiento como motivo en cada grupo? & Comparar la proporción que lee por gusto o entretenimiento según autopercepción y grupo. & P11, H\_LEC, SEXO, COND\_ACT \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -367,6 +367,10 @@ Así pues, este análisis es el primer paso para explicar cómo la identidad lec
 
 Ante esto, surgen nuevas interrogantes: ¿por qué los motivos y las duraciones diferencian mejor a los grupos que el volumen? ¿Los patrones de lectura informal se mantienen estables de un año a otro? Por ello, en la siguiente etapa se requiere aplicar pruebas de inferencia estadística para evaluar diferencias significativas en las medias y medianas de duración y volumen por ocupación y sexo, así como ver la variación en el tiempo.
 
+\subsection*{Limitaciones}
+
+
+Existen resultados sin ponderar que describen la muestra. Además, se incluye solo a lectores de revistas y P26 se refiere a cualquier material. Por construcción de H_LEC, entre lectores de revistas la distinción entre H_LEC = 1 y 3 corresponde a si la persona dice acostumbrar leer. También hay cosas como estudiantes, jubilados y otras condiciones que no se analizan, y no se ajusta por edad ni escolaridad. El archivo no conserva identificadores, por lo que no se verificó si hay personas repetidas entre años. Por último, está el hecho de que es un análisis descriptivo que describe asociaciones, no causalidad.
 
 Liga al archivo R Markdown: https://github.com/RodrigoFQ7/Reto-Modelaci-n-Estad-stica.
 
