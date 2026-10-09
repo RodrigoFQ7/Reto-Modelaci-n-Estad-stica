@@ -1,0 +1,1277 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+\documentclass[
+  spanish,
+  12pt,
+]{extarticle}
+\usepackage{xcolor}
+\usepackage[margin=3cm]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\ifLuaTeX
+\usepackage[bidi=basic]{babel}
+\else
+\usepackage[bidi=default]{babel}
+\fi
+% get rid of language-specific shorthands (see #6817):
+\let\LanguageShortHands\languageshorthands
+\def\languageshorthands#1{}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amssymb}
+\usepackage{caption}
+\usepackage{esint}
+\usepackage{setspace}
+\captionsetup[figure]{name=Figura,labelsep=period}
+\captionsetup[table]{name=Tabla,labelsep=period}
+\setlength{\parskip}{0.5em}
+\usepackage{array}
+\usepackage{ragged2e}
+\usepackage{longtable}
+\usepackage{booktabs}
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdflang={es},
+  colorlinks=true,
+  linkcolor={black},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={blue},
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+
+\begin{titlepage}
+        \centering
+        
+        \vspace{1cm}
+        
+        \includegraphics[width=\textwidth]{imagenes/tecnologico-de-monterrey-blue.png}
+        
+        \vspace{2cm}
+        
+        {\LARGE\bfseries Etapa 2: Comprensión y preparación de datos\par}
+        
+        \vspace{0.5cm}
+        
+        {\LARGE\bfseries Modelación estadística para la toma de decisiones \par}
+        
+        \vspace{3cm}
+        
+        {\Large Fernanda Meléndez Banda A00843603\par}
+        {\Large Carlos Emilio Escobedo Castillo A00843640\par}
+        {\Large Eduardo David Vargas Herrera A00843714\par}
+        {\Large Rodrigo Fuentes Quintana A00843675\par}
+        
+        \vspace{0.5cm}
+        
+        
+        \vfill
+        
+        {\large \today\par}
+        
+\end{titlepage}
+
+\captionsetup{labelformat=empty, font=small, skip=3pt}
+
+\section{1. Pregunta de investigación y
+objetivos}\label{pregunta-de-investigaciuxf3n-y-objetivos}
+
+\textbf{Pregunta general.} ¿Se corresponde la autopercepción como lector
+(H\_LEC) con la práctica real de lectura de revistas, observada en tres
+dimensiones: volumen (número de revistas, P10), duración (tiempo
+continuo de lectura, P26) y motivo principal (P11), y varía esa
+correspondencia según el sexo (SEXO) y la dedicación a los quehaceres
+del hogar (COND\_ACT) en las personas adultas de la muestra de la MOLEC
+entre 2022 y 2024?
+
+\textbf{Objetivo general.} Describir y comparar la práctica de lectura
+de revistas (P10, P26 y P11) entre quienes se perciben lectores y
+quienes no se perciben como tales pero leyeron algún material (H\_LEC =
+1 frente a H\_LEC = 3), en tres grupos definidos por SEXO y COND\_ACT
+(mujeres dedicadas al hogar, mujeres que trabajan y hombres que
+trabajan). Se entenderá que hay correspondencia cuando quienes no se
+perciben lectores muestren menor volumen y menor duración que quienes
+sí; si sus valores son parecidos, se tratará de una práctica que no se
+reconoce como lectura.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Pregunta específica
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Objetivo específico
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Variables
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & Entre quienes leyeron revistas, ¿difiere el número de revistas
+leídas entre quienes se perciben lectores y quienes no, y varía según el
+grupo? & Comparar el número de revistas leídas según autopercepción y
+grupo. & P10, H\_LEC, SEXO, COND\_ACT \\
+2 & ¿Difiere el tiempo continuo de lectura según H\_LEC y según el
+grupo? & Comparar los minutos continuos de lectura según autopercepción
+y grupo. & P26, H\_LEC, SEXO, COND\_ACT \\
+3 & ¿Difiere el motivo principal de lectura de revistas según H\_LEC y
+según el grupo? & Comparar la proporción que lee por gusto o
+entretenimiento según autopercepción y grupo. & P11, H\_LEC, SEXO,
+COND\_ACT \\
+\end{longtable}
+
+\section{2. La base y su preparación}\label{la-base-y-su-preparaciuxf3n}
+
+\textbf{Base.} El archivo reúne la MOLEC de los años 2022, 2023, 2024:
+6028 registros (cada uno es una persona de 18 años o más) y 7 columnas
+(las seis variables de análisis y el año). Las variables se contrastaron
+con los diccionarios de los tres años para confirmar el mismo
+significado y codificación. {[}CONFIRMAR ANTES DE ENTREGAR Y QUITAR ESTA
+NOTA{]} Los blancos por pase (0 o NA) y el código 99 de COND\_ACT no son
+respuestas válidas, por lo que se recodificaron como NA; en P10, P11 y
+P26 el vacío es un pase (quien no leyó revistas no responde) y entre los
+lectores de revistas no hay faltantes. P10 tiene 8 valores por encima
+del máximo del diccionario (25): se conservan y su efecto se revisa en
+el Anexo A6. El análisis es descriptivo y \textbf{sin factor de
+expansión}: describe a la muestra, no a la población de México. Las
+variables se describen en el Anexo A1 y los universos de análisis en el
+Anexo A8.
+
+\textbf{Grupos de comparación.} Se comparan \textbf{mujeres dedicadas al
+hogar} (COND\_ACT = 07), \textbf{mujeres que trabajan} y \textbf{hombres
+que trabajan} (COND\_ACT = 01-03). No se incluyen estudiantes (211),
+jubilados (503) ni las demás condiciones (902 personas en total), porque
+su edad difiere mucho de la de las mujeres del hogar y se mezclaría la
+edad con la ocupación. Así, mujeres del hogar frente a mujeres que
+trabajan contrasta la ocupación dentro de un mismo sexo, y mujeres
+frente a hombres que trabajan contrasta el sexo dentro de una misma
+ocupación; como COND\_ACT registra la actividad principal de la semana
+pasada, las mujeres que trabajan pueden también realizar trabajo
+doméstico. Los hombres dedicados al hogar son 34 y solo se describen
+como casos (Anexo A7). Cada tabla trae su base (N); con N \textless{} 30
+la cifra se marca y no se interpreta.
+
+\section{3. Descripción individual de las
+variables}\label{descripciuxf3n-individual-de-las-variables}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 22\tabcolsep) * \real{0.2892}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 22\tabcolsep) * \real{0.0602}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 22\tabcolsep) * \real{0.0723}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 22\tabcolsep) * \real{0.0964}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 22\tabcolsep) * \real{0.0602}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 22\tabcolsep) * \real{0.0723}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 22\tabcolsep) * \real{0.0361}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 22\tabcolsep) * \real{0.0361}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 22\tabcolsep) * \real{0.0482}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 22\tabcolsep) * \real{0.0482}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 22\tabcolsep) * \real{0.0723}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 22\tabcolsep) * \real{0.1084}}@{}}
+\caption{Tabla 1. Medidas descriptivas de P10 y P26 en lectores de
+revistas}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Media
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mediana
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+DE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+CV
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Min
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Max
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Sesgo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Curtosis
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Media
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mediana
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+DE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+CV
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Min
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Max
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Sesgo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Curtosis
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+P10: revistas (3 meses) & 1146 & 3.3 & 2 & 4.7 & 142.3 & 2 & 4 & 1 & 70
+& 9.1 & 104.8 \\
+P26: minutos continuos & 1146 & 39.6 & 30 & 32.2 & 81.2 & 20 & 60 & 3 &
+300 & 3.0 & 14.3 \\
+\end{longtable}
+
+\textbf{Variables cuantitativas.} Entre las 1146 personas que leyeron
+revistas, los datos se concentran en valores bajos: la mitad leyó 2
+revistas o menos en tres meses (Q1 = 2, Q3 = 4) y la mitad tiene
+sesiones continuas de 30 minutos o menos (Q1 = 20, Q3 = 60). Ambas
+distribuciones son asimétricas a la derecha (sesgo = 9.1 en P10 y 3 en
+P26; histogramas en la Figura A2), por lo que la media (3.3 revistas y
+39.6 minutos) queda por encima de la mediana. La variabilidad es alta
+(CV = 142.3 \% y 81.2 \%) y hay valores inusuales (hasta 70 revistas y
+300 minutos), por lo que se privilegian la mediana y los cuartiles. La
+lectura de revistas aparece así como una práctica de volumen modesto,
+con pocos lectores muy intensos que elevan los promedios.
+
+\textbf{Variables cualitativas.} En la muestra, 55.1 \% es lectora
+habitual de materiales MOLEC (H\_LEC = 1), 13.5 \% no se percibe lectora
+pero leyó algún material (H\_LEC = 3) y 29.2 \% no leyó ninguno; la
+categoría 2 es marginal (2.2 \%). Entre quienes leyeron revistas, el
+motivo más frecuente es el gusto o entretenimiento (57.3 \%), seguido de
+la cultura general (21.8 \%); trabajo y estudio suman 13.8 \%. Las
+frecuencias completas están en el Anexo A9 y la composición por SEXO y
+COND\_ACT en el Anexo A2.
+
+\section{4. Comparaciones según el
+objetivo}\label{comparaciones-seguxfan-el-objetivo}
+
+\subsection{4.1 Condición lectora por grupo (pregunta
+general)}\label{condiciuxf3n-lectora-por-grupo-pregunta-general}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1172}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0391}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0859}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0625}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.2266}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0938}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.3750}}@{}}
+\caption{Tabla 2. Condición lectora (H\_LEC) dentro de cada grupo, en \%
+(cada fila suma 100 \% en las cuatro categorías)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+1 Habitual
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+2 Otros
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+3 Leyó sin percibirse lector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+4 No lector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\% con H\_LEC 3 entre quienes no acostumbran leer
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+1 Habitual
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+2 Otros
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+3 Leyó sin percibirse lector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+4 No lector
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\% con H\_LEC 3 entre quienes no acostumbran leer
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Mujer hogar & 1258 & 49.1 & 2.9 & 12.2 & 35.8 & 25.5 \\
+Mujer trabaja & 1706 & 54.8 & 2.6 & 13.7 & 28.9 & 32.1 \\
+Hombre trabaja & 2007 & 56.6 & 1.4 & 16.1 & 25.9 & 38.3 \\
+\end{longtable}
+
+La proporción de lectores habituales es de 49.1 \% en mujeres dedicadas
+al hogar, 54.8 \% en mujeres que trabajan y 56.6 \% en hombres que
+trabajan; los no lectores (H\_LEC = 4) son 35.8 \%, 28.9 \% y 25.9 \%, y
+quienes no se perciben lectores pero leyeron algún material (H\_LEC =
+3), 12.2 \%, 13.7 \% y 16.1 \% (Figura A1). La menor proporción de
+lectores habituales se observa en las mujeres dedicadas al hogar. Entre
+quienes dicen no acostumbrar leer, el porcentaje que sí leyó algún
+material es 25.5 \%, 32.1 \% y 38.3 \%, respectivamente. Las mujeres del
+hogar son las que menos leen algún material sin percibirse lectoras: en
+la muestra no se observa que esta práctica no reconocida como lectura
+sea mayor en ellas. Entre quienes se perciben lectores leyó revistas
+35.4 \%, 35.8 \% y 35.8 \%, y entre quienes no, 31.2 \%, 34.3 \% y 18.0
+\% (Anexo A10). Los hombres que no se perciben lectores son quienes
+menos leyeron revistas; pudieron leer otros materiales que aquí no se
+miden. Como H\_LEC = 3 incluye cualquier material MOLEC, la práctica de
+quienes no leyeron revistas puede estar en otros materiales, lo que
+delimita lo que la comparación puede mostrar.
+
+\subsection{4.2 Pregunta 1: número de revistas
+(P10)}\label{pregunta-1-nuxfamero-de-revistas-p10}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.2027}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.2838}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0541}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0811}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0541}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0541}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0405}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1081}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0676}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0541}}@{}}
+\caption{Tabla 3. Número de revistas leídas (P10) por grupo y
+autopercepción}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Autopercepción
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Media
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+DE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mín
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mediana
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Máx
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Autopercepción
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Media
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+DE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mín
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mediana
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Máx
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Mujer hogar & Se percibe lector & 219 & 3.3 & 5.0 & 1 & 2 & 2 & 3.00 &
+60 \\
+Mujer hogar & No se percibe lector & 48 & 2.3 & 2.1 & 1 & 1 & 2 & 2.25 &
+15 \\
+Mujer trabaja & Se percibe lector & 335 & 3.3 & 4.2 & 1 & 2 & 2 & 4.00 &
+60 \\
+Mujer trabaja & No se percibe lector & 80 & 2.3 & 1.2 & 1 & 1 & 2 & 3.00
+& 5 \\
+Hombre trabaja & Se percibe lector & 406 & 3.6 & 5.6 & 1 & 2 & 2 & 4.00
+& 70 \\
+Hombre trabaja & No se percibe lector & 58 & 3.1 & 2.9 & 1 & 2 & 2 &
+3.75 & 20 \\
+\end{longtable}
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{Etapa2_Equipo6--1-_files/Etapa2_Equipo6--1-_files/figure-latex/p10-1.pdf}}
+\caption{Figura 1. Número de revistas leídas (P10) según autopercepción
+y grupo (se omiten del eje los valores mayores a 15; los puntos son
+personas)}
+\end{figure}
+
+Entre quienes se perciben lectores, la mediana de revistas es 2 en
+mujeres del hogar, 2 en mujeres que trabajan y 2 en hombres que
+trabajan; entre quienes no se perciben lectores es 2, 2 y 2 (diferencias
+de 0, 0, 0 revistas). El tercer cuartil es 3, 4 y 4 en quienes se
+perciben lectores, frente a 2.25, 3 y 3.75 en quienes no, y las medias
+difieren en 1, 1, 0.5 revistas; estas últimas se ven elevadas por
+valores muy altos (hasta 70) y la variabilidad es mayor entre quienes se
+perciben lectores (DE de 4.2 a 5.6, frente a 1.2 a 2.9). En volumen de
+revistas, quienes no se perciben lectores se parecen mucho a quienes sí,
+sobre todo en el centro de la distribución: la distancia entre
+autopercepción y práctica no está en cuántas revistas se leen. Entre
+mujeres del hogar y mujeres que trabajan que se perciben lectoras, el
+volumen es muy parecido (mediana de 2 y 2; media de 3.3 y 3.3). Los
+cuartiles por grupo se completan en el Anexo A3.
+
+\subsection{4.3 Pregunta 2: tiempo continuo de lectura
+(P26)}\label{pregunta-2-tiempo-continuo-de-lectura-p26}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.2055}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.2877}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0548}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0822}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0685}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0548}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0411}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1096}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0411}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0548}}@{}}
+\caption{Tabla 4. Minutos continuos de lectura (P26) por grupo y
+autopercepción (cualquier material)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Autopercepción
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Media
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+DE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mín
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mediana
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Máx
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Autopercepción
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Media
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+DE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mín
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mediana
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Máx
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Mujer hogar & Se percibe lector & 219 & 35.7 & 22.6 & 10 & 20 & 30 & 40
+& 120 \\
+Mujer hogar & No se percibe lector & 48 & 23.5 & 9.2 & 5 & 20 & 20 & 30
+& 60 \\
+Mujer trabaja & Se percibe lector & 335 & 40.9 & 28.4 & 5 & 20 & 30 & 60
+& 240 \\
+Mujer trabaja & No se percibe lector & 80 & 26.5 & 25.5 & 5 & 15 & 20 &
+30 & 180 \\
+Hombre trabaja & Se percibe lector & 406 & 46.8 & 40.2 & 3 & 30 & 30 &
+60 & 300 \\
+Hombre trabaja & No se percibe lector & 58 & 28.4 & 25.9 & 5 & 15 & 25 &
+30 & 180 \\
+\end{longtable}
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{Etapa2_Equipo6--1-_files/Etapa2_Equipo6--1-_files/figure-latex/p26-1.pdf}}
+\caption{Figura 2. Minutos continuos de lectura (P26) según
+autopercepción y grupo (se omiten del eje los valores mayores a 120
+minutos)}
+\end{figure}
+
+Entre quienes se perciben lectores, la mediana de minutos continuos es
+30 en mujeres del hogar, 30 en mujeres que trabajan y 30 en hombres que
+trabajan; entre quienes no se perciben lectores es 20, 20 y 25. Los
+cuartiles Q1-Q3 de quienes se perciben lectores son 20-40, 20-60 y
+30-60, frente a 20-30, 15-30 y 15-30, y las medias difieren en 12.2,
+14.4, 18.4 minutos. Las distribuciones son asimétricas a la derecha
+(hasta 300 minutos) y P26 se refiere a cualquier material, no solo a
+revistas. En los tres grupos, quienes se perciben lectores leen sesiones
+más largas que quienes no, aunque la magnitud de la diferencia varía
+según el grupo y la medida: quienes no se perciben lectores también
+leen, pero en sesiones más breves, lo que apunta a una correspondencia
+parcial entre autopercepción y práctica. Entre quienes se perciben
+lectores, las mujeres del hogar tienen sesiones más cortas (media de
+35.7 minutos, Q3 de 40) que las mujeres que trabajan (40.9 y 60) y los
+hombres que trabajan (46.8 y 60).
+
+\subsection{4.4 Pregunta 3: motivo de lectura de revistas
+(P11)}\label{pregunta-3-motivo-de-lectura-de-revistas-p11}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1923}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2692}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0513}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1282}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1282}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2308}}@{}}
+\caption{Tabla 5. Motivo principal de lectura de revistas (gusto o
+entretenimiento frente a otros motivos), por grupo y
+autopercepción}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Autopercepción
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Gusto (n)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Gusto (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Otros motivos (\%)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Autopercepción
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Gusto (n)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Gusto (\%)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Otros motivos (\%)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Mujer hogar & Se percibe lector & 219 & 147 & 67.1 & 32.9 \\
+Mujer hogar & No se percibe lector & 48 & 40 & 83.3 & 16.7 \\
+Mujer trabaja & Se percibe lector & 335 & 176 & 52.5 & 47.5 \\
+Mujer trabaja & No se percibe lector & 80 & 60 & 75.0 & 25.0 \\
+Hombre trabaja & Se percibe lector & 406 & 201 & 49.5 & 50.5 \\
+Hombre trabaja & No se percibe lector & 58 & 33 & 56.9 & 43.1 \\
+\end{longtable}
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{Etapa2_Equipo6--1-_files/Etapa2_Equipo6--1-_files/figure-latex/p11-1.pdf}}
+\caption{Figura 3. Lectores de revistas que leen por gusto o
+entretenimiento, por grupo y autopercepción (sobre las barras: \% y
+personas/base)}
+\end{figure}
+
+Entre quienes se perciben lectores, leen por gusto o entretenimiento
+67.1 \% de las mujeres del hogar, 52.5 \% de las mujeres que trabajan y
+49.5 \% de los hombres que trabajan; entre quienes no se perciben
+lectores, 83.3 \%, 75.0 \% y 56.9 \%; la diferencia (no se percibe menos
+se percibe) es de 16.2, 22.5, 7.4 puntos porcentuales. Las bases de
+quienes no se perciben lectores son pequeñas (48 a 80 personas), por lo
+que diferencias de pocos puntos no deben sobreinterpretarse. En los tres
+grupos, quienes no se perciben lectores leen revistas por gusto o
+entretenimiento en mayor proporción que quienes sí se perciben. Entre
+quienes se perciben lectores, las mujeres del hogar leen por gusto en
+mayor proporción que los otros dos grupos, en los que pesan más los
+motivos de trabajo, estudio o cultura general (Anexo A4).
+
+\section{5. Conclusiones de la etapa}\label{conclusiones-de-la-etapa}
+
+\textbf{Patrones principales.} La lectura habitual es menos frecuente
+entre las mujeres del hogar (49.1 \%) que entre las mujeres que trabajan
+(54.8 \%) y los hombres que trabajan (56.6 \%). Entre quienes leyeron
+revistas, el volumen es parecido sin importar la autopercepción
+(diferencias de mediana de una revista o menos); la duración continua es
+menor entre quienes no se perciben lectores; y su motivo es más
+recreativo. La correspondencia entre autopercepción y práctica parece,
+así, parcial: débil en volumen (P10) y más clara en duración (P26) y
+motivo (P11).
+
+\textbf{Diferencias entre grupos.} El porcentaje de quienes no
+acostumbran leer pero sí leyeron algún material es 25.5 \% en mujeres
+del hogar, 32.1 \% en mujeres que trabajan y 38.3 \% en hombres que
+trabajan, y la proporción que leyó revistas entre quienes no se perciben
+lectores es 31.2 \%, 34.3 \% y 18.0 \%. Entre quienes se perciben
+lectores, las mujeres del hogar leen sesiones más cortas que los otros
+grupos. Las mujeres del hogar que se perciben lectoras leen revistas por
+gusto en mayor proporción que los otros grupos.
+
+\textbf{Lo que aún no puede responderse y lo que sigue.} Con un análisis
+descriptivo y sin ponderar no se puede afirmar que las diferencias sean
+estadísticamente distintas ni que valgan para la población, ni si se
+deben a la ocupación y al sexo o a diferencias de edad y escolaridad que
+aquí no se controlan. Tampoco se sabe qué leen quienes no leyeron
+revistas, porque la práctica se mide solo con revistas. Surgen preguntas
+como por qué las duraciones y los motivos distinguen más que los
+volúmenes, y si los patrones se mantienen en cada año (Anexo A5). En la
+siguiente etapa convendría contrastar formalmente las diferencias
+observadas en P10, P26 y P11 y compararlas según edad y escolaridad.
+
+En conjunto, en la muestra de la MOLEC 2022-2024 las personas que no se
+perciben lectores pero leen revistas leen un número de revistas similar
+al de quienes sí se perciben, aunque por gusto y, en general, en
+sesiones más breves. Esto es compatible con que parte de la práctica
+lectora cotidiana no se reconozca como lectura, aunque estos datos no
+permiten confirmarlo.
+
+\textbf{Limitaciones.} (1) Resultados sin ponderar: describen la
+muestra. (2) Se incluye solo a lectores de revistas y P26 se refiere a
+cualquier material. (3) Por construcción de H\_LEC, entre lectores de
+revistas la distinción entre H\_LEC = 1 y 3 corresponde a si la persona
+dice acostumbrar leer. (4) Estudiantes, jubilados y otras condiciones no
+se analizan, y no se ajusta por edad ni escolaridad. (5) El archivo no
+conserva identificadores, por lo que no se verificó si hay personas
+repetidas entre años. (6) Es un análisis descriptivo: describe
+asociaciones, no causalidad.
+
+\textbf{Archivos.} Liga al archivo R Markdown: {[}PEGAR LIGA{]}. Base
+preparada: \texttt{DatosEquipo6\_base\_limpia.csv} (se adjunta).
+
+\newpage
+
+\section{Anexos}\label{anexos}
+
+\textbf{Anexo A1 (Tabla A1).} Describe cada variable (tipo, categorías o
+unidad) y cuántos valores faltantes o fuera de rango tiene.
+
+\begin{table}[H]
+
+\caption{\label{tab:anexo1}Tabla A1. Variables seleccionadas y calidad de los datos (sobre todos los registros; en P10, P11 y P26 el vacío es un pase de pregunta)}
+\centering
+\begin{tabular}[t]{p{1.8cm}p{3.4cm}p{1.8cm}p{4.2cm}rrr}
+\toprule
+Variable & Descripción & Tipo & Unidad o categorías & Falt. (n) & Falt. (\%) & Fuera rango (n)\\
+\midrule
+H\_LEC & Condición lectora construida por INEGI & Cat. nominal & 1 Habitual; 2 Otros materiales; 3 Leyó sin acostumbrar; 4 No lector & 121 & 2.0 & 0\\
+SEXO & Sexo (preg. 8) & Cat. nominal & 1 Hombre; 2 Mujer & 0 & 0.0 & 0\\
+COND\_ACT & Condición de actividad la semana pasada (preg. 15) & Cat. nominal & 01-03 trabaja; 04-05 busca trabajo; 06 estudia; 07 hogar; 08 jubilado; 09-10 otra; 99 no especificado & 0 & 0.0 & 0\\
+P10 & Revistas leídas en tres meses (preg. 10) & Num. discreta & Revistas (diccionario: 1 a 25) & 4675 & 77.6 & 8\\
+P11 & Motivo principal de lectura de revistas (preg. 11) & Cat. nominal & 1 Trabajo; 2 Estudio; 3 Cultura general; 4 Gusto; 5 Religión; 6 Otro & 4675 & 77.6 & 0\\
+\addlinespace
+P26 & Minutos continuos de lectura de algún material (preg. 26) & Num. continua & Minutos (diccionario: 2 a 360) & 1974 & 32.7 & 1\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Anexo A2 (Tabla A2).} Muestra cuántos hombres y mujeres hay en
+cada condición de actividad; justifica los grupos de comparación y el
+tamaño reducido de los hombres dedicados al hogar.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.5135}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1081}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1351}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1081}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1351}}@{}}
+\caption{Tabla A2. Composición por SEXO y COND\_ACT (personas con H\_LEC
+válido)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Condición
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Hombres
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\% hombres
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mujeres
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\% mujeres
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Condición
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Hombres
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\% hombres
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mujeres
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\% mujeres
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Trabaja o tiene trabajo (01-03) & 2007 & 79.0 & 1706 & 50.7 \\
+Busca o espera trabajo (04-05) & 80 & 3.1 & 52 & 1.5 \\
+Estudiante (06) & 92 & 3.6 & 119 & 3.5 \\
+Quehaceres del hogar (07) & 34 & 1.3 & 1258 & 37.4 \\
+Jubilado o pensionado (08) & 286 & 11.3 & 217 & 6.4 \\
+Incapacitado u otra situación (09-10) & 41 & 1.6 & 15 & 0.4 \\
+\end{longtable}
+
+\textbf{Anexo A3 (Tabla A3).} Resume, por grupo, cuánto difieren entre
+quienes se perciben lectores y quienes no la media y los cuartiles de
+P10 y P26; completa las Tablas 3 y 4.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1011}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1685}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1461}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1798}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1124}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0787}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1348}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.0787}}@{}}
+\caption{Tabla A3. Diferencias entre quienes se perciben lectores y
+quienes no (se percibe menos no se percibe), por grupo}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N\_se\_percibe
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N\_no\_se\_percibe
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Dif\_media
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Dif\_Q1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Dif\_mediana
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Dif\_Q3
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N\_se\_percibe
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N\_no\_se\_percibe
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Dif\_media
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Dif\_Q1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Dif\_mediana
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Dif\_Q3
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+P10 & Mujer hogar & 219 & 48 & 1.0 & 1 & 0 & 0.75 \\
+P10 & Mujer trabaja & 335 & 80 & 1.0 & 1 & 0 & 1.00 \\
+P10 & Hombre trabaja & 406 & 58 & 0.5 & 0 & 0 & 0.25 \\
+P26 & Mujer hogar & 219 & 48 & 12.2 & 0 & 10 & 10.00 \\
+P26 & Mujer trabaja & 335 & 80 & 14.4 & 5 & 10 & 30.00 \\
+P26 & Hombre trabaja & 406 & 58 & 18.4 & 15 & 5 & 30.00 \\
+\end{longtable}
+
+\textbf{Anexo A4 (Tabla A4).} Desglosa el motivo de lectura de revistas
+en sus seis categorías, por grupo y autopercepción; complementa la Tabla
+5, que solo separa gusto de otros motivos.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1515}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.2121}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0404}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1010}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0909}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.1010}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 16\tabcolsep) * \real{0.0808}}@{}}
+\caption{Tabla A4. Motivo principal de lectura de revistas (6
+categorías), n (\%) por grupo y autopercepción}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Autopercepción
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Trabajo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Estudio
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Cultura
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Gusto
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Religión
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Otro
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Autopercepción
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Trabajo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Estudio
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Cultura
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Gusto
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Religión
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Otro
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Mujer hogar & Se percibe lector & 219 & 1 (0.5) & 3 (1.4) & 40 (18.3) &
+147 (67.1) & 27 (12.3) & 1 (0.5) \\
+Mujer hogar & No se percibe lector & 48 & 0 (0) & 0 (0) & 4 (8.3) & 40
+(83.3) & 4 (8.3) & 0 (0) \\
+Mujer trabaja & Se percibe lector & 335 & 47 (14) & 14 (4.2) & 69 (20.6)
+& 176 (52.5) & 27 (8.1) & 2 (0.6) \\
+Mujer trabaja & No se percibe lector & 80 & 2 (2.5) & 1 (1.2) & 13
+(16.2) & 60 (75) & 4 (5) & 0 (0) \\
+Hombre trabaja & Se percibe lector & 406 & 68 (16.7) & 14 (3.4) & 112
+(27.6) & 201 (49.5) & 10 (2.5) & 1 (0.2) \\
+Hombre trabaja & No se percibe lector & 58 & 8 (13.8) & 0 (0) & 12
+(20.7) & 33 (56.9) & 5 (8.6) & 0 (0) \\
+\end{longtable}
+
+\textbf{Anexo A5 (Tabla A5).} Repite los indicadores principales para
+cada año, con los tres grupos juntos, para ver si los patrones se
+mantienen; los años no contienen a las mismas personas.
+
+\begin{longtable}[]{@{}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0352}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0352}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0775}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.3099}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1901}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1901}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1620}}@{}}
+\caption{Tabla A5. Indicadores principales por año (tres grupos juntos).
+Los archivos de distintos años no contienen a las mismas
+personas}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Año
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\% habitual
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\% H\_LEC 3 entre quienes no acostumbran leer
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Mediana P10 (percibe / no)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Mediana P26 (percibe / no)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\% gusto (percibe / no)
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Año
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\% habitual
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+\% H\_LEC 3 entre quienes no acostumbran leer
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Mediana P10 (percibe / no)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Mediana P26 (percibe / no)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\% gusto (percibe / no)
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+2022 & 1668 & 56.8 & 32.4 & 2 / 2 & 30 / 22.5 & 53 / 78 \\
+2023 & 1671 & 52.4 & 30.7 & 2 / 2 & 30 / 20 & 56.5 / 64.3 \\
+2024 & 1632 & 53.1 & 35.1 & 2 / 2 & 30 / 20 & 54.5 / 72.5 \\
+\end{longtable}
+
+\textbf{Anexo A6 (Tabla A6).} Repite la Tabla 3 sin los registros de P10
+por encima del máximo del diccionario (25 revistas), para ver cuánto
+influyen en los resultados.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.2027}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.2838}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0541}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0811}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0541}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0541}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0405}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.1081}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0676}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 18\tabcolsep) * \real{0.0541}}@{}}
+\caption{Tabla A6. Sensibilidad: P10 sin los registros por encima de 25
+revistas}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Autopercepción
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Media
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+DE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mín
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mediana
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Máx
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Grupo
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Autopercepción
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+N
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Media
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+DE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mín
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mediana
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Q3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Máx
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Mujer hogar & Se percibe lector & 217 & 2.9 & 1.9 & 1 & 2 & 2 & 3.00 &
+15 \\
+Mujer hogar & No se percibe lector & 48 & 2.3 & 2.1 & 1 & 1 & 2 & 2.25 &
+15 \\
+Mujer trabaja & Se percibe lector & 333 & 3.0 & 2.3 & 1 & 2 & 2 & 4.00 &
+25 \\
+Mujer trabaja & No se percibe lector & 80 & 2.3 & 1.2 & 1 & 1 & 2 & 3.00
+& 5 \\
+Hombre trabaja & Se percibe lector & 403 & 3.2 & 2.7 & 1 & 2 & 2 & 4.00
+& 25 \\
+Hombre trabaja & No se percibe lector & 58 & 3.1 & 2.9 & 1 & 2 & 2 &
+3.75 & 20 \\
+\end{longtable}
+
+Al quitar los 8 registros con P10 mayor a 25, las medianas no cambian
+respecto a la Tabla 3 y las medias de quienes se perciben lectores, que
+concentran los valores altos, bajan o se mantienen.
+
+\textbf{Anexo A7 (Tablas A7a y A7b).} Describe como casos, sin
+porcentajes, a los hombres dedicados al hogar, que son muy pocos para
+compararlos.
+
+\begin{longtable}[]{@{}lr@{}}
+\caption{Tabla A7a. Hombres dedicados al hogar por categoría de H\_LEC
+(casos, sin porcentajes)}\tabularnewline
+\toprule\noalign{}
+H\_LEC & n \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+H\_LEC & n \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1. Habitual & 15 \\
+2. Otros materiales & 2 \\
+3. Leyó sin percibirse lector & 7 \\
+4. No lector & 10 \\
+\end{longtable}
+
+\begin{longtable}[]{@{}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.0746}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.4478}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.0597}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.3582}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.0597}}@{}}
+\caption{Tabla A7b. Hombres dedicados al hogar que leyeron revistas
+(casos individuales)}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Año
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+H\_LEC
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+P10
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Motivo (P11)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+P26
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Año
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+H\_LEC
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+P10
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Motivo (P11)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+P26
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+2022 & 3. Leyó sin percibirse lector & 2 & Estudio & 30 \\
+2022 & 1. Habitual & 2 & Gusto / entretenimiento & 20 \\
+2022 & 1. Habitual & 12 & Religión & 25 \\
+2023 & 1. Habitual & 3 & Religión & 30 \\
+\end{longtable}
+
+\textbf{Anexo A8 (Tabla A8).} Muestra cómo se llega del total de
+registros al universo de análisis y al de lectores de revistas.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.9468}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.0532}}@{}}
+\caption{Tabla A8. Registros y universos del análisis}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Concepto
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+n
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Concepto
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+n
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Registros en la base (2022-2024) & 6028 \\
+Sin categoría válida de H\_LEC (blanco por pase) & 121 \\
+Con H\_LEC válido & 5907 \\
+Hombres dedicados al hogar (solo casos, Anexo A7) & 34 \\
+Estudiantes, jubilados, personas que buscan trabajo y otras condiciones
+(no se comparan) & 902 \\
+Sin SEXO o COND\_ACT especificado & 0 \\
+Universo del análisis (tres grupos) & 4971 \\
+Lectores de revistas con H\_LEC = 1 o 3 (P10 con valor) & 1146 \\
+\end{longtable}
+
+\textbf{Anexo A9 (Tabla A9).} Da las frecuencias completas de H\_LEC
+(todas las personas con valor válido) y de P11 (lectores de revistas),
+de las que se citan las cifras principales en la sección 3.
+
+\begin{longtable}[]{@{}llrr@{}}
+\caption{Tabla A9. Distribución de frecuencias de H\_LEC (personas con
+H\_LEC válido) y de P11 (lectores de revistas)}\tabularnewline
+\toprule\noalign{}
+Variable & Categoría & n & \% \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Variable & Categoría & n & \% \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+H\_LEC (N=5907) & 1. Habitual & 3256 & 55.1 \\
+H\_LEC (N=5907) & 2. Otros materiales & 130 & 2.2 \\
+H\_LEC (N=5907) & 3. Leyó sin percibirse lector & 798 & 13.5 \\
+H\_LEC (N=5907) & 4. No lector & 1723 & 29.2 \\
+P11 (N=1146) & Trabajo & 126 & 11.0 \\
+P11 (N=1146) & Estudio & 32 & 2.8 \\
+P11 (N=1146) & Cultura general / estar al día & 250 & 21.8 \\
+P11 (N=1146) & Gusto / entretenimiento & 657 & 57.3 \\
+P11 (N=1146) & Religión & 77 & 6.7 \\
+P11 (N=1146) & Otro & 4 & 0.3 \\
+\end{longtable}
+
+\textbf{Anexo A10 (Tabla A10).} Indica qué porcentaje de cada grupo y
+autopercepción leyó revistas en los últimos tres meses; es la base de
+los lectores de revistas que se comparan en la sección 4.
+
+\begin{longtable}[]{@{}llrrr@{}}
+\caption{Tabla A10. Personas que leyeron revistas en los últimos tres
+meses, por grupo y autopercepción}\tabularnewline
+\toprule\noalign{}
+Grupo & Autopercepción & N & Leyeron revistas & \% \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Grupo & Autopercepción & N & Leyeron revistas & \% \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Mujer hogar & Se percibe lector & 618 & 219 & 35.4 \\
+Mujer hogar & No se percibe lector & 154 & 48 & 31.2 \\
+Mujer trabaja & Se percibe lector & 935 & 335 & 35.8 \\
+Mujer trabaja & No se percibe lector & 233 & 80 & 34.3 \\
+Hombre trabaja & Se percibe lector & 1135 & 406 & 35.8 \\
+Hombre trabaja & No se percibe lector & 323 & 58 & 18.0 \\
+\end{longtable}
+
+\textbf{Figura A1.} Muestra en barras la distribución de H\_LEC dentro
+de cada grupo (representación gráfica de la Tabla 2).
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{Etapa2_Equipo6--1-_files/Etapa2_Equipo6--1-_files/figure-latex/figA1-1.pdf}}
+\caption{Figura A1. Condición lectora (H\_LEC) dentro de cada grupo, en
+\% (mismo orden de grupos que en las tablas)}
+\end{figure}
+
+\textbf{Figura A2.} Muestra los histogramas de P10 y P26 en lectores de
+revistas, que sustentan la descripción de forma de la sección 3.
+
+\begin{figure}
+\centering
+\pandocbounded{\includegraphics[keepaspectratio]{Etapa2_Equipo6--1-_files/Etapa2_Equipo6--1-_files/figure-latex/figA2-1.pdf}}
+\caption{Figura A2. Distribución de P10 y P26 en lectores de revistas
+(se omiten 12 casos con P10 \textgreater{} 15 y 6 con P26 \textgreater{}
+180 minutos)}
+\end{figure}
+
+\end{document}
