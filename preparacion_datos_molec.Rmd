@@ -22,20 +22,25 @@ M24 = read.csv("datos/Datos_molec_2024-1.csv")
 rbind("2022" = dim(M22), "2023" = dim(M23), "2024" = dim(M24))
 ```
 
-Completar: número de observaciones y de variables de cada base. Las variables vienen como números aunque la mayoría son cualitativas; se revisa en el descriptor del INEGI cuáles son realmente numéricas (en este proyecto, P10 y P26).
-
 # Selección de las variables
 
-Las variables del proyecto son seis: dos cuantitativas y cuatro cualitativas.
-
-| Variable | Pregunta | Tipo |
-|---|---|---|
-| h_lec | Autopercepción y práctica de lectura (variable construida por INEGI) | Cualitativa |
-| sexo | Sexo | Cualitativa |
-| cond_act | Condición de actividad (la semana pasada...) | Cualitativa |
-| p11 | Motivo principal de lectura de revistas | Cualitativa |
-| p10 | Número de revistas leídas en los últimos tres meses | Cuantitativa |
-| p26 | Minutos continuos de lectura | Cuantitativa |
+\begin{table}[H]
+  \centering
+  \caption{Variables seleccionadas para el análisis}
+  \label{tab:variables}
+  \begin{tabular}{@{}l >{\raggedright\arraybackslash}p{9.5cm} l@{}}
+    \toprule
+    \textbf{Variable} & \textbf{Pregunta} & \textbf{Tipo} \\
+    \midrule
+    \texttt{h\_lec}    & Autopercepción y práctica de lectura (variable construida por INEGI) & Cualitativa \\
+    \texttt{sexo}      & Sexo                                                & Cualitativa \\
+    \texttt{cond\_act} & Condición de actividad (la semana pasada\ldots)     & Cualitativa \\
+    \texttt{p11}       & Motivo principal de lectura de revistas             & Cualitativa \\
+    \texttt{p10}       & Número de revistas leídas en los últimos tres meses & Cuantitativa \\
+    \texttt{p26}       & Minutos continuos de lectura                        & Cuantitativa \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 Las columnas cambian de posición entre años, por lo que se seleccionan por **nombre** y no por número de columna. Primero se verifica que las seis existan en cada base:
 
@@ -87,7 +92,6 @@ Completar: porcentaje de NA de cada variable.
 
 ## Respuestas no contestadas (ceros)
 
-En estas bases los **blancos por pase vienen codificados como 0**, no como NA. Ninguna de las seis variables tiene el 0 como valor válido (`sexo`: 1-2; `cond_act`: 1-10 y 99; `h_lec`: 1-4; `p10`: 1-25; `p11`: 1-6; `p26`: 2-360), así que cada 0 es una pregunta que no se le hizo a la persona (o que no contestó).
 
 ```{r}
 ceros = sapply(list("2022" = M22sel, "2023" = M23sel, "2024" = M24sel),
@@ -99,14 +103,14 @@ n_anio = c(nrow(M22sel), nrow(M23sel), nrow(M24sel))
 round(100 * sweep(ceros, 2, n_anio, "/"), 2)
 ```
 
-Se verifica que `p10` (y, por tanto, haber leído revistas) solo tenga valores mayores que 0 en las categorías 1 y 3 de `h_lec`:
+Se verifica que p10 solo tenga valores mayores que 0 en las categorías 1 y 3 de h_lec:
 
 ```{r}
 M_todo = rbind(M22sel, M23sel, M24sel)
 table(h_lec = M_todo$h_lec, lee_revistas = M_todo$p10 > 0)
 ```
 
-La categoría `h_lec = 0` corresponde a blancos por pase de esa pregunta. Se comprueba con la pregunta 1 (¿sabe leer y escribir un recado?), que se puede agregar temporalmente a `vars`.
+La categoría h_lec = 0 corresponde a blancos por pase de esa pregunta. Se comprueba con la pregunta 1, que se puede agregar temporalmente a vars.
 
 ## Ceros a NA
 
@@ -123,22 +127,21 @@ M_todo = rbind(M22sel, M23sel, M24sel)
 table(h_lec = M_todo$h_lec, con_p10 = !is.na(M_todo$p10), useNA = "ifany")
 ```
 
-Ahora los NA de `p10`, `p11` y `p26` son blancos por pase, no datos perdidos. Por eso **no se usa `na.omit()` en esta base**: eliminaría a todas las personas que no leyeron revistas y destruiría el universo del estudio. Los NA se manejan al analizar, según la pregunta de investigación.
+Ahora los NA de p10, p11 y p26 son blancos por pase.  Los NA se manejan al analizar, según la pregunta de investigación.
 
 ## Valores fuera de rango o no especificados
 
 ```{r}
-table(M_todo$cond_act, useNA = "ifany")   # 99 = no especificado
-table(M_todo$h_lec, useNA = "ifany")      # códigos válidos: 1 a 4
-table(M_todo$p11, useNA = "ifany")        # códigos válidos: 1 a 6
-summary(M_todo[, c("p10", "p26")])        # p10: 1 a 25; p26: 2 a 360
+table(M_todo$cond_act, useNA = "ifany")
+table(M_todo$h_lec, useNA = "ifany")
+table(M_todo$p11, useNA = "ifany")
+summary(M_todo[, c("p10", "p26")])
 ```
 
-Completar: códigos fuera de catálogo y valores extremos de `p10` y `p26`.
+Completar códigos fuera de catálogo y valores extremos de p10 y p26.
 
 # Archivo con todos los años
 
-**Columna de año**
 
 ```{r}
 n22 = nrow(M22sel)
@@ -147,26 +150,22 @@ n24 = nrow(M24sel)
 
 anio = c(rep(2022, n22), rep(2023, n23), rep(2024, n24))
 
-# Verifica que el vector anio tenga la misma longitud que la suma de las filas
 length(anio) == n22 + n23 + n24
 ```
-
-**Data frame de los tres años juntos**
 
 ```{r}
 molec = data.frame(anio, rbind(M22sel, M23sel, M24sel))
 ```
 
-Verifica que contenga los tres años:
+Verificar que contenga los tres años
 
 ```{r}
 table(molec$anio)
 ```
 
-**Archivo de años juntos**
+Database con los años juntos
 
 ```{r}
-# El archivo se guarda en la carpeta "datos" (se crea si todavía no existe)
 dir.create("datos", showWarnings = FALSE)
 write.csv(molec, "datos/DatosEquipo6_v2.csv", row.names = FALSE)
 ```
