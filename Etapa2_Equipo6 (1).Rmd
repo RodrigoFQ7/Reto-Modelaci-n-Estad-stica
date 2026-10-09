@@ -4,26 +4,31 @@ output:
   pdf_document:
     number_sections: true
     toc: false
+  word_document:
+    toc: false
+  html_document:
+    toc: false
+    df_print: paged
 lang: es
 fontsize: 12pt
 geometry: margin=3cm
 urlcolor: blue
 linkcolor: black
 header-includes:
-  - \usepackage{graphicx}
-  - \usepackage{float}
-  - \usepackage{amssymb}
-  - \usepackage{caption}
-  - \usepackage{esint}
-  - \usepackage{setspace}
-  - \captionsetup[figure]{name=Figura,labelsep=period}
-  - \captionsetup[table]{name=Tabla,labelsep=period}
-  - \setlength{\parskip}{0.5em}
-  - \usepackage{array}
-  - \usepackage{ragged2e}
-  - \usepackage{longtable}
-  - \usepackage{booktabs}
-  - \newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+- \usepackage{graphicx}
+- \usepackage{float}
+- \usepackage{amssymb}
+- \usepackage{caption}
+- \usepackage{esint}
+- \usepackage{setspace}
+- \captionsetup[figure]{name=Figura,labelsep=period}
+- \captionsetup[table]{name=Tabla,labelsep=period}
+- \setlength{\parskip}{0.5em}
+- \usepackage{array}
+- \usepackage{ragged2e}
+- \usepackage{longtable}
+- \usepackage{booktabs}
+- \newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
 ---
 
 \begin{titlepage}
