@@ -11,7 +11,7 @@ output:
     df_print: paged
 lang: es
 fontsize: 12pt
-geometry: margin=3cm
+geometry: margin=2.5cm
 urlcolor: blue
 linkcolor: black
 header-includes:
@@ -367,10 +367,6 @@ Así pues, este análisis es el primer paso para explicar cómo la identidad lec
 
 Ante esto, surgen nuevas interrogantes: ¿por qué los motivos y las duraciones diferencian mejor a los grupos que el volumen? ¿Los patrones de lectura informal se mantienen estables de un año a otro? Por ello, en la siguiente etapa se requiere aplicar pruebas de inferencia estadística para evaluar diferencias significativas en las medias y medianas de duración y volumen por ocupación y sexo, así como ver la variación en el tiempo.
 
-\subsection*{Limitaciones}
-
-
-Existen resultados sin ponderar que describen la muestra. Además, se incluye solo a lectores de revistas y P26 se refiere a cualquier material. Por construcción de H_LEC, entre lectores de revistas la distinción entre H_LEC = 1 y 3 corresponde a si la persona dice acostumbrar leer. También hay cosas como estudiantes, jubilados y otras condiciones que no se analizan, y no se ajusta por edad ni escolaridad. El archivo no conserva identificadores, por lo que no se verificó si hay personas repetidas entre años. Por último, está el hecho de que es un análisis descriptivo que describe asociaciones, no causalidad.
 
 Liga al archivo R Markdown: https://github.com/RodrigoFQ7/Reto-Modelaci-n-Estad-stica.
 
