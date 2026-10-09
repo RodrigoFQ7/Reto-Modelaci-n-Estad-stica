@@ -68,21 +68,20 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
                       fig.width = 7, fig.height = 3, dpi = 120)
 options(knitr.kable.NA = "—")
 library(knitr)
-library(e1071)   # skewness() y kurtosis()
+library(e1071)
 
 pct = function(a, b) round(100 * a / b, 1)
-f   = function(x) sprintf("%.1f", unname(x))                        # un decimal para el texto
-si  = function(cond, a, b = "") if (isTRUE(cond)) a else b          # frase condicional para el texto
+f   = function(x) sprintf("%.1f", unname(x))
+si  = function(cond, a, b = "") if (isTRUE(cond)) a else b
 ```
 
 ```{r datos}
 raw = read.csv("datos/DatosEquipo6_v2.csv")
-# Nombres de las columnas (el archivo trae: anio, h_lec, sexo, cond_act, p10, p11, p26)
+
 names(raw) = c("anio", "H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")
 datos = raw
 vars6 = c("H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")
 
-# Vacíos y valores fuera del rango del diccionario
 calidad = data.frame(
   Variable = vars6,
   Vacios = colSums(is.na(raw[, vars6])),
@@ -103,13 +102,11 @@ datos$H_LEC_lbl = factor(datos$H_LEC, levels = 1:4,
                          labels = c("1. Habitual", "2. Otros materiales",
                                     "3. Leyó sin percibirse lector", "4. No lector"))
 
-# Autopercepción: solo H_LEC = 1 y H_LEC = 3 entran a la comparación
 datos$Aut = NA
 datos$Aut[datos$H_LEC %in% 1] = "Se percibe lector"
 datos$Aut[datos$H_LEC %in% 3] = "No se percibe lector"
 datos$Aut = factor(datos$Aut, levels = c("Se percibe lector", "No se percibe lector"))
 
-# Grupos de comparación (COND_ACT 7 = hogar; 1 a 3 = trabaja)
 datos$Grupo = NA
 datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 7]   = "Mujer hogar"
 datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 1:3] = "Mujer trabaja"
@@ -121,15 +118,14 @@ datos$Cond_lbl = cut(datos$COND_ACT, breaks = c(0, 3, 5, 6, 7, 8, 10),
                                 "Estudiante (06)", "Quehaceres del hogar (07)",
                                 "Jubilado o pensionado (08)", "Incapacitado u otra situación (09-10)"))
 
-# Universos de análisis
-V = subset(datos, !is.na(H_LEC))                    # H_LEC válido
-U = subset(V, !is.na(Grupo))                        # tres grupos de comparación
-L = subset(U, H_LEC %in% c(1, 3) & !is.na(P10))     # lectores de revistas
-H = subset(V, SEXO == 1 & COND_ACT == 7)            # hombres del hogar (solo casos)
+V = subset(datos, !is.na(H_LEC))   
+U = subset(V, !is.na(Grupo)) 
+L = subset(U, H_LEC %in% c(1, 3) & !is.na(P10)) 
+H = subset(V, SEXO == 1 & COND_ACT == 7) 
 
-n_est   = sum(V$COND_ACT %in% 6)                    # estudiantes
-n_jub   = sum(V$COND_ACT %in% 8)                    # jubilados
-n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))         # todas las condiciones que no se comparan
+n_est   = sum(V$COND_ACT %in% 6)
+n_jub   = sum(V$COND_ACT %in% 8)
+n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))
 ```
 
 ```{=latex}
@@ -149,11 +145,11 @@ n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))         # todas las condiciones que 
     \toprule
      & Pregunta específica & Objetivo específico & Variables \\
     \midrule
-    1 & Entre quienes leyeron revistas, ¿difiere el número de revistas leídas entre quienes se perciben lectores y quienes no, y varía según el grupo? & Comparar el número de revistas leídas según autopercepción y grupo. & P10, H\_LEC, SEXO, COND\_ACT \\
+    1 & Entre las personas que leyeron revistas, ¿qué diferencias existen en el número de revistas leídas entre quienes se consideran lectoras y quienes no, y cómo se comportan esas diferencias en cada grupo (mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan)? & P10, H\_LEC, SEXO, COND\_ACT \\
     \addlinespace
-    2 & ¿Difiere el tiempo continuo de lectura según H\_LEC y según el grupo? & Comparar los minutos continuos de lectura según autopercepción y grupo. & P26, H\_LEC, SEXO, COND\_ACT \\
+    2 & ¿Cómo se compara el tiempo continuo de lectura (en minutos) entre quienes se perciben lectores y quienes no, y cómo cambia esa comparación según el grupo? & Comparar los minutos continuos de lectura según autopercepción y grupo. & P26, H\_LEC, SEXO, COND\_ACT \\
     \addlinespace
-    3 & ¿Difiere el motivo principal de lectura de revistas según H\_LEC y según el grupo? & Comparar la proporción que lee por gusto o entretenimiento según autopercepción y grupo. & P11, H\_LEC, SEXO, COND\_ACT \\
+    3 & ¿Qué proporción de quienes leen revistas lo hace por gusto o entretenimiento según se perciban lectores o no, y cómo se relaciona con el grupo? & Comparar la proporción que lee por gusto o entretenimiento según autopercepción y grupo. & P11, H\_LEC, SEXO, COND\_ACT \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -351,17 +347,25 @@ Para abordar el segundo objetivo específico, la Figura 3 ilustra de forma gráf
 
 Dentro del grupo de las mujeres que se dedican al hogar, el cual presenta el mayor porcentaje de lectura por entretenimiento, se destaca el grupo que no se percibe lector (83.3%), mientras que las que se perciben lectoras registran un 67.1%. Por su parte, dentro de las mujeres que trabajan el 75.0% contestó que lee revistas por entretenimiento, a comparación con el 52.6% de las que sí se perciben lectoras. En el caso de los hombres que trabajan, se registraron los porcentajes más bajos de lectura por gusto, con un 56.9% para los que no se perciben lectores y un 49.5% para los que sí se perciben lectores. 
 
-De esta manera, en todos los grupos analizados quienes no se perciben lectores leen por gusto o entretenimiento en un porcentaje mayor que aquellos que sí se perciben como lectores, siendo las mujeres en el hogar el grupo con mayor motivación por gusto y los hombres que trabajan el que menos. Las demás razones por las cuales se lee se encuentran detalladas en el Anexo (A4). 
+De esta manera, en todos los grupos analizados quienes no se perciben lectores leen por gusto o entretenimiento en un porcentaje mayor que aquellos que sí se perciben como lectores, siendo las mujeres en el hogar el grupo con mayor motivación por gusto y los hombres que trabajan el que menos. Las demás razones por las cuales se lee se encuentran detalladas en el Anexo (A3). 
 
 \section*{Conclusiones de la etapa}
 
-\subsection*{Patrones principales} `r si(hab[1] < min(hab[2:3]), paste0("La lectura habitual es menos frecuente entre las mujeres del hogar (", f(hab[1]), " %) que entre las mujeres que trabajan (", f(hab[2]), " %) y los hombres que trabajan (", f(hab[3]), " %)."), paste0("La proporción de lectores habituales es de ", f(hab[1]), " %, ", f(hab[2]), " % y ", f(hab[3]), " % en mujeres del hogar, mujeres que trabajan y hombres que trabajan."))` Entre quienes leyeron revistas, `r si(p10_parecido, "el volumen es parecido sin importar la autopercepción (diferencias de mediana de una revista o menos)", "el volumen difiere según la autopercepción en al menos un grupo")`; `r si(p26_lec_mayor, "la duración continua es menor entre quienes no se perciben lectores", "la duración continua no sigue el mismo patrón en todos los grupos")`; y `r si(p11_dir, "su motivo es más recreativo", "el motivo no sigue el mismo patrón en todos los grupos")`. `r si(p10_parecido & p26_lec_mayor & p11_dir, "La correspondencia entre autopercepción y práctica parece, así, parcial: débil en volumen (P10) y más clara en duración (P26) y motivo (P11).", "Las tres dimensiones no apuntan en la misma dirección (Tablas 3 a 5), por lo que la correspondencia no es uniforme.")`
+\subsection*{Patrones principales y diferencias por grupos} 
 
-\subsection*{Diferencias entre grupos} El porcentaje de quienes no acostumbran leer pero sí leyeron algún material es `r f(pr[1])` % en mujeres del hogar, `r f(pr[2])` % en mujeres que trabajan y `r f(pr[3])` % en hombres que trabajan, y la proporción que leyó revistas entre quienes no se perciben lectores es `r f(cp[2])` %, `r f(cp[4])` % y `r f(cp[6])` %. `r si(hogar_corta, "Entre quienes se perciben lectores, las mujeres del hogar leen sesiones más cortas que los otros grupos.", "")` `r si(hogar_gusto, "Las mujeres del hogar que se perciben lectoras leen revistas por gusto en mayor proporción que los otros grupos.", "")`
+Al analizar en detalle cada uno de los tres grupos, la lectura autoreconocida es menor en mujeres del hogar (49.1%) frente a mujeres (54.8%) y hombres (56.6%) que trabajan, mientras que el consumo no reconocido alcanza el 31.2%, 34.3% y 18.0%, respectivamente. 
 
-**Lo que aún no puede responderse y lo que sigue.** Con un análisis descriptivo y sin ponderar no se puede afirmar que las diferencias sean estadísticamente distintas ni que valgan para la población, ni si se deben a la ocupación y al sexo o a diferencias de edad y escolaridad que aquí no se controlan. Tampoco se sabe qué leen quienes no leyeron revistas, porque la práctica se mide solo con revistas. Surgen preguntas como por qué las duraciones y los motivos distinguen más que los volúmenes, y si los patrones se mantienen en cada año (Anexo A5). En la siguiente etapa convendría contrastar formalmente las diferencias observadas en P10, P26 y P11 y compararlas según edad y escolaridad.
+Tras este análisis, quienes no se perciben lectores leen en volúmenes similares a los habituales, pero en sesiones más breves y recreativas. Esto se alinea con Bourdieu (1979, citado en Lahire, 2007) sobre cómo las prácticas cotidianas no se reconocen bajo el canon de la "alta cultura". 
 
-En conjunto, `r si(p10_parecido & p11_dir, "en la muestra de la MOLEC 2022-2024 las personas que no se perciben lectores pero leen revistas leen un número de revistas similar al de quienes sí se perciben, aunque por gusto y, en general, en sesiones más breves. Esto es compatible con que parte de la práctica lectora cotidiana no se reconozca como lectura, aunque estos datos no permiten confirmarlo.", "en la muestra de la MOLEC 2022-2024 la relación entre la autopercepción lectora y la práctica de lectura de revistas no es uniforme entre dimensiones ni entre grupos, por lo que conviene estudiarla por dimensión y por condición de vida.")`
+Así, influenciadas por la "pobreza de tiempo" (García Sainz, 2017; Ramírez de Garay, 2025), las mujeres del hogar no lectoras leen en sesiones cortas (23.5 minutos, DE 9.2) pero por gusto (83.3%). En contraste, los hombres trabajadores que sí se perciben lectores registran la menor lectura por entretenimiento (49.5%) y tiempos más largos, pero variables (46.8 minutos, DE 40.2). 
+
+\subsection*{Contribuciones y alcances de la investigación}
+
+Así pues, este análisis es el primer paso para explicar cómo la identidad lectora está mediada por expectativas sociales y las limitantes del tiempo. En esta etapa se llegó a la conclusión de que las duraciones y motivaciones diferencian mejor a los grupos que el volumen de lectura. No obstante, el análisis descriptivo no permite realizar inferencias poblacionales, establecer causalidad ni aislar el efecto de otros factores socioculturales.  
+
+\subsection*{Nuevos interrogantes y siguientes pasos}
+
+Ante esto, surgen nuevas interrogantes: ¿por qué los motivos y las duraciones diferencian mejor a los grupos que el volumen? ¿Los patrones de lectura informal se mantienen estables de un año a otro? Por ello, en la siguiente etapa se requiere aplicar pruebas de inferencia estadística para evaluar diferencias significativas en las medias y medianas de duración y volumen por ocupación y sexo, así como ver la variación en el tiempo.
 
 \subsection*{Limitaciones}
 
