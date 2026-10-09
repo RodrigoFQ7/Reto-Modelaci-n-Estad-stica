@@ -138,10 +138,10 @@ n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))         # todas las condiciones que 
 
 \section*{Pregunta de investigación y objetivos}
 
-\textbf{Pregunta general} 
+\subsection*{Pregunta general} 
 ¿Se corresponde la autopercepción como lector (H_LEC) con la práctica real de lectura de revistas, observada en tres dimensiones: volumen (número de revistas, P10), duración (tiempo continuo de lectura, P26) y motivo principal (P11), y varía esa correspondencia según el sexo (SEXO) y la dedicación a los quehaceres del hogar (COND_ACT) en las personas adultas de la muestra de la MOLEC entre 2022 y 2024?
 
-\textbf{Objetivo general} Describir y comparar la práctica de lectura de revistas (P10, P26 y P11) entre quienes se perciben lectores y quienes no se perciben como tales pero leyeron algún material (H_LEC = 1 frente a H_LEC = 3), en tres grupos definidos por SEXO y COND_ACT (mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan). Se entenderá que hay correspondencia cuando quienes no se perciben lectores muestren menor volumen y menor duración que quienes sí; si sus valores son parecidos, se tratará de una práctica que no se reconoce como lectura.
+\subsection*{Objetivo general} Describir y comparar la práctica de lectura de revistas (P10, P26 y P11) entre quienes se perciben lectores y quienes no se perciben como tales pero leyeron algún material (H_LEC = 1 frente a H_LEC = 3), en tres grupos definidos por SEXO y COND_ACT (mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan). Se entenderá que hay correspondencia cuando quienes no se perciben lectores muestren menor volumen y menor duración que quienes sí; si sus valores son parecidos, se tratará de una práctica que no se reconoce como lectura.
 
 \begin{table}[H]
   \centering
@@ -160,9 +160,13 @@ n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))         # todas las condiciones que 
 
 \section*{Preparación de la base de datos}
 
-El archivo reúne la MOLEC de los años `r paste(sort(unique(raw$anio)), collapse = ", ")`: `r nrow(raw)` registros (cada uno es una persona de 18 años o más) y `r ncol(raw)` columnas (las seis variables de análisis y el año). Las variables se contrastaron con los diccionarios de los tres años para confirmar el mismo significado y codificación. [CONFIRMAR ANTES DE ENTREGAR Y QUITAR ESTA NOTA] Los blancos por pase (0 o NA) y el código 99 de COND_ACT no son respuestas válidas, por lo que se recodificaron como NA; en P10, P11 y P26 el vacío es un pase (quien no leyó revistas no responde) y entre los lectores de revistas no hay faltantes. P10 tiene `r fuera10` valores por encima del máximo del diccionario (25): se conservan y su efecto se revisa en el Anexo A6. El análisis es descriptivo y **sin factor de expansión**: describe a la muestra, no a la población de México. Las variables se describen en el Anexo A1 y los universos de análisis en el Anexo A8.
+El archivo reúne datos del MOLEC de los años 2022, 2023, 2024: 6028 registros (cada uno es una persona de 18 años o más) y 7 columnas (las seis variables de análisis y el año). Las variables se contrastaron con los diccionarios de los tres años para confirmar el mismo significado y codificación: los datos no identificados (0 o NA) y el código 99 de COND_ACT no son respuestas válidas, por lo que se plantearon como NA; en P10, P11 y P26 el vacío es un pase (quien no leyó revistas no responde) y entre los lectores de revistas no hay datos faltantes. 
 
-**Grupos de comparación.** Se comparan **mujeres dedicadas al hogar** (COND_ACT = 07), **mujeres que trabajan** y **hombres que trabajan** (COND_ACT = 01-03). No se incluyen estudiantes (`r n_est`), jubilados (`r n_jub`) ni las demás condiciones (`r n_otras` personas en total), porque su edad difiere mucho de la de las mujeres del hogar y se mezclaría la edad con la ocupación. Así, mujeres del hogar frente a mujeres que trabajan contrasta la ocupación dentro de un mismo sexo, y mujeres frente a hombres que trabajan contrasta el sexo dentro de una misma ocupación; como COND_ACT registra la actividad principal de la semana pasada, las mujeres que trabajan pueden también realizar trabajo doméstico. Los hombres dedicados al hogar son `r nrow(H)` y solo se describen como casos (Anexo A7). Cada tabla trae su base (N); con N < 30 la cifra se marca y no se interpreta.
+ P10 tiene 8 valores por encima del máximo del diccionario (25): se conservan y su efecto se revisa en el Anexo A6. El análisis es descriptivo y solo se mantiene en la muestra, no más allá a la población mexicana. Las variables se describen en el Anexo A1 y los universos de análisis en el Anexo A8. Grupos de comparación: se comparan mujeres dedicadas al hogar (COND_ACT = 07), mujeres que trabajan y hombres que trabajan (COND_ACT = 01-03).  
+
+No se incluyen estudiantes (211), jubilados (503) ni las demás condiciones (902 personas en total), porque su edad difiere mucho de la de las mujeres del hogar y se mezclaría la edad con la ocupación. Así, mujeres del hogar frente a mujeres que trabajan contrasta la ocupación dentro de un mismo sexo, y mujeres frente a hombres que trabajan contrasta el sexo dentro de una misma ocupación; como COND_ACT registra la actividad principal de la semana pasada, las mujeres que trabajan pueden también realizar trabajo doméstico. 
+
+ Los hombres dedicados al hogar son 34 y solo se describen como casos (Anexo A7), aunque no serán abordados concretamente por ser una muestra muy pequeña. Cada tabla trae su base (N); con N < 30.
 
 \section*{Descripción individual de las variables}
 
@@ -186,7 +190,11 @@ s10 = round(tab_num[1, ], 1)
 s26 = round(tab_num[2, ], 1)
 ```
 
-\subsection*{Variables cuantitativas} Entre las `r s10["N"]` personas que leyeron revistas, los datos se concentran en valores bajos: la mitad leyó `r s10["Mediana"]` revistas o menos en tres meses (Q1 = `r s10["Q1"]`, Q3 = `r s10["Q3"]`) y la mitad tiene sesiones continuas de `r s26["Mediana"]` minutos o menos (Q1 = `r s26["Q1"]`, Q3 = `r s26["Q3"]`). Ambas distribuciones son asimétricas a la derecha (sesgo = `r s10["Sesgo"]` en P10 y `r s26["Sesgo"]` en P26; histogramas en la Figura A2), por lo que la media (`r s10["Media"]` revistas y `r s26["Media"]` minutos) queda por encima de la mediana. La variabilidad es alta (CV = `r s10["CV"]` % y `r s26["CV"]` %) y hay valores inusuales (hasta `r s10["Max"]` revistas y `r s26["Max"]` minutos), por lo que se privilegian la mediana y los cuartiles. La lectura de revistas aparece así como una práctica de volumen modesto, con pocos lectores muy intensos que elevan los promedios.
+\subsection*{Variables cuantitativas} 
+
+Variables cuantitativas: Entre las 1146 personas que leyeron revistas, los datos se concentran en valores bajos: la mitad leyó entre 2 y 4 revistas en tres meses (Q1 = 2, Q3 = 4) y la mitad tiene sesiones continuas de alrededor de 30 minutos (Q1 = 20, Q3 = 60). Ambas distribuciones tienen sesgo hacia la derecha (sesgo = 9.1 en P10 y 3 en P26; histogramas en la Figura A2), por lo que la media (3.3 revistas y 39.6 minutos) queda por encima de la mediana. La variabilidad es alta (CV = 142.3% y 81.2%) y hay outliers (por ejemplo, hasta 70 revistas y 300 minutos), por lo que se priorizan la mediana y los 2cuartiles.  
+
+La lectura de revistas aparece como una práctica de volumen modesto, con pocos lectores,pero muy intensos que elevan los promedios. Variables cualitativas: En la muestra, 55.1% es lectora habitual de materiales considerados por MOLEC (H_LEC = 1), 13.5% no se percibe lectora, pero leyó algún material (H_LEC = 3) y 29.2% no leyó ninguno; la categoría 2 es omitible (2.2%). Entre quienes leyeron revistas, el motivo más frecuente es el gusto o entretenimiento (57.3%), seguido de la cultura general (21.8%); trabajo y estudio suman 13.8%. Las frecuencias completas están en el Anexo A9 y la composición por SEXO y COND_ACT en el Anexo A2.
 
 ```{r cual}
 fh = table(V$H_LEC_lbl)
@@ -213,7 +221,7 @@ t4 = data.frame(Grupo = rownames(tb), N = as.vector(rowSums(tb)),
                 as.data.frame.matrix(pc), check.names = FALSE, row.names = NULL)
 names(t4)[3:6] = c("1 Habitual", "2 Otros", "3 Leyó sin percibirse lector", "4 No lector")
 t4[["% con H_LEC 3 entre quienes no acostumbran leer"]] = pct(tb[, 3], tb[, 3] + tb[, 4])
-kable(t4, caption = "Tabla 2. Condición lectora (H_LEC) dentro de cada grupo, en % (cada fila suma 100 % en las cuatro categorías)")
+kable(t4, caption = "Tabla 2. Condición lectora (H_LEC) dentro de cada grupo, en %")
 
 hab = pc[, 1]; sper = pc[, 3]; nol = pc[, 4]
 pr = t4[[ncol(t4)]]
@@ -228,7 +236,9 @@ cob = cob[, c("Grupo", "Autopercepción", "N", "Leyeron revistas", "%")]
 cp = cob[["%"]]
 ```
 
-La proporción de lectores habituales es de `r f(hab[1])` % en mujeres dedicadas al hogar, `r f(hab[2])` % en mujeres que trabajan y `r f(hab[3])` % en hombres que trabajan; los no lectores (H_LEC = 4) son `r f(nol[1])` %, `r f(nol[2])` % y `r f(nol[3])` %, y quienes no se perciben lectores pero leyeron algún material (H_LEC = 3), `r f(sper[1])` %, `r f(sper[2])` % y `r f(sper[3])` % (Figura A1). `r si(hab[1] < min(hab[2:3]), "La menor proporción de lectores habituales se observa en las mujeres dedicadas al hogar.", "Las mujeres dedicadas al hogar no son el grupo con menor proporción de lectores habituales.")` Entre quienes dicen no acostumbrar leer, el porcentaje que sí leyó algún material es `r f(pr[1])` %, `r f(pr[2])` % y `r f(pr[3])` %, respectivamente. `r si(pr[1] < min(pr[2:3]), "Las mujeres del hogar son las que menos leen algún material sin percibirse lectoras: en la muestra no se observa que esta práctica no reconocida como lectura sea mayor en ellas.", si(pr[1] > max(pr[2:3]), "Las mujeres del hogar son las que más leen algún material sin percibirse lectoras.", "No se observa un orden claro entre los grupos en este porcentaje."))` Entre quienes se perciben lectores leyó revistas `r f(cp[1])` %, `r f(cp[3])` % y `r f(cp[5])` %, y entre quienes no, `r f(cp[2])` %, `r f(cp[4])` % y `r f(cp[6])` % (Anexo A10). `r si(cp[6] < min(cp[c(2, 4)]), "Los hombres que no se perciben lectores son quienes menos leyeron revistas; pudieron leer otros materiales que aquí no se miden.", "")` Como H_LEC = 3 incluye cualquier material MOLEC, la práctica de quienes no leyeron revistas puede estar en otros materiales, lo que delimita lo que la comparación puede mostrar.
+La proporción de lectores habituales es de 49.1% en mujeres dedicadas al hogar, 54.8% en mujeres que trabajan y 56.6% en hombres que trabajan; los no lectores (H_LEC = 4) son 35.8%, 28.9% y 25.9% respectivamente, y quienes no se perciben lectores, pero leyeron algún material (H_LEC = 3), 12.2%, 13.7% y 16.1% (Figura A1). La menor proporción de lectores habituales se observa en las mujeres dedicadas al hogar. Entre quienes dicen no acostumbrar leer, el porcentaje que sí leyó algún material es 25.5%, 32.1% y 38.3%, respectivamente.  
+
+Estos datos muestran que las mujeres dedicadas al hogar reconocen que su nivel de lectura es bajo y no valoran o no identifican lo que leen como un acto de lectura real. Es decir, en la muestra no se observa que esta práctica no reconocida como lectura sea mayor en ellas. Entre quienes se perciben lectores: leyeron revistas 35.4%, 35.8% y 35.8%, y entre quienes no, 31.2%, 34.3% y 18.0% (Anexo A10). Los hombres que no se perciben lectores son quienes menos leyeron revistas; pudieron leer otros materiales que aquí no se miden. Como H_LEC = 3 incluye cualquier material MOLEC, la práctica de quienes no leyeron revistas puede estar en otros materiales, lo que delimita lo que la comparación puede mostrar.
 
 \subsection*{Pregunta 1: número de revistas (P10)}
 
@@ -259,18 +269,22 @@ for (g in levels(L$Grupo)) {
              pch = 16, cex = 0.4, col = rgb(0, 0, 0, 0.25), add = TRUE)
 }
 
-lec = c(1, 3, 5); nlec = c(2, 4, 6)   # filas de "se percibe" y "no se percibe"
+lec = c(1, 3, 5); nlec = c(2, 4, 6)
 dm10 = res10$Mediana[lec] - res10$Mediana[nlec]
 dx10 = round(res10$Media[lec] - res10$Media[nlec], 1)
 p10_parecido = all(abs(dm10) <= 1)
 ```
 
-Entre quienes se perciben lectores, la mediana de revistas es `r res10$Mediana[1]` en mujeres del hogar, `r res10$Mediana[3]` en mujeres que trabajan y `r res10$Mediana[5]` en hombres que trabajan; entre quienes no se perciben lectores es `r res10$Mediana[2]`, `r res10$Mediana[4]` y `r res10$Mediana[6]` (diferencias de `r paste(dm10, collapse = ", ")` revistas). El tercer cuartil es `r res10$Q3[1]`, `r res10$Q3[3]` y `r res10$Q3[5]` en quienes se perciben lectores, frente a `r res10$Q3[2]`, `r res10$Q3[4]` y `r res10$Q3[6]` en quienes no, y las medias difieren en `r paste(dx10, collapse = ", ")` revistas; estas últimas se ven elevadas por valores muy altos (hasta `r max(res10[[10]])`) y la variabilidad es mayor entre quienes se perciben lectores (DE de `r min(res10$DE[lec])` a `r max(res10$DE[lec])`, frente a `r min(res10$DE[nlec])` a `r max(res10$DE[nlec])`). `r si(p10_parecido, "En volumen de revistas, quienes no se perciben lectores se parecen mucho a quienes sí, sobre todo en el centro de la distribución: la distancia entre autopercepción y práctica no está en cuántas revistas se leen.", si(all(dm10 > 0), "Quienes no se perciben lectores leen menos revistas que quienes sí, por lo que en volumen la autopercepción parece corresponderse con la práctica.", "El sentido de la diferencia no es el mismo en todos los grupos, por lo que no se resume en un solo patrón."))` `r si(abs(res10$Mediana[1] - res10$Mediana[3]) >= 1 | abs(res10$Media[1] - res10$Media[3]) >= 1, "Entre mujeres del hogar y mujeres que trabajan se observan diferencias en el volumen (Tabla 3).", paste0("Entre mujeres del hogar y mujeres que trabajan que se perciben lectoras, el volumen es muy parecido (mediana de ", res10$Mediana[1], " y ", res10$Mediana[3], "; media de ", res10$Media[1], " y ", res10$Media[3], ")."))` Los cuartiles por grupo se completan en el Anexo A3.
+Entre quienes se perciben lectores: la mediana de revistas es 2 en mujeres del hogar, 2 en mujeres que trabajan y 2 en hombres que trabajan; entre quienes no se perciben lectores es 2, 2 y 2 (diferencias de 0 en las revistas). El tercer cuartil es 3, 4 y 4 en quienes se perciben lectores, frente a 2.25, 3 y 3.75 en quienes no, y las medias difieren en 1, 1, 0.5 revistas; estas últimas se ven elevadas por valores muy altos (hasta 70) y la variabilidad es mayor entre quienes se perciben lectores (desviación estándar de 4.2 a 5.6, frente a 1.2 a 2.9).  
+
+En volumen de revistas, quienes no se perciben lectores se parecen mucho a quienes sí, sobre todo en el centro de la distribución: la distancia entre autopercepción y práctica no está en cuántas revistas se leen. Entre mujeres del hogar y mujeres que trabajan que se perciben lectoras, el volumen es muy parecido (mediana de 2 y 2; media de 3.3 y 3.3).  
 
 \subsection*{Pregunta 2: tiempo continuo de lectura (P26)}
 
+A continuación, la Tabla 4 presenta los estadísticos descriptivos del tiempo continuo de lectura según el grupo y la autopercepción, mientras que la Figura 2 muestra gráficamente esta distribución a través de diagramas de caja. 
+
 ```{r p26, fig.height=2.4, fig.cap="Figura 2. Minutos continuos de lectura (P26) según autopercepción y grupo (se omiten del eje los valores mayores a 120 minutos)"}
-# Medidas de P26 por grupo y autopercepción (una medida por línea)
+
 res26 = aggregate(P26 ~ Aut + Grupo, data = L, FUN = length)
 names(res26) = c("Aut", "Grupo", "N")
 res26$Media   = round(aggregate(P26 ~ Aut + Grupo, data = L, FUN = mean)$P26, 1)
@@ -302,9 +316,11 @@ p26_lec_mayor = all(res26$Media[lec] > res26$Media[nlec])
 hogar_corta = res26$Media[1] < min(res26$Media[c(3, 5)]) & res26$Q3[1] <= min(res26$Q3[c(3, 5)])
 ```
 
-Entre quienes se perciben lectores, la mediana de minutos continuos es `r res26$Mediana[1]` en mujeres del hogar, `r res26$Mediana[3]` en mujeres que trabajan y `r res26$Mediana[5]` en hombres que trabajan; entre quienes no se perciben lectores es `r res26$Mediana[2]`, `r res26$Mediana[4]` y `r res26$Mediana[6]`. Los cuartiles Q1-Q3 de quienes se perciben lectores son `r res26$Q1[1]`-`r res26$Q3[1]`, `r res26$Q1[3]`-`r res26$Q3[3]` y `r res26$Q1[5]`-`r res26$Q3[5]`, frente a `r res26$Q1[2]`-`r res26$Q3[2]`, `r res26$Q1[4]`-`r res26$Q3[4]` y `r res26$Q1[6]`-`r res26$Q3[6]`, y las medias difieren en `r paste(dx26, collapse = ", ")` minutos. Las distribuciones son asimétricas a la derecha (hasta `r max(res26[[10]])` minutos) y P26 se refiere a cualquier material, no solo a revistas. `r si(p26_lec_mayor, "En los tres grupos, quienes se perciben lectores leen sesiones más largas que quienes no, aunque la magnitud de la diferencia varía según el grupo y la medida: quienes no se perciben lectores también leen, pero en sesiones más breves, lo que apunta a una correspondencia parcial entre autopercepción y práctica.", "En la duración continua no se observa que quienes se perciben lectores lean sesiones más largas en todos los grupos, por lo que la correspondencia con la autopercepción no es uniforme.")` `r si(hogar_corta, paste0("Entre quienes se perciben lectores, las mujeres del hogar tienen sesiones más cortas (media de ", f(res26$Media[1]), " minutos, Q3 de ", res26$Q3[1], ") que las mujeres que trabajan (", f(res26$Media[3]), " y ", res26$Q3[3], ") y los hombres que trabajan (", f(res26$Media[5]), " y ", res26$Q3[5], ")."), paste0("Entre quienes se perciben lectores no se observa que las mujeres del hogar tengan sesiones más cortas que los otros grupos (medias de ", f(res26$Media[1]), ", ", f(res26$Media[3]), " y ", f(res26$Media[5]), " minutos)."))`
+Tanto en la Tabla 4 como la Figura 2 se aprecia que, en los tres grupos analizados, las personas que se reconocen a sí mismos como lectoras leen una mayor cantidad de minutos continuos en promedio que aquellos que no se perciben así. No obstante, existe una alta dispersión, como se observa en las cajas celestes del boxplot de la Figura 2, entre estos subconjuntos debido a las altas desviaciones estándar con respecto a las medias. El caso más extremo son los hombres que trabajan y se perciben lectores, quienes tienen la media más alta con 46.8 minutos y una DE de 40.2. Esto se debe a los casos atípicos donde, por ejemplo, hay hombres que trabajan y reportan 300 minutos de lectura continua y mujeres que también trabajan y reportan 240.  
 
-\subsection{Pregunta 3: motivo de lectura de revistas (P11)}
+Por su parte, el grupo con mayor uniformidad son las mujeres de hogar no lectoras, las cuales registran la media más baja con 23.5 minutos y una DE 9.2. Esto refleja que entre las amas de casa que no se sienten lectoras son más comunes los tiempos de lectura cortos. 
+
+\subsection*{Pregunta 3: motivo de lectura de revistas (P11)}
 
 ```{r p11, fig.height=2.4, fig.cap="Figura 3. Lectores de revistas que leen por gusto o entretenimiento, por grupo y autopercepción (sobre las barras: % y personas/base)"}
 # P11
@@ -315,7 +331,6 @@ Q3[["Gusto (n)"]] = aggregate(Gusto ~ Aut + Grupo, data = L, FUN = sum)$Gusto
 Q3[["Gusto (%)"]] = pct(Q3[["Gusto (n)"]], Q3$N)
 Q3[["Otros motivos (%)"]] = pct(Q3$N - Q3[["Gusto (n)"]], Q3$N)
 Q3 = Q3[, c("Grupo", "Autopercepción", "N", "Gusto (n)", "Gusto (%)", "Otros motivos (%)")]
-kable(Q3, caption = "Tabla 5. Motivo principal de lectura de revistas, por grupo y autopercepción")
 
 m  = matrix(Q3[["Gusto (%)"]], nrow = 2)
 nm = matrix(Q3[["Gusto (n)"]], nrow = 2)
@@ -332,7 +347,11 @@ p11_dir = all(dg > 0)
 hogar_gusto = gusto[1] > max(gusto[c(3, 5)])
 ```
 
-Entre quienes se perciben lectores, leen por gusto o entretenimiento `r f(gusto[1])` % de las mujeres del hogar, `r f(gusto[3])` % de las mujeres que trabajan y `r f(gusto[5])` % de los hombres que trabajan; entre quienes no se perciben lectores, `r f(gusto[2])` %, `r f(gusto[4])` % y `r f(gusto[6])` %; la diferencia (no se percibe menos se percibe) es de `r paste(f(dg), collapse = ", ")` puntos porcentuales. Las bases de quienes no se perciben lectores son pequeñas (`r min(Q3$N[nlec])` a `r max(Q3$N[nlec])` personas), por lo que diferencias de pocos puntos no deben sobreinterpretarse. `r si(p11_dir, "En los tres grupos, quienes no se perciben lectores leen revistas por gusto o entretenimiento en mayor proporción que quienes sí se perciben.", "El sentido de la diferencia en el motivo no es el mismo en los tres grupos, por lo que no se resume en un solo patrón (Tabla 5 y Anexo A4).")` `r si(hogar_gusto, "Entre quienes se perciben lectores, las mujeres del hogar leen por gusto en mayor proporción que los otros dos grupos, en los que pesan más los motivos de trabajo, estudio o cultura general (Anexo A4).", "")`
+Para abordar el segundo objetivo específico, la Figura 3 ilustra de forma gráfica la proporción de lectores que leen revistas por gusto o entretenimiento según estas mismas variables.  
+
+Dentro del grupo de las mujeres que se dedican al hogar, el cual presenta el mayor porcentaje de lectura por entretenimiento, se destaca el grupo que no se percibe lector (83.3%), mientras que las que se perciben lectoras registran un 67.1%. Por su parte, dentro de las mujeres que trabajan el 75.0% contestó que lee revistas por entretenimiento, a comparación con el 52.6% de las que sí se perciben lectoras. En el caso de los hombres que trabajan, se registraron los porcentajes más bajos de lectura por gusto, con un 56.9% para los que no se perciben lectores y un 49.5% para los que sí se perciben lectores. 
+
+De esta manera, en todos los grupos analizados quienes no se perciben lectores leen por gusto o entretenimiento en un porcentaje mayor que aquellos que sí se perciben como lectores, siendo las mujeres en el hogar el grupo con mayor motivación por gusto y los hombres que trabajan el que menos. Las demás razones por las cuales se lee se encuentran detalladas en el Anexo (A4). 
 
 \section*{Conclusiones de la etapa}
 
@@ -344,7 +363,7 @@ Entre quienes se perciben lectores, leen por gusto o entretenimiento `r f(gusto[
 
 En conjunto, `r si(p10_parecido & p11_dir, "en la muestra de la MOLEC 2022-2024 las personas que no se perciben lectores pero leen revistas leen un número de revistas similar al de quienes sí se perciben, aunque por gusto y, en general, en sesiones más breves. Esto es compatible con que parte de la práctica lectora cotidiana no se reconozca como lectura, aunque estos datos no permiten confirmarlo.", "en la muestra de la MOLEC 2022-2024 la relación entre la autopercepción lectora y la práctica de lectura de revistas no es uniforme entre dimensiones ni entre grupos, por lo que conviene estudiarla por dimensión y por condición de vida.")`
 
-\subsection{Limitaciones} (1) Resultados sin ponderar: describen la muestra. (2) Se incluye solo a lectores de revistas y P26 se refiere a cualquier material. (3) Por construcción de H_LEC, entre lectores de revistas la distinción entre H_LEC = 1 y 3 corresponde a si la persona dice acostumbrar leer. (4) Estudiantes, jubilados y otras condiciones no se analizan, y no se ajusta por edad ni escolaridad. (5) El archivo no conserva identificadores, por lo que no se verificó si hay personas repetidas entre años. (6) Es un análisis descriptivo: describe asociaciones, no causalidad.
+\subsection*{Limitaciones} (1) Resultados sin ponderar: describen la muestra. (2) Se incluye solo a lectores de revistas y P26 se refiere a cualquier material. (3) Por construcción de H_LEC, entre lectores de revistas la distinción entre H_LEC = 1 y 3 corresponde a si la persona dice acostumbrar leer. (4) Estudiantes, jubilados y otras condiciones no se analizan, y no se ajusta por edad ni escolaridad. (5) El archivo no conserva identificadores, por lo que no se verificó si hay personas repetidas entre años. (6) Es un análisis descriptivo: describe asociaciones, no causalidad.
 
 Liga al archivo R Markdown: [PEGAR LIGA]. Base preparada: `DatosEquipo6_base_limpia.csv` (se adjunta).
 
@@ -395,29 +414,10 @@ tc = data.frame(Condición = rownames(tn),
 kable(tc, caption = "Tabla A2. Composición por SEXO y COND_ACT (personas con H_LEC válido)")
 ```
 
-**Anexo A3 (Tabla A3).** Resume, por grupo, cuánto difieren entre quienes se perciben lectores y quienes no la media y los cuartiles de P10 y P26; completa las Tablas 3 y 4.
+
+**Anexo A3 (Tabla A3).** Desglosa el motivo de lectura de revistas en sus seis categorías, por grupo y autopercepción; complementa la Tabla 5, que solo separa gusto de otros motivos.
 
 ```{r anexo3}
-# Diferencias (se percibe lector menos no se percibe lector), por grupo
-con10 = data.frame(Variable = "P10", Grupo = levels(L$Grupo),
-                   N_se_percibe = res10$N[lec], N_no_se_percibe = res10$N[nlec],
-                   Dif_media = round(res10$Media[lec] - res10$Media[nlec], 1),
-                   Dif_Q1 = res10$Q1[lec] - res10$Q1[nlec],
-                   Dif_mediana = res10$Mediana[lec] - res10$Mediana[nlec],
-                   Dif_Q3 = res10$Q3[lec] - res10$Q3[nlec])
-con26 = data.frame(Variable = "P26", Grupo = levels(L$Grupo),
-                   N_se_percibe = res26$N[lec], N_no_se_percibe = res26$N[nlec],
-                   Dif_media = round(res26$Media[lec] - res26$Media[nlec], 1),
-                   Dif_Q1 = res26$Q1[lec] - res26$Q1[nlec],
-                   Dif_mediana = res26$Mediana[lec] - res26$Mediana[nlec],
-                   Dif_Q3 = res26$Q3[lec] - res26$Q3[nlec])
-con = rbind(con10, con26)
-kable(con, caption = "Tabla A3. Diferencias entre quienes se perciben lectores y quienes no (se percibe menos no se percibe), por grupo")
-```
-
-**Anexo A4 (Tabla A4).** Desglosa el motivo de lectura de revistas en sus seis categorías, por grupo y autopercepción; complementa la Tabla 5, que solo separa gusto de otros motivos.
-
-```{r anexo4}
 # Una etiqueta por subgrupo, en el orden de las tablas: "Mujer hogar / Se percibe lector", ...
 L$Subgrupo = interaction(L$Grupo, L$Aut, sep = " / ", lex.order = TRUE)
 n6 = table(L$Subgrupo, factor(L$P11, levels = 1:6))     # personas por motivo
@@ -427,12 +427,12 @@ d6 = data.frame(Grupo = rep(levels(L$Grupo), each = 2),
                 N = as.vector(rowSums(n6)),
                 matrix(paste0(n6, " (", p6, ")"), nrow = 6), check.names = FALSE)
 names(d6)[4:9] = c("Trabajo", "Estudio", "Cultura", "Gusto", "Religión", "Otro")
-kable(d6, caption = "Tabla A4. Motivo principal de lectura de revistas (6 categorías), n (%) por grupo y autopercepción")
+kable(d6, caption = "Tabla A3. Motivo principal de lectura de revistas (6 categorías), n (%) por grupo y autopercepción")
 ```
 
-**Anexo A5 (Tabla A5).** Repite los indicadores principales para cada año, con los tres grupos juntos, para ver si los patrones se mantienen; los años no contienen a las mismas personas.
+**Anexo A4 (Tabla A4).** Repite los indicadores principales para cada año, con los tres grupos juntos, para ver si los patrones se mantienen; los años no contienen a las mismas personas.
 
-```{r anexo5}
+```{r anexo4}
 U34 = subset(U, H_LEC %in% c(3, 4))   # quienes no acostumbran leer
 L1  = subset(L, H_LEC == 1)           # lectores de revistas que se perciben lectores
 L3  = subset(L, H_LEC == 3)           # lectores de revistas que no se perciben lectores
@@ -445,13 +445,12 @@ est = data.frame(Año = sort(unique(U$anio)),
                  "% gusto (percibe / no)" = paste(round(100 * tapply(L1$P11 == 4, L1$anio, mean), 1), "/",
                                                   round(100 * tapply(L3$P11 == 4, L3$anio, mean), 1)),
                  check.names = FALSE, row.names = NULL)
-kable(est, caption = "Tabla A5. Indicadores principales por año (tres grupos juntos). Los archivos de distintos años no contienen a las mismas personas")
+kable(est, caption = "Tabla A4. Indicadores principales por año (tres grupos juntos). Los archivos de distintos años no contienen a las mismas personas")
 ```
 
-**Anexo A6 (Tabla A6).** Repite la Tabla 3 sin los registros de P10 por encima del máximo del diccionario (25 revistas), para ver cuánto influyen en los resultados.
+**Anexo A5 (Tabla A5).** Repite la Tabla 3 sin los registros de P10 por encima del máximo del diccionario (25 revistas), para ver cuánto influyen en los resultados.
 
-```{r anexo6}
-# Igual que la Tabla 3, pero sin los registros con P10 mayor a 25
+```{r anexo5}
 L25 = subset(L, P10 <= 25)
 res10_25 = aggregate(P10 ~ Aut + Grupo, data = L25, FUN = length)
 names(res10_25) = c("Aut", "Grupo", "N")
@@ -464,25 +463,25 @@ res10_25$Q3      = aggregate(P10 ~ Aut + Grupo, data = L25, FUN = quantile, prob
 res10_25$Max     = aggregate(P10 ~ Aut + Grupo, data = L25, FUN = max)$P10
 res10_25 = res10_25[, c("Grupo", "Aut", "N", "Media", "DE", "Min", "Q1", "Mediana", "Q3", "Max")]
 names(res10_25) = c("Grupo", "Autopercepción", "N", "Media", "DE", "Mín", "Q1", "Mediana", "Q3", "Máx")
-kable(res10_25, caption = "Tabla A6. Sensibilidad: P10 sin los registros por encima de 25 revistas")
+kable(res10_25, caption = "Tabla A5. Sensibilidad: P10 sin los registros por encima de 25 revistas")
 ```
 
 Al quitar los `r fuera10` registros con P10 mayor a 25, las medianas `r if (identical(res10$Mediana, res10_25$Mediana)) "no cambian" else "cambian en algún grupo"` respecto a la Tabla 3 y las medias de quienes se perciben lectores, que concentran los valores altos, `r if (all(res10_25$Media[lec] <= res10$Media[lec])) "bajan o se mantienen" else "no bajan en todos los grupos"`.
 
-**Anexo A7 (Tablas A7a y A7b).** Describe como casos, sin porcentajes, a los hombres dedicados al hogar, que son muy pocos para compararlos.
+**Anexo A6 (Tablas A6a y A6b).** Describe como casos, sin porcentajes, a los hombres dedicados al hogar, que son muy pocos para compararlos.
 
-```{r anexo7}
+```{r anexo6}
 th = table(H$H_LEC_lbl)
-kable(data.frame(H_LEC = names(th), n = as.vector(th)), caption = "Tabla A7a. Hombres dedicados al hogar por categoría de H_LEC (casos, sin porcentajes)")
+kable(data.frame(H_LEC = names(th), n = as.vector(th)), caption = "Tabla A6a. Hombres dedicados al hogar por categoría de H_LEC (casos, sin porcentajes)")
 Hc = H[!is.na(H$P10), c("anio", "H_LEC_lbl", "P10", "P11", "P26")]
 Hc$P11 = factor(Hc$P11, levels = 1:6, labels = motivos)
 names(Hc) = c("Año", "H_LEC", "P10", "Motivo (P11)", "P26")
-kable(Hc, row.names = FALSE, caption = "Tabla A7b. Hombres dedicados al hogar que leyeron revistas (casos individuales)")
+kable(Hc, row.names = FALSE, caption = "Tabla A6b. Hombres dedicados al hogar que leyeron revistas (casos individuales)")
 ```
 
-**Anexo A8 (Tabla A8).** Muestra cómo se llega del total de registros al universo de análisis y al de lectores de revistas.
+**Anexo A7 (Tabla A7).** Muestra cómo se llega del total de registros al universo de análisis y al de lectores de revistas.
 
-```{r anexo8}
+```{r anexo7}
 flujo = data.frame(
   Concepto = c("Registros en la base (2022-2024)",
                "Sin categoría válida de H_LEC (blanco por pase)",
@@ -494,19 +493,19 @@ flujo = data.frame(
                "Lectores de revistas con H_LEC = 1 o 3 (P10 con valor)"),
   n = c(nrow(datos), sum(is.na(datos$H_LEC)), nrow(V), nrow(H), n_otras,
         nrow(V) - nrow(U) - nrow(H) - n_otras, nrow(U), nrow(L)))
-kable(flujo, caption = "Tabla A8. Registros y universos del análisis")
+kable(flujo, caption = "Tabla A7. Registros y universos del análisis")
 ```
 
-**Anexo A9 (Tabla A9).** Da las frecuencias completas de H_LEC (todas las personas con valor válido) y de P11 (lectores de revistas), de las que se citan las cifras principales en la sección 3.
+**Anexo A8 (Tabla A8).** Da las frecuencias completas de H_LEC (todas las personas con valor válido) y de P11 (lectores de revistas), de las que se citan las cifras principales en la sección 3.
+
+```{r anexo8}
+kable(t3, caption = "Tabla A8. Distribución de frecuencias de H_LEC (personas con H_LEC válido) y de P11 (lectores de revistas)")
+```
+
+**Anexo A9 (Tabla A9).** Indica qué porcentaje de cada grupo y autopercepción leyó revistas en los últimos tres meses; es la base de los lectores de revistas que se comparan en la sección 4.
 
 ```{r anexo9}
-kable(t3, caption = "Tabla A9. Distribución de frecuencias de H_LEC (personas con H_LEC válido) y de P11 (lectores de revistas)")
-```
-
-**Anexo A10 (Tabla A10).** Indica qué porcentaje de cada grupo y autopercepción leyó revistas en los últimos tres meses; es la base de los lectores de revistas que se comparan en la sección 4.
-
-```{r anexo10}
-kable(cob, caption = "Tabla A10. Personas que leyeron revistas en los últimos tres meses, por grupo y autopercepción")
+kable(cob, caption = "Tabla A9. Personas que leyeron revistas en los últimos tres meses, por grupo y autopercepción")
 ```
 
 **Figura A1.** Muestra en barras la distribución de H_LEC dentro de cada grupo (representación gráfica de la Tabla 2).
