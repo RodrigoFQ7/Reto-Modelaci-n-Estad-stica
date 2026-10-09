@@ -92,71 +92,24 @@ si  = function(cond, a, b = "") if (isTRUE(cond)) a else b          # frase cond
 ```
 
 ```{r datos}
-# ---- Lectura ----
-raw = read.csv("DatosEquipo6_v2.csv")
+# ---- Lectura (base ya limpia por preparacion_datos_molec.Rmd) ----
+raw = read.csv("datos/DatosEquipo6_v2.csv")
 names(raw) = ifelse(tolower(names(raw)) == "anio", "anio", toupper(names(raw)))
 datos = raw
 vars6 = c("H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")
 
-# ---- Calidad: rangos del diccionario MOLEC ----
-rango_dic = list(H_LEC = 1:4, SEXO = 1:2, COND_ACT = 1:10,
-                 P10 = 1:25, P11 = 1:6, P26 = 2:360)
-
-# "Vacío" = NA, 0 (blanco por pase) o, en COND_ACT, 99 (no especificado)
-vacio = function(v) {
-  x = raw[[v]]
-  is.na(x) | x == 0 | (v == "COND_ACT" & x == 99)
-}
-
+# ---- Calidad: vacíos y valores fuera del rango del diccionario (no se eliminan) ----
 calidad = data.frame(
   Variable = vars6,
-  Vacios = sapply(vars6, function(v) sum(vacio(v))),
-  Fuera  = sapply(vars6, function(v) sum(!vacio(v) & !(raw[[v]] %in% rango_dic[[v]]))),
+  Vacios = colSums(is.na(raw[, vars6])),
+  Fuera = c(sum(!(raw$H_LEC %in% c(1:4, NA))),
+            sum(!(raw$SEXO %in% c(1:2, NA))),
+            sum(!(raw$COND_ACT %in% c(1:10, NA))),
+            sum(raw$P10 > 25, na.rm = TRUE),
+            sum(!(raw$P11 %in% c(1:6, NA))),
+            sum(raw$P26 < 2 | raw$P26 > 360, na.rm = TRUE)),
   row.names = NULL)
-
-# Los vacíos pasan a NA. Los valores fuera de rango (P10 > 25) NO se eliminan.
-for (v in vars6) datos[[v]][vacio(v)] = NA
 fuera10 = calidad$Fuera[calidad$Variable == "P10"]
-
-# ---- Etiquetas y grupos ----
-motivos = c("Trabajo", "Estudio", "Cultura general / estar al día",
-            "Gusto / entretenimiento", "Religión", "Otro")
-
-datos$Sexo_lbl  = factor(datos$SEXO, levels = 1:2, labels = c("Hombre", "Mujer"))
-datos$H_LEC_lbl = factor(datos$H_LEC, levels = 1:4,
-                         labels = c("1. Habitual", "2. Otros materiales",
-                                    "3. Leyó sin percibirse lector", "4. No lector"))
-# Autopercepción (solo H_LEC = 1 y 3 entran a la comparación de revistas)
-datos$Aut = factor(ifelse(datos$H_LEC == 1, "Se percibe lector",
-                   ifelse(datos$H_LEC == 3, "No se percibe lector", NA)),
-                   levels = c("Se percibe lector", "No se percibe lector"))
-
-# COND_ACT: 7 = quehaceres del hogar; 1-3 = trabaja. Estudiantes, jubilados y otras condiciones no se comparan.
-datos$Grupo = ifelse(datos$SEXO %in% 2 & datos$COND_ACT %in% 7, "Mujer hogar",
-              ifelse(datos$SEXO %in% 2 & datos$COND_ACT %in% 1:3, "Mujer trabaja",
-              ifelse(datos$SEXO %in% 1 & datos$COND_ACT %in% 1:3, "Hombre trabaja", NA)))
-# El orden de los niveles fija el orden de los grupos en TODAS las tablas y gráficas
-datos$Grupo = factor(datos$Grupo, levels = c("Mujer hogar", "Mujer trabaja", "Hombre trabaja"))
-
-datos$Cond_lbl = cut(datos$COND_ACT, breaks = c(0, 3, 5, 6, 7, 8, 10),
-                     labels = c("Trabaja o tiene trabajo (01-03)", "Busca o espera trabajo (04-05)",
-                                "Estudiante (06)", "Quehaceres del hogar (07)",
-                                "Jubilado o pensionado (08)", "Incapacitado u otra situación (09-10)"))
-
-# ---- Universos ----
-V = subset(datos, !is.na(H_LEC))                              # H_LEC válido
-U = subset(V, !is.na(Grupo))                                  # tres grupos de comparación
-L = subset(U, H_LEC %in% c(1, 3) & !is.na(P10))               # lectores de revistas
-H = subset(V, SEXO == 1 & COND_ACT == 7)                      # hombres del hogar (solo casos)
-stopifnot(!anyNA(L$P11), !anyNA(L$P26))                       # P10, P11 y P26 coinciden en N
-
-n_est   = sum(V$COND_ACT %in% 6)                              # estudiantes
-n_jub   = sum(V$COND_ACT %in% 8)                              # jubilados
-n_otras = sum(!is.na(V$SEXO) & V$COND_ACT %in% c(4:6, 8:10))  # otras condiciones (no se comparan)
-
-# ---- Base preparada ----
-write.csv(U[, c("anio", "H_LEC", "SEXO", "COND_ACT", "Grupo", "P10", "P11", "P26")],
-          "DatosEquipo6_base_limpia.csv", row.names = FALSE)
 ```
 
 ```{r funciones}
