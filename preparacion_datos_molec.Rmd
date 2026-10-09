@@ -42,10 +42,10 @@ rbind("2022" = dim(M22), "2023" = dim(M23), "2024" = dim(M24))
   \end{tabular}
 \end{table}
 
-Las columnas cambian de posición entre años, por lo que se seleccionan por **nombre** y no por número de columna. Primero se verifica que las seis existan en cada base:
+Las columnas cambian de posición entre años, por lo que se seleccionan por **nombre**. Verificamos que las seis existan en cada base:
 
 ```{r}
-# Por si alguna base trae los nombres en mayúsculas
+# Quitar mayúsculas
 names(M22) = tolower(names(M22))
 names(M23) = tolower(names(M23))
 names(M24) = tolower(names(M24))
@@ -58,7 +58,7 @@ rownames(revision) = vars
 revision
 ```
 
-Todo debe ser TRUE. Si hay algún FALSE, se busca el nombre equivalente con `names(M23)` o `names(M24)` y se corrige en `vars`.
+Todo debe ser TRUE. Si hay algún FALSE, se busca el nombre equivalente con names(M23) o names(M24) y se corrige en vars.
 
 ## Data frame de las variables seleccionadas
 
@@ -67,7 +67,6 @@ M22sel = M22[, vars]
 M23sel = M23[, vars]
 M24sel = M24[, vars]
 
-# Los "b" (blanco por pase) deben quedar como NA y todas las columnas como numéricas
 a_num = function(d) { d[] = lapply(d, function(x) suppressWarnings(as.numeric(x))); d }
 M22sel = a_num(M22sel)
 M23sel = a_num(M23sel)
@@ -76,9 +75,7 @@ M24sel = a_num(M24sel)
 str(M22sel)
 ```
 
-# Calidad de los datos
-
-## Datos faltantes (NA)
+## Datos faltantes
 
 Porcentaje de NA de cada variable por año:
 
@@ -87,8 +84,6 @@ faltantes = sapply(list("2022" = M22sel, "2023" = M23sel, "2024" = M24sel),
                    function(d) round(100 * colMeans(is.na(d)), 2))
 faltantes
 ```
-
-Completar: porcentaje de NA de cada variable.
 
 ## Respuestas no contestadas (ceros)
 
