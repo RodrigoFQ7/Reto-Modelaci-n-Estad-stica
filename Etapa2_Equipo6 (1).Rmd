@@ -97,6 +97,12 @@ raw = read.csv("datos/DatosEquipo6_v2.csv")
 names(raw) = ifelse(tolower(names(raw)) == "anio", "anio", toupper(names(raw)))
 datos = raw
 vars6 = c("H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")
+# Definir los conteos que faltaban
+# Definir el subconjunto de hombres dedicados al hogar (COND_ACT = 7)
+H = subset(datos, SEXO == 1 & COND_ACT == 7)
+n_est   = sum(raw$COND_ACT == "06", na.rm = TRUE)
+n_jub   = sum(raw$COND_ACT == "08", na.rm = TRUE)
+n_otras = sum(!(raw$COND_ACT %in% c("01", "02", "03", "07", "06", "08", NA)), na.rm = TRUE)
 
 # ---- Calidad: vacíos y valores fuera del rango del diccionario (no se eliminan) ----
 calidad = data.frame(
