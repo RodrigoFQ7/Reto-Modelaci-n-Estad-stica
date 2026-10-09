@@ -162,11 +162,11 @@ n_otras = sum(V$COND_ACT %in% c(4:6, 8:10))         # todas las condiciones que 
 
 El archivo reúne datos del MOLEC de los años 2022, 2023, 2024: 6028 registros (cada uno es una persona de 18 años o más) y 7 columnas (las seis variables de análisis y el año). Las variables se contrastaron con los diccionarios de los tres años para confirmar el mismo significado y codificación: los datos no identificados (0 o NA) y el código 99 de COND_ACT no son respuestas válidas, por lo que se plantearon como NA; en P10, P11 y P26 el vacío es un pase (quien no leyó revistas no responde) y entre los lectores de revistas no hay datos faltantes. 
 
- P10 tiene 8 valores por encima del máximo del diccionario (25): se conservan y su efecto se revisa en el Anexo A6. El análisis es descriptivo y solo se mantiene en la muestra, no más allá a la población mexicana. Las variables se describen en el Anexo A1 y los universos de análisis en el Anexo A8. Grupos de comparación: se comparan mujeres dedicadas al hogar (COND_ACT = 07), mujeres que trabajan y hombres que trabajan (COND_ACT = 01-03).  
+ P10 tiene 8 valores por encima del máximo del diccionario (25): se conservan y su efecto se revisa en el Anexo A5. El análisis es descriptivo y solo se mantiene en la muestra, no más allá a la población mexicana. Las variables se describen en el Anexo A1 y los universos de análisis en el Anexo A7. Grupos de comparación: se comparan mujeres dedicadas al hogar (COND_ACT = 07), mujeres que trabajan y hombres que trabajan (COND_ACT = 01-03).  
 
 No se incluyen estudiantes (211), jubilados (503) ni las demás condiciones (902 personas en total), porque su edad difiere mucho de la de las mujeres del hogar y se mezclaría la edad con la ocupación. Así, mujeres del hogar frente a mujeres que trabajan contrasta la ocupación dentro de un mismo sexo, y mujeres frente a hombres que trabajan contrasta el sexo dentro de una misma ocupación; como COND_ACT registra la actividad principal de la semana pasada, las mujeres que trabajan pueden también realizar trabajo doméstico. 
 
- Los hombres dedicados al hogar son 34 y solo se describen como casos (Anexo A7), aunque no serán abordados concretamente por ser una muestra muy pequeña. Cada tabla trae su base (N); con N < 30.
+ Los hombres dedicados al hogar son 34 y solo se describen como casos (Anexo A6), aunque no serán abordados concretamente por ser una muestra muy pequeña. Cada tabla trae su base (N); con N < 30.
 
 \section*{Descripción individual de las variables}
 
@@ -194,7 +194,7 @@ s26 = round(tab_num[2, ], 1)
 
 Variables cuantitativas: Entre las 1146 personas que leyeron revistas, los datos se concentran en valores bajos: la mitad leyó entre 2 y 4 revistas en tres meses (Q1 = 2, Q3 = 4) y la mitad tiene sesiones continuas de alrededor de 30 minutos (Q1 = 20, Q3 = 60). Ambas distribuciones tienen sesgo hacia la derecha (sesgo = 9.1 en P10 y 3 en P26; histogramas en la Figura A2), por lo que la media (3.3 revistas y 39.6 minutos) queda por encima de la mediana. La variabilidad es alta (CV = 142.3% y 81.2%) y hay outliers (por ejemplo, hasta 70 revistas y 300 minutos), por lo que se priorizan la mediana y los 2cuartiles.  
 
-La lectura de revistas aparece como una práctica de volumen modesto, con pocos lectores,pero muy intensos que elevan los promedios. Variables cualitativas: En la muestra, 55.1% es lectora habitual de materiales considerados por MOLEC (H_LEC = 1), 13.5% no se percibe lectora, pero leyó algún material (H_LEC = 3) y 29.2% no leyó ninguno; la categoría 2 es omitible (2.2%). Entre quienes leyeron revistas, el motivo más frecuente es el gusto o entretenimiento (57.3%), seguido de la cultura general (21.8%); trabajo y estudio suman 13.8%. Las frecuencias completas están en el Anexo A9 y la composición por SEXO y COND_ACT en el Anexo A2.
+La lectura de revistas aparece como una práctica de volumen modesto, con pocos lectores,pero muy intensos que elevan los promedios. Variables cualitativas: En la muestra, 55.1% es lectora habitual de materiales considerados por MOLEC (H_LEC = 1), 13.5% no se percibe lectora, pero leyó algún material (H_LEC = 3) y 29.2% no leyó ninguno; la categoría 2 es omitible (2.2%). Entre quienes leyeron revistas, el motivo más frecuente es el gusto o entretenimiento (57.3%), seguido de la cultura general (21.8%); trabajo y estudio suman 13.8%. Las frecuencias completas están en el Anexo A8 y la composición por SEXO y COND_ACT en el Anexo A2.
 
 ```{r cual}
 fh = table(V$H_LEC_lbl)
@@ -208,7 +208,7 @@ t3 = rbind(
              n = as.vector(fp), "%" = pp, check.names = FALSE))
 ```
 
-\subsection*{Variables cualitativas} En la muestra, `r ph[1]` % es lectora habitual de materiales MOLEC (H_LEC = 1), `r ph[3]` % no se percibe lectora pero leyó algún material (H_LEC = 3) y `r ph[4]` % no leyó ninguno; la categoría 2 es marginal (`r ph[2]` %). Entre quienes leyeron revistas, el motivo más frecuente es el gusto o entretenimiento (`r pp[4]` %), seguido de la cultura general (`r pp[3]` %); trabajo y estudio suman `r pct(sum(fp[1:2]), sum(fp))` %. Las frecuencias completas están en el Anexo A9 y la composición por SEXO y COND_ACT en el Anexo A2.
+\subsection*{Variables cualitativas} En la muestra, `r ph[1]` % es lectora habitual de materiales MOLEC (H_LEC = 1), `r ph[3]` % no se percibe lectora pero leyó algún material (H_LEC = 3) y `r ph[4]` % no leyó ninguno; la categoría 2 es marginal (`r ph[2]` %). Entre quienes leyeron revistas, el motivo más frecuente es el gusto o entretenimiento (`r pp[4]` %), seguido de la cultura general (`r pp[3]` %); trabajo y estudio suman `r pct(sum(fp[1:2]), sum(fp))` %. Las frecuencias completas están en el Anexo A8 y la composición por SEXO y COND_ACT en el Anexo A2.
 
 \section*{Comparaciones según el objetivo}
 
@@ -238,7 +238,7 @@ cp = cob[["%"]]
 
 La proporción de lectores habituales es de 49.1% en mujeres dedicadas al hogar, 54.8% en mujeres que trabajan y 56.6% en hombres que trabajan; los no lectores (H_LEC = 4) son 35.8%, 28.9% y 25.9% respectivamente, y quienes no se perciben lectores, pero leyeron algún material (H_LEC = 3), 12.2%, 13.7% y 16.1% (Figura A1). La menor proporción de lectores habituales se observa en las mujeres dedicadas al hogar. Entre quienes dicen no acostumbrar leer, el porcentaje que sí leyó algún material es 25.5%, 32.1% y 38.3%, respectivamente.  
 
-Estos datos muestran que las mujeres dedicadas al hogar reconocen que su nivel de lectura es bajo y no valoran o no identifican lo que leen como un acto de lectura real. Es decir, en la muestra no se observa que esta práctica no reconocida como lectura sea mayor en ellas. Entre quienes se perciben lectores: leyeron revistas 35.4%, 35.8% y 35.8%, y entre quienes no, 31.2%, 34.3% y 18.0% (Anexo A10). Los hombres que no se perciben lectores son quienes menos leyeron revistas; pudieron leer otros materiales que aquí no se miden. Como H_LEC = 3 incluye cualquier material MOLEC, la práctica de quienes no leyeron revistas puede estar en otros materiales, lo que delimita lo que la comparación puede mostrar.
+Estos datos muestran que las mujeres dedicadas al hogar reconocen que su nivel de lectura es bajo y no valoran o no identifican lo que leen como un acto de lectura real. Es decir, en la muestra no se observa que esta práctica no reconocida como lectura sea mayor en ellas. Entre quienes se perciben lectores: leyeron revistas 35.4%, 35.8% y 35.8%, y entre quienes no, 31.2%, 34.3% y 18.0% (Anexo A9). Los hombres que no se perciben lectores son quienes menos leyeron revistas; pudieron leer otros materiales que aquí no se miden. Como H_LEC = 3 incluye cualquier material MOLEC, la práctica de quienes no leyeron revistas puede estar en otros materiales, lo que delimita lo que la comparación puede mostrar.
 
 \subsection*{Pregunta 1: número de revistas (P10)}
 
@@ -421,24 +421,23 @@ kable(tc, caption = "Tabla A2. Composición por SEXO y COND_ACT (personas con H_
 **Anexo A3 (Tabla A3).** Desglosa el motivo de lectura de revistas en sus seis categorías, por grupo y autopercepción; complementa la Tabla 5, que solo separa gusto de otros motivos.
 
 ```{r anexo3}
-# Una etiqueta por subgrupo, en el orden de las tablas: "Mujer hogar / Se percibe lector", ...
 L$Subgrupo = interaction(L$Grupo, L$Aut, sep = " / ", lex.order = TRUE)
-n6 = table(L$Subgrupo, factor(L$P11, levels = 1:6))     # personas por motivo
-p6 = round(100 * prop.table(n6, 1), 1)                   # % dentro de cada subgrupo
+n6 = table(L$Subgrupo, factor(L$P11, levels = 1:6))
+p6 = round(100 * prop.table(n6, 1), 1)
 d6 = data.frame(Grupo = rep(levels(L$Grupo), each = 2),
                 Autopercepción = rep(levels(L$Aut), times = 3),
                 N = as.vector(rowSums(n6)),
                 matrix(paste0(n6, " (", p6, ")"), nrow = 6), check.names = FALSE)
 names(d6)[4:9] = c("Trabajo", "Estudio", "Cultura", "Gusto", "Religión", "Otro")
-kable(d6, caption = "Tabla A3. Motivo principal de lectura de revistas (6 categorías), n (%) por grupo y autopercepción")
+kable(d6, caption = "Tabla A3. Motivo principal de lectura de revistas, n (%) por grupo y autopercepción")
 ```
 
 **Anexo A4 (Tabla A4).** Repite los indicadores principales para cada año, con los tres grupos juntos, para ver si los patrones se mantienen; los años no contienen a las mismas personas.
 
 ```{r anexo4}
-U34 = subset(U, H_LEC %in% c(3, 4))   # quienes no acostumbran leer
-L1  = subset(L, H_LEC == 1)           # lectores de revistas que se perciben lectores
-L3  = subset(L, H_LEC == 3)           # lectores de revistas que no se perciben lectores
+U34 = subset(U, H_LEC %in% c(3, 4))
+L1  = subset(L, H_LEC == 1)
+L3  = subset(L, H_LEC == 3)
 est = data.frame(Año = sort(unique(U$anio)),
                  N = as.vector(table(U$anio)),
                  "% habitual" = round(100 * tapply(U$H_LEC == 1, U$anio, mean), 1),
