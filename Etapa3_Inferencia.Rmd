@@ -1,0 +1,722 @@
+---
+title: "Autopercepción lectora y práctica de lectura según sexo y ocupación"
+subtitle: "Análisis inferencial de los datos MOLEC 2022-2024"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+output:
+  html_document:
+    toc: true
+    df_print: paged
+  pdf_document:
+    toc: true
+    number_sections: true
+---
+
+```{r opciones}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.align = "center", fig.width = 6.5, fig.height = 3.8)
+options(knitr.kable.NA = "")
+```
+
+```{r setup}
+library(ggplot2)   # gráficos
+library(knitr)     # tablas
+
+# ---- Parámetros del análisis ----
+alpha_val  <- 0.04
+conf_val   <- 1 - alpha_val
+ruta_datos <- "datos/DatosEquipo6_v2.csv"
+
+# TRUE  = solo lectores de revistas (P10 > 0), como en la etapa descriptiva
+# FALSE = todo el universo con grupo y autopercepción válidos
+SOLO_LECTORES_REVISTAS <- TRUE
+
+# ---- Carga y validación ----
+stopifnot(file.exists(ruta_datos))
+raw <- read.csv(ruta_datos)
+stopifnot(ncol(raw) == 7)
+names(raw) <- c("anio", "H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")
+datos <- raw
+
+# ---- Factores ----
+datos$Aut <- NA
+datos$Aut[datos$H_LEC %in% 1] <- "Se percibe lector"
+datos$Aut[datos$H_LEC %in% 3] <- "No se percibe lector"
+datos$Aut <- factor(datos$Aut, levels = c("Se percibe lector", "No se percibe lector"))
+
+datos$Grupo <- NA
+datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 7]   <- "Mujer hogar"
+datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 1:3] <- "Mujer trabaja"
+datos$Grupo[datos$SEXO %in% 1 & datos$COND_ACT %in% 1:3] <- "Hombre trabaja"
+datos$Grupo <- factor(datos$Grupo,
+                      levels = c("Mujer hogar", "Mujer trabaja", "Hombre trabaja"))
+
+# ---- Subconjuntos ----
+V <- subset(datos, !is.na(Aut))     # autopercepción válida (H_LEC = 1 o 3)
+U <- subset(V, !is.na(Grupo))       # además con grupo definido
+W <- if (SOLO_LECTORES_REVISTAS) subset(U, P10 > 0) else U   # base de trabajo
+W$Grupo <- droplevels(W$Grupo)
+W$Aut   <- droplevels(W$Aut)
+N_total <- nrow(W)
+```
+
+```{r helpers}
+# ---- Formato ----
+fmt <- function(x, d = 2) formatC(x, format = "f", digits = d)
+fp  <- function(p) ifelse(p < 0.0001, "< 0.0001", formatC(p, format = "f", digits = 4))
+fpt <- function(p) ifelse(p < 0.0001, "p < 0.0001", paste0("p = ", formatC(p, format = "f", digits = 4)))
+dec <- function(p) ifelse(p < alpha_val, "Rechaza H0", "No rechaza H0")
+
+# ---- Tabla ANOVA ----
+tabla_aov <- function(modelo) {
+  s <- summary(modelo)[[1]]
+  out <- data.frame(Fuente = trimws(rownames(s)), gl = s[["Df"]], SC = s[["Sum Sq"]],
+                    CM = s[["Mean Sq"]], F = s[["F value"]], p = s[["Pr(>F)"]],
+                    stringsAsFactors = FALSE)
+  tot <- data.frame(Fuente = "Total", gl = sum(out$gl), SC = sum(out$SC),
+                    CM = NA, F = NA, p = NA, stringsAsFactors = FALSE)
+  rbind(out, tot)
+}
+
+disp_aov <- function(t) {
+  data.frame(Fuente = gsub(":", " x ", t$Fuente), gl = t$gl, SC = round(t$SC, 2),
+             CM = round(t$CM, 3), F = round(t$F, 3),
+             p = ifelse(is.na(t$p), "", fp(t$p)),
+             Decision = ifelse(is.na(t$p), "", dec(t$p)), stringsAsFactors = FALSE)
+}
+
+pval <- function(modelo, termino) {
+  s <- summary(modelo)[[1]]
+  s[["Pr(>F)"]][trimws(rownames(s)) == termino]
+}
+
+var_expl <- function(modelo) {                 # SC de los factores / SC total
+  ss <- summary(modelo)[[1]][["Sum Sq"]]
+  sum(ss[-length(ss)]) / sum(ss)
+}
+
+efectos <- function(dat, v, fac) {             # efecto = media del nivel - media general
+  mu <- mean(dat[[v]])
+  m  <- tapply(dat[[v]], dat[[fac]], mean)
+  n  <- tapply(dat[[v]], dat[[fac]], length)
+  data.frame(Nivel = names(m), n = as.integer(n), Media = as.numeric(m),
+             Efecto = as.numeric(m) - mu, stringsAsFactors = FALSE)
+}
+
+disp_tukey <- function(tk) {
+  d <- as.data.frame(tk)
+  data.frame(Comparacion = rownames(d), Dif = round(d$diff, 3), LI = round(d$lwr, 3),
+             LS = round(d$upr, 3), p_ajustado = fp(d$`p adj`), stringsAsFactors = FALSE)
+}
+
+txt_tukey <- function(tk) {
+  d   <- as.data.frame(tk)
+  sig <- d$`p adj` < alpha_val
+  lim <- !sig & d$`p adj` < 0.05
+  s1 <- if (any(sig)) {
+    paste0("Son significativas con $\\alpha = ", alpha_val, "$: ",
+           paste0(rownames(d)[sig], " (diferencia = ", fmt(d$diff[sig], 2),
+                  "; p ajustado ", fp(d$`p adj`[sig]), ")", collapse = "; "), ".")
+  } else {
+    paste0("Ninguna comparación es significativa con $\\alpha = ", alpha_val, "$.")
+  }
+  s2 <- if (any(lim)) {
+    paste0(" Quedan al límite (significativas con 0.05, pero no con ", alpha_val, "): ",
+           paste0(rownames(d)[lim], " (p ajustado ", fp(d$`p adj`[lim]), ")", collapse = "; "), ".")
+  } else ""
+  paste0(s1, s2)
+}
+
+asimetria <- function(x) mean(((x - mean(x)) / sd(x))^3)
+```
+
+```{r analisis}
+# =====================  Comparaciones por celda  =====================
+a_no <- "No se percibe lector"
+a_si <- "Se percibe lector"
+
+cel <- data.frame(clave = c("MH-NL", "MT-NL", "HT-NL", "MH-L", "MT-L", "HT-L"),
+                  grupo = rep(c("Mujer hogar", "Mujer trabaja", "Hombre trabaja"), 2),
+                  aut   = rep(c(a_no, a_si), each = 3), stringsAsFactors = FALSE)
+
+spec <- data.frame(
+  id = paste0("IC", 1:8),
+  v  = c("P26", "P26", "P26", "P26", "P26", "P10", "P10", "P10"),
+  ka = c("MH-NL", "MT-NL", "HT-NL", "MH-NL", "HT-L", "MH-NL", "MT-NL", "HT-NL"),
+  kb = c("MH-L",  "MT-L",  "HT-L",  "MT-NL", "MT-L", "MH-L",  "MT-L",  "HT-L"),
+  desc = c("Mujeres del hogar: no lectoras - lectoras",
+           "Mujeres que trabajan: no lectoras - lectoras",
+           "Hombres que trabajan: no lectores - lectores",
+           "No lectoras: mujeres del hogar - mujeres que trabajan",
+           "Lectores: hombres que trabajan - mujeres que trabajan",
+           "Mujeres del hogar: no lectoras - lectoras",
+           "Mujeres que trabajan: no lectoras - lectoras",
+           "Hombres que trabajan: no lectores - lectores"),
+  stringsAsFactors = FALSE)
+spec$variable <- ifelse(spec$v == "P26", "P26 (min)", "P10 (revistas)")
+spec$comp     <- paste(spec$ka, spec$kb, sep = " - ")
+
+vec <- function(clave, v) {
+  g <- cel$grupo[cel$clave == clave]
+  a <- cel$aut[cel$clave == clave]
+  d <- W[W$Grupo == g & W$Aut == a & !is.na(W[[v]]), ]
+  d[[v]]
+}
+
+# IC de la diferencia de medias (celda a - celda b) y del cociente de varianzas
+comparar <- function(v, ka, kb) {
+  x <- vec(ka, v); y <- vec(kb, v)
+  n1 <- length(x); n2 <- length(y)
+  vt    <- var.test(x, y, conf.level = conf_val)       # IC con la distribución F
+  razon <- unname(vt$estimate)
+  li_v  <- vt$conf.int[1]; ls_v <- vt$conf.int[2]
+  iguales <- li_v <= 1 && ls_v >= 1
+  if (n1 >= 40 && n2 >= 40) {                          # muestras grandes: z
+    z  <- abs(qnorm(alpha_val / 2))
+    E  <- z * sqrt(var(x) / n1 + var(y) / n2)
+    li <- mean(x) - mean(y) - E
+    ls <- mean(x) - mean(y) + E
+  } else {                                             # muestras pequeñas: t
+    tt <- t.test(x, y, var.equal = iguales, conf.level = conf_val)
+    li <- tt$conf.int[1]; ls <- tt$conf.int[2]
+  }
+  data.frame(v = v, ka = ka, kb = kb, n1 = n1, n2 = n2,
+             Media_1 = mean(x), Media_2 = mean(y),
+             Dif = mean(x) - mean(y), LI = li, LS = ls,
+             Razon = razon, LI_v = li_v, LS_v = ls_v, stringsAsFactors = FALSE)
+}
+
+tabla_ic <- do.call(rbind, lapply(seq_len(nrow(spec)), function(i) {
+  data.frame(IC = spec$id[i], comparar(spec$v[i], spec$ka[i], spec$kb[i]), stringsAsFactors = FALSE)
+}))
+tabla_ic$Variable  <- spec$variable
+tabla_ic$Incluye_0 <- tabla_ic$LI <= 0 & tabla_ic$LS >= 0
+tabla_ic$Incluye_1 <- tabla_ic$LI_v <= 1 & tabla_ic$LS_v >= 1
+
+pares <- combn(nrow(cel), 2)                           # las 15 parejas de celdas
+comp <- do.call(rbind, lapply(c("P26", "P10"), function(v) {
+  do.call(rbind, lapply(seq_len(ncol(pares)), function(k) {
+    comparar(v, cel$clave[pares[1, k]], cel$clave[pares[2, k]])
+  }))
+}))
+
+# =====================  ANOVA de dos factores  =====================
+analiza_anova <- function(v) {
+  dat <- W[!is.na(W[[v]]), ]
+  fml <- function(rhs) as.formula(paste0(v, " ~ ", rhs))
+  A   <- aov(fml("Grupo * Aut"), data = dat)
+  Ab  <- aov(fml("Aut * Grupo"), data = dat)           # para revisar el orden de los factores
+  tab_A <- tabla_aov(A)
+  inter_sig <- pval(A, "Grupo:Aut") < alpha_val
+  if (inter_sig) {
+    tab_main <- tab_A
+    terminos <- c("Grupo", "Aut", "Grupo:Aut")
+    final <- A
+  } else {
+    B <- aov(fml("Grupo + Aut"), data = dat)
+    tab_main <- tabla_aov(B)
+    terminos <- tab_main$Fuente[tab_main$Fuente %in% c("Grupo", "Aut") & tab_main$p < alpha_val]
+    final <- if (length(terminos) > 0) aov(fml(paste(terminos, collapse = " + ")), data = dat) else NULL
+  }
+  diag <- if (is.null(final)) A else final
+  tk_g <- if ("Grupo" %in% terminos) TukeyHSD(final, "Grupo", conf.level = conf_val)[["Grupo"]] else NULL
+  tk_i <- if (inter_sig) TukeyHSD(A, "Grupo:Aut", conf.level = conf_val)[["Grupo:Aut"]] else NULL
+  sds  <- tapply(dat[[v]], list(dat$Grupo, dat$Aut), sd)
+  list(v = v, dat = dat, A = A, tab_A = tab_A, inter_sig = inter_sig, tab_main = tab_main,
+       terminos = terminos, final = final,
+       tab_F = if (is.null(final)) NULL else tabla_aov(final),
+       tk_g = tk_g, tk_i = tk_i, diag = diag,
+       ve_A = var_expl(A), ve_F = if (is.null(final)) NA else var_expl(final),
+       asim = asimetria(resid(diag)), razon_sd = max(sds) / min(sds),
+       ord = data.frame(p1 = c(pval(A, "Grupo"), pval(A, "Aut"), pval(A, "Grupo:Aut")),
+                        p2 = c(pval(Ab, "Grupo"), pval(Ab, "Aut"), pval(Ab, "Aut:Grupo"))))
+}
+
+res10 <- analiza_anova("P10")
+res26 <- analiza_anova("P26")
+
+# =====================  Medias por celda con IC  =====================
+medias_celda <- function(v) {
+  d <- W[!is.na(W[[v]]), ]
+  r <- aggregate(d[[v]], by = list(Grupo = d$Grupo, Aut = d$Aut),
+                 FUN = function(x) c(m = mean(x), se = sd(x) / sqrt(length(x)), n = length(x)))
+  r <- cbind(r[1:2], as.data.frame(r$x))
+  r$crit <- ifelse(r$n >= 30, abs(qnorm(alpha_val / 2)), qt(1 - alpha_val / 2, pmax(r$n - 1, 1)))
+  r$LI <- r$m - r$crit * r$se
+  r$LS <- r$m + r$crit * r$se
+  r$Variable <- if (v == "P26") "Minutos continuos de lectura (P26)" else "Revistas leídas (P10)"
+  r
+}
+mc <- rbind(medias_celda("P10"), medias_celda("P26"))
+```
+
+```{r flags}
+ma10 <- tapply(res10$dat$P10, res10$dat$Aut, mean)
+ma26 <- tapply(res26$dat$P26, res26$dat$Aut, mean)
+a10 <- "Aut" %in% res10$terminos;   a26 <- "Aut" %in% res26$terminos
+g10s <- "Grupo" %in% res10$terminos; g26s <- "Grupo" %in% res26$terminos
+mayor10 <- unname(ma10["Se percibe lector"] > ma10["No se percibe lector"])
+mayor26 <- unname(ma26["Se percibe lector"] > ma26["No se percibe lector"])
+inter_alguna <- res10$inter_sig || res26$inter_sig
+txt_ve <- function(x) if (is.na(x)) "-" else paste0(fmt(100 * x, 2), " %")
+```
+
+# Resumen {-}
+
+```{r resumen, results="asis"}
+cat("**Objetivo.** Evaluar si la autopercepción lectora se corresponde con la práctica de lectura (número de revistas y minutos continuos de lectura) y si esa relación cambia según el sexo y la ocupación (mujeres del hogar, mujeres que trabajan y hombres que trabajan).\n\n")
+
+cat("**Datos y métodos.** Se analizaron ", N_total, " personas del MOLEC 2022-2024",
+    if (SOLO_LECTORES_REVISTAS) " que leen al menos una revista" else "",
+    ". Se estimaron intervalos de confianza al 96 % para diferencias entre grupos y se ajustó un ANOVA de dos factores (grupo ocupacional y autopercepción lectora) para cada medida de práctica lectora, con $\\alpha = ", alpha_val, "$.\n\n", sep = "")
+
+cat("**Hallazgos principales.**\n\n")
+cat("- ",
+    if (a10 && a26 && mayor10 && mayor26) {
+      paste0("La autopercepción se corresponde con la práctica: quienes se perciben lectores leen más revistas (", fmt(ma10["Se percibe lector"]), " vs. ", fmt(ma10["No se percibe lector"]),
+             ") y más minutos continuos (", fmt(ma26["Se percibe lector"]), " vs. ", fmt(ma26["No se percibe lector"]), ").")
+    } else if (a10 || a26) {
+      paste0("La autopercepción se asocia con la práctica solo en ", if (a10) "el número de revistas." else "los minutos continuos.")
+    } else "No hay evidencia de que la práctica de lectura difiera según la autopercepción.",
+    "\n", sep = "")
+cat("- ",
+    if (g10s && g26s) "El grupo ocupacional se asocia con ambas medidas de práctica."
+    else if (g10s) "El grupo ocupacional se asocia con el número de revistas, pero no con los minutos continuos."
+    else if (g26s) "El grupo ocupacional se asocia con los minutos continuos, pero no con el número de revistas."
+    else "No hay evidencia de diferencias entre grupos ocupacionales en la práctica de lectura.",
+    "\n", sep = "")
+cat("- ",
+    if (inter_alguna) "La brecha entre quienes se perciben lectores y quienes no cambia según el grupo (interacción significativa)."
+    else "La brecha entre quienes se perciben lectores y quienes no es similar en los tres grupos (sin interacción significativa).",
+    "\n", sep = "")
+cat("- Los factores considerados explican poco de la variación individual (revistas: ", txt_ve(res10$ve_F),
+    "; minutos continuos: ", txt_ve(res26$ve_F), ").\n\n", sep = "")
+```
+
+# Introducción
+
+Una parte de las personas que leen no se reconoce como lectora. Este fenómeno, que aquí se denomina **consumo no reconocido de lectura**, hace que la autopercepción lectora sea un indicador imperfecto de la práctica real de lectura, y puede variar según el sexo y la ocupación de las personas, por ejemplo entre quienes se dedican a los quehaceres del hogar y quienes trabajan fuera de casa.
+
+Esta etapa del estudio utiliza inferencia estadística para responder tres preguntas:
+
+1. ¿La autopercepción lectora se corresponde con la práctica de lectura, medida por el número de revistas leídas y los minutos continuos de lectura?
+2. ¿Esa correspondencia cambia según el grupo (mujeres del hogar, mujeres que trabajan, hombres que trabajan)?
+3. ¿Los grupos difieren entre sí en su práctica de lectura?
+
+# Datos y métodos
+
+## Datos y variables
+
+```{r tabla-variables}
+vars <- data.frame(
+  Variable = c("`H_LEC`", "`SEXO` y `COND_ACT`", "`P10`", "`P26`"),
+  Descripcion = c("Autopercepción lectora: 1 = se percibe lector, 3 = no se percibe lector",
+                  "Sexo y condición de actividad. Grupos: mujer hogar (mujer, quehaceres del hogar), mujer trabaja y hombre trabaja (condición de actividad 1 a 3)",
+                  "Número de revistas leídas",
+                  "Minutos continuos de lectura"),
+  Papel = c("Factor 2 (autopercepción)", "Factor 1 (grupo ocupacional)", "Variable respuesta", "Variable respuesta"),
+  stringsAsFactors = FALSE)
+kable(vars, format = "pipe", col.names = c("Variable", "Descripción", "Papel en el análisis"),
+      caption = "Variables utilizadas")
+```
+
+```{r tabla-n}
+tn <- as.data.frame.matrix(table(W$Grupo, W$Aut))
+tn$Total <- rowSums(tn)
+tn <- rbind(tn, Total = colSums(tn))
+kable(tn, caption = paste0("Casos analizados por grupo y autopercepción lectora", if (SOLO_LECTORES_REVISTAS) " (solo lectores de revistas, P10 > 0)" else ""))
+```
+
+Para identificar las seis combinaciones de grupo y autopercepción se usan las claves MH (mujer hogar), MT (mujer trabaja) y HT (hombre trabaja), seguidas de NL (no se percibe lector) o L (se percibe lector); por ejemplo, MH-NL son las mujeres del hogar que no se perciben lectoras.
+
+## Estrategia analítica
+
+**Intervalos de confianza.** Se estimaron intervalos al 96 % para la diferencia de medias entre pares de celdas, con el estadístico z cuando ambas muestras tienen al menos 40 casos (y t de Student en caso contrario, con varianzas iguales o distintas según el intervalo del cociente de varianzas). Para evaluar si la variabilidad es comparable entre celdas se estimó también el intervalo del cociente de varianzas (distribución F). Un intervalo que no incluye el 0 (diferencia de medias) o el 1 (cociente de varianzas) indica una diferencia entre los grupos.
+
+**ANOVA de dos factores.** Para cada medida de práctica lectora se ajustó el modelo
+
+$$Y_{ijk} = \mu + \tau_i + \alpha_j + \tau_i\alpha_j + \varepsilon_{ijk}, \qquad \varepsilon_{ijk} \sim N(0, \sigma),$$
+
+donde $\tau_i$ es el efecto del grupo ocupacional, $\alpha_j$ el de la autopercepción lectora y $\tau_i\alpha_j$ su interacción. Las hipótesis nulas son que no hay efecto del grupo ($\tau_i = 0$), de la autopercepción ($\alpha_j = 0$) ni de la interacción ($\tau_i\alpha_j = 0$). Si la interacción no es significativa, el modelo se reajusta con los efectos principales y se conservan solo los factores significativos. Las diferencias entre grupos se comparan con la prueba de Tukey, y se reporta la varianza explicada ($SC_{factores}/SC_{totales}$).
+
+**Supuestos.** Normalidad de los residuos (QQ-plot), homocedasticidad (cociente de varianzas y gráfico de residuos contra valores ajustados) e independencia de las observaciones.
+
+El nivel de significancia es $\alpha = 0.04$ en todas las pruebas.
+
+# Resultados
+
+## Práctica de lectura por grupo y autopercepción
+
+```{r fig-medias, fig.width=7.5, fig.height=3.8, fig.cap="Promedio de revistas leídas y de minutos continuos de lectura por grupo y autopercepción lectora (IC al 96 %)."}
+ggplot(mc, aes(x = Grupo, y = m, color = Aut, group = Aut)) +
+  geom_line(position = position_dodge(0.4)) +
+  geom_point(position = position_dodge(0.4), size = 2.5) +
+  geom_errorbar(aes(ymin = LI, ymax = LS), width = 0.15, position = position_dodge(0.4)) +
+  facet_wrap(~ Variable, scales = "free_y") +
+  labs(x = NULL, y = "Promedio", color = NULL) +
+  theme_minimal() + theme(legend.position = "bottom")
+```
+
+La figura muestra la pregunta central del estudio: en cada grupo, la distancia entre las dos líneas es la brecha entre quienes se perciben lectores y quienes no. Si las líneas fueran paralelas, la brecha sería la misma en los tres grupos.
+
+## Intervalos de confianza para las diferencias entre grupos
+
+```{r tabla-leyenda}
+kable(data.frame(IC = spec$id, Variable = spec$variable, Comparacion = spec$desc, Claves = spec$comp),
+      format = "pipe", col.names = c("IC", "Variable", "Comparación (celda a - celda b)", "Claves"),
+      caption = "Comparaciones evaluadas")
+```
+
+```{r tabla-medias}
+vis <- tabla_ic[, c("IC", "Variable", "n1", "n2", "Media_1", "Media_2", "Dif", "LI", "LS")]
+vis$`Incluye 0` <- ifelse(tabla_ic$Incluye_0, "Sí", "No")
+kable(vis, digits = 3, row.names = FALSE,
+      caption = "Intervalos de confianza al 96 % para la diferencia de medias (celda a - celda b)")
+```
+
+```{r fig-forest, fig.width=7, fig.height=4.6, fig.cap="Diferencias de medias con IC al 96 %. En rojo, los intervalos que no incluyen el 0."}
+fd <- tabla_ic
+fd$etq <- factor(paste0(fd$IC, "  ", spec$comp), levels = rev(paste0(fd$IC, "  ", spec$comp)))
+fd$Variable <- factor(fd$Variable, levels = unique(fd$Variable))
+fd$Incluye <- ifelse(fd$Incluye_0, "Incluye 0", "No incluye 0")
+
+ggplot(fd, aes(x = Dif, y = etq, color = Incluye)) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_linerange(aes(xmin = LI, xmax = LS), orientation = "y", linewidth = 0.9) +
+  geom_point(size = 2.5) +
+  facet_wrap(~ Variable, scales = "free", ncol = 1) +
+  scale_color_manual(values = c("Incluye 0" = "grey50", "No incluye 0" = "firebrick")) +
+  labs(x = "Diferencia estimada", y = NULL, color = NULL) +
+  theme_minimal() + theme(legend.position = "bottom")
+```
+
+```{r fig-heatmap, fig.width=7.5, fig.height=4.2, fig.cap="Diferencia de medias entre todas las parejas de celdas (fila - columna). El color indica si el IC al 96 % excluye el 0."}
+hm <- comp
+hm$Variable <- ifelse(hm$v == "P26", "Minutos continuos (P26)", "Revistas (P10)")
+hm$Resultado <- ifelse(hm$LI > 0, "Fila mayor que columna",
+                       ifelse(hm$LS < 0, "Fila menor que columna", "IC incluye el 0"))
+hm$ka <- factor(hm$ka, levels = rev(cel$clave))
+hm$kb <- factor(hm$kb, levels = cel$clave)
+
+ggplot(hm, aes(x = kb, y = ka, fill = Resultado)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = fmt(Dif, 1)), size = 3) +
+  facet_wrap(~ Variable) +
+  scale_fill_manual(values = c("Fila mayor que columna" = "#6baed6", "Fila menor que columna" = "#fd8d3c",
+                               "IC incluye el 0" = "grey88")) +
+  labs(x = "Columna (celda b)", y = "Fila (celda a)", fill = NULL) +
+  theme_minimal() + theme(legend.position = "bottom")
+```
+
+### Interpretación
+
+```{r interp-ic, results="asis"}
+status <- function(r) if (r$Incluye_0) "el intervalo incluye el 0" else "el intervalo no incluye el 0"
+nota_b <- function(r26, r10) {
+  s26 <- !r26$Incluye_0; s10 <- !r10$Incluye_0
+  if (s26 && s10) " La diferencia es significativa en ambas medidas."
+  else if (s26) " Solo la diferencia en minutos continuos es significativa."
+  else if (s10) " Solo la diferencia en revistas es significativa."
+  else " Ninguna de las dos diferencias es concluyente."
+}
+frase_brecha <- function(g, r26, r10) {
+  paste0("- **", g, ".** La diferencia entre quienes no se perciben lectores y quienes sí (no lectores - lectores) es de ",
+         fmt(r26$Dif, 2), " minutos de lectura continua (IC 96 %: ", fmt(r26$LI, 2), " a ", fmt(r26$LS, 2), "; ", status(r26),
+         ") y de ", fmt(r10$Dif, 2), " revistas (IC 96 %: ", fmt(r10$LI, 2), " a ", fmt(r10$LS, 2), "; ", status(r10), ").",
+         nota_b(r26, r10))
+}
+frase_entre <- function(r, desc, unidad) {
+  paste0("- **", desc, ".** Diferencia de ", fmt(r$Dif, 2), " ", unidad, " (IC 96 %: ", fmt(r$LI, 2), " a ", fmt(r$LS, 2), "); ",
+         status(r), if (r$Incluye_0) ", por lo que no hay evidencia de diferencia entre estos grupos." else ", por lo que hay evidencia de diferencia entre estos grupos.")
+}
+
+cat("**Brecha entre quienes se perciben lectores y quienes no, dentro de cada grupo.**\n\n")
+cat(frase_brecha("Mujeres del hogar", tabla_ic[1, ], tabla_ic[6, ]), "\n\n", sep = "")
+cat(frase_brecha("Mujeres que trabajan", tabla_ic[2, ], tabla_ic[7, ]), "\n\n", sep = "")
+cat(frase_brecha("Hombres que trabajan", tabla_ic[3, ], tabla_ic[8, ]), "\n\n", sep = "")
+
+cat("**Diferencias entre grupos con la misma autopercepción (minutos continuos).**\n\n")
+cat(frase_entre(tabla_ic[4, ], "No lectoras: mujeres del hogar - mujeres que trabajan", "minutos"), "\n\n", sep = "")
+cat(frase_entre(tabla_ic[5, ], "Lectores: hombres que trabajan - mujeres que trabajan", "minutos"), "\n\n", sep = "")
+
+n_par   <- ncol(pares)
+n_dif26 <- sum(comp$v == "P26" & (comp$LI > 0 | comp$LS < 0))
+n_dif10 <- sum(comp$v == "P10" & (comp$LI > 0 | comp$LS < 0))
+cat("**Panorama completo.** En el mapa de diferencias, ", n_dif26, " de las ", n_par, " parejas de celdas difieren en minutos continuos y ",
+    n_dif10, " de las ", n_par, " difieren en revistas. ",
+    "Cada intervalo tiene 96 % de confianza por separado; al leer varios a la vez, la confianza conjunta es menor, por lo que el mapa debe tomarse como exploratorio.\n\n", sep = "")
+```
+
+## Comparación de la variabilidad
+
+```{r tabla-varianzas}
+visv <- tabla_ic[, c("IC", "Variable", "Razon", "LI_v", "LS_v")]
+visv$Comparacion <- spec$comp
+visv <- visv[, c("IC", "Variable", "Comparacion", "Razon", "LI_v", "LS_v")]
+names(visv) <- c("IC", "Variable", "Comparación", "Cociente", "LI", "LS")
+visv$`Incluye 1` <- ifelse(tabla_ic$Incluye_1, "Sí", "No")
+kable(visv, digits = 3, row.names = FALSE,
+      caption = "IC al 96 % para el cociente de varianzas (celda a / celda b)")
+```
+
+```{r interp-var, results="asis"}
+n_var26 <- sum(comp$v == "P26" & (comp$LI_v > 1 | comp$LS_v < 1))
+n_var10 <- sum(comp$v == "P10" & (comp$LI_v > 1 | comp$LS_v < 1))
+distintas <- tabla_ic$IC[!tabla_ic$Incluye_1]
+cat("Entre las comparaciones elegidas, ",
+    if (length(distintas) > 0) paste0("la variabilidad difiere en ", paste(distintas, collapse = ", "), " (el IC del cociente no incluye el 1)")
+    else "no hay evidencia de que la variabilidad difiera (todos los IC del cociente incluyen el 1)",
+    ". Considerando las ", n_par, " parejas de celdas, ", n_var26, " difieren en variabilidad en minutos continuos y ", n_var10,
+    " en revistas. ",
+    if (n_var26 + n_var10 > 0) "Esta heterogeneidad se toma en cuenta al evaluar el supuesto de homocedasticidad del ANOVA. " else "",
+    "Estos intervalos suponen normalidad incluso con muestras grandes, y `P10` y `P26` son muy asimétricas; por ello son aproximados.\n\n", sep = "")
+```
+
+## Efecto del grupo y de la autopercepción: ANOVA de dos factores
+
+```{r funciones-anova}
+interp_anova <- function(res, medida) {
+  pA <- function(tab, f) tab$p[tab$Fuente == f]
+  dat <- res$dat; v <- res$v
+  p_int <- pA(res$tab_A, "Grupo:Aut")
+  p_g <- pA(res$tab_main, "Grupo"); p_a <- pA(res$tab_main, "Aut")
+  mg <- tapply(dat[[v]], dat$Grupo, mean)
+  ma <- tapply(dat[[v]], dat$Aut, mean)
+  ve <- if (length(res$terminos) == 0) res$ve_A else res$ve_F
+
+  cat("- **Interacción** (", fpt(p_int), "). ",
+      if (res$inter_sig) "La brecha entre quienes se perciben lectores y quienes no cambia según el grupo (líneas no paralelas en la figura), por lo que los efectos principales deben leerse con cautela."
+      else "No hay evidencia de que la brecha entre quienes se perciben lectores y quienes no cambie según el grupo (líneas aproximadamente paralelas), por lo que los efectos principales pueden interpretarse por separado.",
+      "\n\n", sep = "")
+
+  cat("- **Autopercepción lectora** (", fpt(p_a), "). ",
+      if (p_a < alpha_val) {
+        paste0("Se rechaza $H_0$: quienes se perciben lectores promedian ", fmt(ma["Se percibe lector"]), " en ", medida,
+               " frente a ", fmt(ma["No se percibe lector"]), " de quienes no se perciben lectores.")
+      } else {
+        paste0("No se rechaza $H_0$: no hay evidencia de diferencia en ", medida, " según la autopercepción (",
+               fmt(ma["Se percibe lector"]), " vs. ", fmt(ma["No se percibe lector"]), ").")
+      }, "\n\n", sep = "")
+
+  cat("- **Grupo ocupacional** (", fpt(p_g), "). ",
+      if (p_g < alpha_val) {
+        paste0("Se rechaza $H_0$: los promedios en ", medida, " son ", fmt(mg["Mujer hogar"]), " (mujer hogar), ",
+               fmt(mg["Mujer trabaja"]), " (mujer trabaja) y ", fmt(mg["Hombre trabaja"]), " (hombre trabaja); el mayor corresponde a ",
+               tolower(names(which.max(mg))), ".")
+      } else {
+        paste0("No se rechaza $H_0$: no hay evidencia de que los promedios en ", medida, " difieran entre grupos (",
+               fmt(mg["Mujer hogar"]), ", ", fmt(mg["Mujer trabaja"]), " y ", fmt(mg["Hombre trabaja"]), ").")
+      }, "\n\n", sep = "")
+
+  cat("- **Magnitud.** ",
+      if (length(res$terminos) == 0) paste0("Ningún factor resulta significativo; el modelo completo explica ", fmt(100 * ve, 2), " % de la variación.")
+      else paste0("El modelo final explica ", fmt(100 * ve, 2), " % de la variación total."),
+      if (ve < 0.10) paste0(" Es una proporción baja: el ", fmt(100 * (1 - ve), 1),
+                            " % restante se debe a la variabilidad entre personas y a otras variables no incluidas.") else "",
+      "\n\n", sep = "")
+
+  coincide <- all((res$ord$p1 < alpha_val) == (res$ord$p2 < alpha_val))
+  cat("- **Robustez.** Como los grupos tienen tamaños distintos, se revisó si el orden de los factores en el modelo modifica las conclusiones: ",
+      if (coincide) "las conclusiones son las mismas con ambos órdenes."
+      else "las conclusiones cambian según el orden, por lo que los resultados cercanos a $\\alpha$ deben tomarse con cautela.",
+      "\n\n", sep = "")
+}
+
+plot_tukey <- function(tk, titulo) {
+  d <- as.data.frame(tk)
+  d$comp <- rownames(d)
+  d$res  <- ifelse(d$lwr > 0 | d$upr < 0, "No incluye 0", "Incluye 0")
+  ggplot(d, aes(x = diff, y = comp, color = res)) +
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_linerange(aes(xmin = lwr, xmax = upr), orientation = "y", linewidth = 0.9) +
+    geom_point(size = 2.5) +
+    scale_color_manual(values = c("Incluye 0" = "grey50", "No incluye 0" = "firebrick")) +
+    labs(title = titulo, x = "Diferencia de medias (IC simultáneo al 96 %)", y = NULL, color = NULL) +
+    theme_minimal() + theme(legend.position = "bottom")
+}
+```
+
+### Número de revistas (`P10`)
+
+```{r anova-p10}
+kable(disp_aov(res10$tab_A), row.names = FALSE, caption = "ANOVA con interacción: número de revistas (P10)")
+if (!res10$inter_sig && !is.null(res10$final)) {
+  kable(disp_aov(res10$tab_F), row.names = FALSE, caption = "Modelo final (solo factores significativos): P10")
+}
+if ("Grupo" %in% res10$terminos && !res10$inter_sig) {
+  kable(efectos(res10$dat, "P10", "Grupo"), digits = 3, row.names = FALSE,
+        caption = "Efecto estimado por grupo ocupacional (media del grupo - media general): P10")
+}
+if ("Aut" %in% res10$terminos && !res10$inter_sig) {
+  kable(efectos(res10$dat, "P10", "Aut"), digits = 3, row.names = FALSE,
+        caption = "Efecto estimado por autopercepción (media del nivel - media general): P10")
+}
+if (!is.null(res10$tk_g)) {
+  kable(disp_tukey(res10$tk_g), row.names = FALSE, caption = "Comparaciones de Tukey entre grupos: P10")
+}
+if (!is.null(res10$tk_i)) {
+  kable(disp_tukey(res10$tk_i), row.names = FALSE, caption = "Comparaciones de Tukey para la interacción: P10")
+}
+```
+
+```{r fig-tukey-p10, fig.height=2.8, fig.cap="Comparaciones de Tukey entre grupos: número de revistas (P10)."}
+if (!is.null(res10$tk_g)) plot_tukey(res10$tk_g, "Revistas leídas (P10)")
+```
+
+```{r interp-p10, results="asis"}
+cat("**Interpretación.**\n\n")
+interp_anova(res10, "número de revistas")
+if (!is.null(res10$tk_g)) cat("- **Comparaciones entre grupos (Tukey).** ", txt_tukey(res10$tk_g), "\n\n", sep = "")
+if (!is.null(res10$tk_i)) cat("- **Comparaciones de la interacción (Tukey).** ", txt_tukey(res10$tk_i), "\n\n", sep = "")
+```
+
+### Minutos continuos de lectura (`P26`)
+
+```{r anova-p26}
+kable(disp_aov(res26$tab_A), row.names = FALSE, caption = "ANOVA con interacción: minutos continuos de lectura (P26)")
+if (!res26$inter_sig && !is.null(res26$final)) {
+  kable(disp_aov(res26$tab_F), row.names = FALSE, caption = "Modelo final (solo factores significativos): P26")
+}
+if ("Grupo" %in% res26$terminos && !res26$inter_sig) {
+  kable(efectos(res26$dat, "P26", "Grupo"), digits = 3, row.names = FALSE,
+        caption = "Efecto estimado por grupo ocupacional (media del grupo - media general): P26")
+}
+if ("Aut" %in% res26$terminos && !res26$inter_sig) {
+  kable(efectos(res26$dat, "P26", "Aut"), digits = 3, row.names = FALSE,
+        caption = "Efecto estimado por autopercepción (media del nivel - media general): P26")
+}
+if (!is.null(res26$tk_g)) {
+  kable(disp_tukey(res26$tk_g), row.names = FALSE, caption = "Comparaciones de Tukey entre grupos: P26")
+}
+if (!is.null(res26$tk_i)) {
+  kable(disp_tukey(res26$tk_i), row.names = FALSE, caption = "Comparaciones de Tukey para la interacción: P26")
+}
+```
+
+```{r fig-tukey-p26, fig.height=2.8, fig.cap="Comparaciones de Tukey entre grupos: minutos continuos de lectura (P26)."}
+if (!is.null(res26$tk_g)) plot_tukey(res26$tk_g, "Minutos continuos de lectura (P26)")
+```
+
+```{r interp-p26, results="asis"}
+cat("**Interpretación.**\n\n")
+interp_anova(res26, "minutos continuos de lectura")
+if (!is.null(res26$tk_g)) cat("- **Comparaciones entre grupos (Tukey).** ", txt_tukey(res26$tk_g), "\n\n", sep = "")
+if (!is.null(res26$tk_i)) cat("- **Comparaciones de la interacción (Tukey).** ", txt_tukey(res26$tk_i), "\n\n", sep = "")
+```
+
+### Resumen de los modelos
+
+```{r resumen-modelos}
+term_txt <- function(t) if (length(t) == 0) "ninguno" else gsub(":", " x ", paste(t, collapse = ", "))
+pf <- function(res, f) res$tab_main$p[res$tab_main$Fuente == f]
+kable(data.frame(Variable = c("P10 (revistas)", "P26 (minutos)"),
+                 p_interaccion = fp(c(pval(res10$A, "Grupo:Aut"), pval(res26$A, "Grupo:Aut"))),
+                 p_grupo = fp(c(pf(res10, "Grupo"), pf(res26, "Grupo"))),
+                 p_autopercepcion = fp(c(pf(res10, "Aut"), pf(res26, "Aut"))),
+                 Modelo_final = c(term_txt(res10$terminos), term_txt(res26$terminos)),
+                 Varianza_explicada = c(txt_ve(res10$ve_F), txt_ve(res26$ve_F))),
+      row.names = FALSE,
+      caption = paste0("Resumen de los modelos de dos factores (alpha = ", alpha_val, ")"))
+```
+
+## Verificación de supuestos
+
+```{r fig-supuestos, fig.width=7, fig.height=6, fig.cap="Diagnóstico de los residuos de los modelos finales: normalidad (arriba) y residuos contra valores ajustados (abajo)."}
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+for (r in list(res10, res26)) {
+  qqnorm(resid(r$diag), main = paste("QQ-plot de residuos:", r$v), pch = 16, col = rgb(0, 0, 0, 0.4))
+  qqline(resid(r$diag), col = "firebrick", lwd = 2)
+}
+for (r in list(res10, res26)) {
+  plot(fitted(r$diag), resid(r$diag), main = paste("Residuos vs. ajustados:", r$v),
+       xlab = "Ajustados", ylab = "Residuos", pch = 16, col = rgb(0, 0, 0, 0.4))
+  abline(h = 0, lty = 2)
+}
+par(mfrow = c(1, 1))
+```
+
+```{r interp-supuestos, results="asis"}
+txt_supuestos <- function(res, nombre) {
+  asim <- res$asim; razon_sd <- res$razon_sd
+  dir <- if (asim > 0) "derecha" else "izquierda"
+  norm_txt <- if (abs(asim) > 1) {
+    paste0("alejamiento marcado (asimetría de los residuos = ", fmt(asim, 2), ", cola larga a la ", dir, ")")
+  } else if (abs(asim) > 0.5) {
+    paste0("alejamiento moderado (asimetría = ", fmt(asim, 2), ")")
+  } else "solo alejamientos ligeros"
+  hom_txt <- if (razon_sd > 2) {
+    paste0("las desviaciones estándar entre celdas son muy distintas (la mayor es ", fmt(razon_sd, 1), " veces la menor)")
+  } else if (razon_sd > 1.5) {
+    paste0("las desviaciones estándar entre celdas son moderadamente distintas (cociente máximo/mínimo = ", fmt(razon_sd, 1), ")")
+  } else paste0("las desviaciones estándar entre celdas son similares (cociente máximo/mínimo = ", fmt(razon_sd, 1), ")")
+  paste0("- **", nombre, ".** Normalidad: ", norm_txt, ". Homocedasticidad: ", hom_txt, ".\n\n")
+}
+cat(txt_supuestos(res10, "Revistas (P10)"))
+cat(txt_supuestos(res26, "Minutos continuos (P26)"))
+
+viola <- abs(res10$asim) > 1 || abs(res26$asim) > 1 || res10$razon_sd > 2 || res26$razon_sd > 2
+cat("La independencia se supone, pues cada registro corresponde a una persona distinta. ",
+    if (viola) paste0("Dado el alejamiento de la normalidad o de la homocedasticidad, los valores p y los intervalos deben tomarse como aproximados. El tamaño de muestra (n = ",
+                      N_total, ") ayuda por el teorema central del límite, pero este alejamiento es una limitación del análisis.")
+    else "Los supuestos se cumplen razonablemente.",
+    "\n\n", sep = "")
+```
+
+# Conclusiones
+
+```{r conclusiones, results="asis"}
+cat("**1. Autopercepción y práctica.** ",
+    if (a10 && a26 && mayor10 && mayor26) {
+      paste0("La autopercepción lectora se corresponde con la práctica: quienes se perciben lectores leen más revistas (", fmt(ma10["Se percibe lector"]), " vs. ", fmt(ma10["No se percibe lector"]),
+             ") y más minutos continuos (", fmt(ma26["Se percibe lector"]), " vs. ", fmt(ma26["No se percibe lector"]), ").")
+    } else if (a10 || a26) {
+      paste0("La autopercepción se asocia con la práctica solo en ", if (a10) "el número de revistas (P10)" else "los minutos continuos (P26)",
+             "; en la otra medida no hay evidencia de diferencia.")
+    } else "No hay evidencia de que la práctica (P10 y P26) difiera según la autopercepción.",
+    "\n\n", sep = "")
+
+sig26 <- !tabla_ic$Incluye_0[1:3]
+sig10 <- !tabla_ic$Incluye_0[6:8]
+gn    <- cel$grupo[1:3]
+lista <- function(g) if (length(g) > 0) paste0(" (", paste(tolower(g), collapse = ", "), ")") else ""
+cat("**2. Variación según el grupo.** ",
+    if (inter_alguna) "Al menos una interacción es significativa: la brecha entre quienes se perciben lectores y quienes no cambia según el grupo. "
+    else "Ninguna interacción es significativa: la brecha entre quienes se perciben lectores y quienes no es similar en los tres grupos. ",
+    "Los intervalos por grupo muestran que la brecha es significativa en ", sum(sig26), " de 3 grupos en minutos continuos", lista(gn[sig26]),
+    " y en ", sum(sig10), " de 3 grupos en revistas", lista(gn[sig10]), ".\n\n", sep = "")
+
+tuk <- c(if (!is.null(res10$tk_g)) paste0("revistas: ", txt_tukey(res10$tk_g)),
+         if (!is.null(res26$tk_g)) paste0("minutos continuos: ", txt_tukey(res26$tk_g)))
+cat("**3. Diferencias entre grupos.** ",
+    if (g10s && g26s) "El grupo ocupacional se asocia con ambas medidas de práctica."
+    else if (g10s) "El grupo ocupacional se asocia con el número de revistas, pero no con los minutos continuos."
+    else if (g26s) "El grupo ocupacional se asocia con los minutos continuos, pero no con el número de revistas."
+    else "No hay evidencia de diferencias entre grupos en P10 ni en P26.",
+    if (length(tuk) > 0) paste0(" En las comparaciones de Tukey, ", paste(tuk, collapse = " ")) else "",
+    "\n\n", sep = "")
+
+r1 <- tabla_ic[1, ]; r6 <- tabla_ic[6, ]
+cat("**4. Consumo no reconocido en mujeres del hogar.** Las mujeres del hogar que no se perciben lectoras (n = ", r1$n1,
+    ") registran en promedio ", fmt(r1$Media_1, 1), " minutos continuos de lectura y ", fmt(r6$Media_1, 1), " revistas",
+    if (SOLO_LECTORES_REVISTAS) " (al menos una por construcción de la muestra)" else "",
+    ": practican la lectura aunque no se reconozcan como lectoras. En minutos continuos, su práctica ",
+    if (!r1$Incluye_0 && r1$Dif < 0) "es menor que la de las mujeres del hogar que sí se perciben lectoras."
+    else "no se distingue claramente de la de las mujeres del hogar que sí se perciben lectoras.",
+    "\n\n", sep = "")
+
+cat("**5. Poder explicativo.** Los factores incluidos explican poco de la variación individual (revistas: ", txt_ve(res10$ve_F),
+    "; minutos continuos: ", txt_ve(res26$ve_F), "); la mayor parte de la variabilidad depende de otros factores no incluidos en este análisis.\n\n", sep = "")
+```
+
+## Limitaciones {-}
+
+- Los datos no están ponderados (sin factor de expansión) y juntan 2022-2024, por lo que los resultados describen la muestra y no se generalizan directamente a la población.
+- `H_LEC`, `P10` y `P26` son autorreportes y pueden estar afectados por deseabilidad social.
+- Los resultados indican asociación, no causalidad.
+- `P10` y `P26` son muy asimétricas y no cumplen bien la normalidad; los valores p y los intervalos son aproximados.
+- Los grupos más pequeños (por ejemplo, mujeres del hogar que no se perciben lectoras) generan intervalos más amplios.
+
+```{r limitacion-p10, results="asis"}
+if (SOLO_LECTORES_REVISTAS) {
+  cat("- El análisis se restringe a quienes leen al menos una revista (`P10 > 0`), así que las conclusiones aplican solo a lectores de revistas.\n")
+}
+```
