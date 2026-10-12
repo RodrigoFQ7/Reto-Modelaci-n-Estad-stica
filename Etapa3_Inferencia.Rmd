@@ -2,16 +2,19 @@
 title: "Autopercepción lectora y práctica de lectura según sexo y ocupación"
 subtitle: "Análisis inferencial de los datos MOLEC 2022-2024"
 date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+lang: es
+header-includes:
+  - \renewcommand{\spanishtablename}{Tabla}
 output:
-  html_document:
-    toc: true
-    df_print: paged
   pdf_document:
     toc: true
     number_sections: true
+  html_document:
+    toc: true
+    df_print: paged
 ---
 
-```{r opciones}
+```{r opciones, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
                       fig.align = "center", fig.width = 6.5, fig.height = 3.8)
 options(knitr.kable.NA = "")
@@ -234,19 +237,6 @@ analiza_anova <- function(v) {
 res10 <- analiza_anova("P10")
 res26 <- analiza_anova("P26")
 
-# =====================  Medias por celda con IC  =====================
-medias_celda <- function(v) {
-  d <- W[!is.na(W[[v]]), ]
-  r <- aggregate(d[[v]], by = list(Grupo = d$Grupo, Aut = d$Aut),
-                 FUN = function(x) c(m = mean(x), se = sd(x) / sqrt(length(x)), n = length(x)))
-  r <- cbind(r[1:2], as.data.frame(r$x))
-  r$crit <- ifelse(r$n >= 30, abs(qnorm(alpha_val / 2)), qt(1 - alpha_val / 2, pmax(r$n - 1, 1)))
-  r$LI <- r$m - r$crit * r$se
-  r$LS <- r$m + r$crit * r$se
-  r$Variable <- if (v == "P26") "Minutos continuos de lectura (P26)" else "Revistas leídas (P10)"
-  r
-}
-mc <- rbind(medias_celda("P10"), medias_celda("P26"))
 ```
 
 ```{r flags}
@@ -260,60 +250,20 @@ inter_alguna <- res10$inter_sig || res26$inter_sig
 txt_ve <- function(x) if (is.na(x)) "-" else paste0(fmt(100 * x, 2), " %")
 ```
 
-# Resumen {-}
-
-```{r resumen, results="asis"}
-cat("**Objetivo.** Evaluar si la autopercepción lectora se corresponde con la práctica de lectura (número de revistas y minutos continuos de lectura) y si esa relación cambia según el sexo y la ocupación (mujeres del hogar, mujeres que trabajan y hombres que trabajan).\n\n")
-
-cat("**Datos y métodos.** Se analizaron ", N_total, " personas del MOLEC 2022-2024",
-    if (SOLO_LECTORES_REVISTAS) " que leen al menos una revista" else "",
-    ". Se estimaron intervalos de confianza al 96 % para diferencias entre grupos y se ajustó un ANOVA de dos factores (grupo ocupacional y autopercepción lectora) para cada medida de práctica lectora, con $\\alpha = ", alpha_val, "$.\n\n", sep = "")
-
-cat("**Hallazgos principales.**\n\n")
-cat("- ",
-    if (a10 && a26 && mayor10 && mayor26) {
-      paste0("La autopercepción se corresponde con la práctica: quienes se perciben lectores leen más revistas (", fmt(ma10["Se percibe lector"]), " vs. ", fmt(ma10["No se percibe lector"]),
-             ") y más minutos continuos (", fmt(ma26["Se percibe lector"]), " vs. ", fmt(ma26["No se percibe lector"]), ").")
-    } else if (a10 || a26) {
-      paste0("La autopercepción se asocia con la práctica solo en ", if (a10) "el número de revistas." else "los minutos continuos.")
-    } else "No hay evidencia de que la práctica de lectura difiera según la autopercepción.",
-    "\n", sep = "")
-cat("- ",
-    if (g10s && g26s) "El grupo ocupacional se asocia con ambas medidas de práctica."
-    else if (g10s) "El grupo ocupacional se asocia con el número de revistas, pero no con los minutos continuos."
-    else if (g26s) "El grupo ocupacional se asocia con los minutos continuos, pero no con el número de revistas."
-    else "No hay evidencia de diferencias entre grupos ocupacionales en la práctica de lectura.",
-    "\n", sep = "")
-cat("- ",
-    if (inter_alguna) "La brecha entre quienes se perciben lectores y quienes no cambia según el grupo (interacción significativa)."
-    else "La brecha entre quienes se perciben lectores y quienes no es similar en los tres grupos (sin interacción significativa).",
-    "\n", sep = "")
-cat("- Los factores considerados explican poco de la variación individual (revistas: ", txt_ve(res10$ve_F),
-    "; minutos continuos: ", txt_ve(res26$ve_F), ").\n\n", sep = "")
-```
-
-# Introducción
-
-Una parte de las personas que leen no se reconoce como lectora. Este fenómeno, que aquí se denomina **consumo no reconocido de lectura**, hace que la autopercepción lectora sea un indicador imperfecto de la práctica real de lectura, y puede variar según el sexo y la ocupación de las personas, por ejemplo entre quienes se dedican a los quehaceres del hogar y quienes trabajan fuera de casa.
-
-Esta etapa del estudio utiliza inferencia estadística para responder tres preguntas:
-
-1. ¿La autopercepción lectora se corresponde con la práctica de lectura, medida por el número de revistas leídas y los minutos continuos de lectura?
-2. ¿Esa correspondencia cambia según el grupo (mujeres del hogar, mujeres que trabajan, hombres que trabajan)?
-3. ¿Los grupos difieren entre sí en su práctica de lectura?
-
 # Datos y métodos
 
 ## Datos y variables
 
 ```{r tabla-variables}
 vars <- data.frame(
-  Variable = c("`H_LEC`", "`SEXO` y `COND_ACT`", "`P10`", "`P26`"),
+  Variable = c("`H_LEC`", "`SEXO` y `COND_ACT`", "`P10`", "`P26`", "`P11`"),
   Descripcion = c("Autopercepción lectora: 1 = se percibe lector, 3 = no se percibe lector",
                   "Sexo y condición de actividad. Grupos: mujer hogar (mujer, quehaceres del hogar), mujer trabaja y hombre trabaja (condición de actividad 1 a 3)",
                   "Número de revistas leídas",
-                  "Minutos continuos de lectura"),
-  Papel = c("Factor 2 (autopercepción)", "Factor 1 (grupo ocupacional)", "Variable respuesta", "Variable respuesta"),
+                  "Minutos continuos de lectura",
+                  "Motivo principal de lectura de revistas (4 = gusto o entretenimiento)"),
+  Papel = c("Factor 2 (autopercepción)", "Factor 1 (grupo ocupacional)", "Variable respuesta", "Variable respuesta",
+            "Variable respuesta (proporción)"),
   stringsAsFactors = FALSE)
 kable(vars, format = "pipe", col.names = c("Variable", "Descripción", "Papel en el análisis"),
       caption = "Variables utilizadas")
@@ -338,25 +288,13 @@ $$Y_{ijk} = \mu + \tau_i + \alpha_j + \tau_i\alpha_j + \varepsilon_{ijk}, \qquad
 
 donde $\tau_i$ es el efecto del grupo ocupacional, $\alpha_j$ el de la autopercepción lectora y $\tau_i\alpha_j$ su interacción. Las hipótesis nulas son que no hay efecto del grupo ($\tau_i = 0$), de la autopercepción ($\alpha_j = 0$) ni de la interacción ($\tau_i\alpha_j = 0$). Si la interacción no es significativa, el modelo se reajusta con los efectos principales y se conservan solo los factores significativos. Las diferencias entre grupos se comparan con la prueba de Tukey, y se reporta la varianza explicada ($SC_{factores}/SC_{totales}$).
 
+**Diferencia de proporciones (`P11`).** Para el motivo de lectura se estimó, en cada grupo, el intervalo al 96 % para la diferencia de la proporción que lee por gusto o entretenimiento (no lectores - lectores), con la aproximación normal, y se aplicó la prueba ji cuadrada de independencia entre autopercepción y motivo (gusto u otro). Para saber si esa brecha cambia según el grupo, se estimó el intervalo de la diferencia entre las brechas de cada par de grupos.
+
 **Supuestos.** Normalidad de los residuos (QQ-plot), homocedasticidad (cociente de varianzas y gráfico de residuos contra valores ajustados) e independencia de las observaciones.
 
 El nivel de significancia es $\alpha = 0.04$ en todas las pruebas.
 
 # Resultados
-
-## Práctica de lectura por grupo y autopercepción
-
-```{r fig-medias, fig.width=7.5, fig.height=3.8, fig.cap="Promedio de revistas leídas y de minutos continuos de lectura por grupo y autopercepción lectora (IC al 96 %)."}
-ggplot(mc, aes(x = Grupo, y = m, color = Aut, group = Aut)) +
-  geom_line(position = position_dodge(0.4)) +
-  geom_point(position = position_dodge(0.4), size = 2.5) +
-  geom_errorbar(aes(ymin = LI, ymax = LS), width = 0.15, position = position_dodge(0.4)) +
-  facet_wrap(~ Variable, scales = "free_y") +
-  labs(x = NULL, y = "Promedio", color = NULL) +
-  theme_minimal() + theme(legend.position = "bottom")
-```
-
-La figura muestra la pregunta central del estudio: en cada grupo, la distancia entre las dos líneas es la brecha entre quienes se perciben lectores y quienes no. Si las líneas fueran paralelas, la brecha sería la misma en los tres grupos.
 
 ## Intervalos de confianza para las diferencias entre grupos
 
@@ -386,24 +324,6 @@ ggplot(fd, aes(x = Dif, y = etq, color = Incluye)) +
   facet_wrap(~ Variable, scales = "free", ncol = 1) +
   scale_color_manual(values = c("Incluye 0" = "grey50", "No incluye 0" = "firebrick")) +
   labs(x = "Diferencia estimada", y = NULL, color = NULL) +
-  theme_minimal() + theme(legend.position = "bottom")
-```
-
-```{r fig-heatmap, fig.width=7.5, fig.height=4.2, fig.cap="Diferencia de medias entre todas las parejas de celdas (fila - columna). El color indica si el IC al 96 % excluye el 0."}
-hm <- comp
-hm$Variable <- ifelse(hm$v == "P26", "Minutos continuos (P26)", "Revistas (P10)")
-hm$Resultado <- ifelse(hm$LI > 0, "Fila mayor que columna",
-                       ifelse(hm$LS < 0, "Fila menor que columna", "IC incluye el 0"))
-hm$ka <- factor(hm$ka, levels = rev(cel$clave))
-hm$kb <- factor(hm$kb, levels = cel$clave)
-
-ggplot(hm, aes(x = kb, y = ka, fill = Resultado)) +
-  geom_tile(color = "white") +
-  geom_text(aes(label = fmt(Dif, 1)), size = 3) +
-  facet_wrap(~ Variable) +
-  scale_fill_manual(values = c("Fila mayor que columna" = "#6baed6", "Fila menor que columna" = "#fd8d3c",
-                               "IC incluye el 0" = "grey88")) +
-  labs(x = "Columna (celda b)", y = "Fila (celda a)", fill = NULL) +
   theme_minimal() + theme(legend.position = "bottom")
 ```
 
@@ -438,12 +358,7 @@ cat("**Diferencias entre grupos con la misma autopercepción (minutos continuos)
 cat(frase_entre(tabla_ic[4, ], "No lectoras: mujeres del hogar - mujeres que trabajan", "minutos"), "\n\n", sep = "")
 cat(frase_entre(tabla_ic[5, ], "Lectores: hombres que trabajan - mujeres que trabajan", "minutos"), "\n\n", sep = "")
 
-n_par   <- ncol(pares)
-n_dif26 <- sum(comp$v == "P26" & (comp$LI > 0 | comp$LS < 0))
-n_dif10 <- sum(comp$v == "P10" & (comp$LI > 0 | comp$LS < 0))
-cat("**Panorama completo.** En el mapa de diferencias, ", n_dif26, " de las ", n_par, " parejas de celdas difieren en minutos continuos y ",
-    n_dif10, " de las ", n_par, " difieren en revistas. ",
-    "Cada intervalo tiene 96 % de confianza por separado; al leer varios a la vez, la confianza conjunta es menor, por lo que el mapa debe tomarse como exploratorio.\n\n", sep = "")
+n_par <- ncol(pares)   # número de parejas de celdas (se usa en la sección de variabilidad)
 ```
 
 ## Comparación de la variabilidad
@@ -484,8 +399,8 @@ interp_anova <- function(res, medida) {
   ve <- if (length(res$terminos) == 0) res$ve_A else res$ve_F
 
   cat("- **Interacción** (", fpt(p_int), "). ",
-      if (res$inter_sig) "La brecha entre quienes se perciben lectores y quienes no cambia según el grupo (líneas no paralelas en la figura), por lo que los efectos principales deben leerse con cautela."
-      else "No hay evidencia de que la brecha entre quienes se perciben lectores y quienes no cambie según el grupo (líneas aproximadamente paralelas), por lo que los efectos principales pueden interpretarse por separado.",
+      if (res$inter_sig) "La brecha entre quienes se perciben lectores y quienes no cambia según el grupo, por lo que los efectos principales deben leerse con cautela."
+      else "No hay evidencia de que la brecha entre quienes se perciben lectores y quienes no cambie según el grupo, por lo que los efectos principales pueden interpretarse por separado.",
       "\n\n", sep = "")
 
   cat("- **Autopercepción lectora** (", fpt(p_a), "). ",
@@ -618,6 +533,71 @@ kable(data.frame(Variable = c("P10 (revistas)", "P26 (minutos)"),
       caption = paste0("Resumen de los modelos de dos factores (alpha = ", alpha_val, ")"))
 ```
 
+## Motivo de lectura: proporción que lee por gusto (`P11`)
+
+```{r p11-prop}
+# Proporción que lee revistas por gusto o entretenimiento (P11 = 4), por grupo y autopercepción
+W$Gusto <- W$P11 == 4
+z_c     <- abs(qnorm(alpha_val / 2))
+grupos  <- levels(W$Grupo)
+
+p11 <- data.frame(Grupo = grupos, n_NL = 0, p_NL = 0, n_L = 0, p_L = 0,
+                  Dif = 0, LI = 0, LS = 0, p_chi = 0)
+for (i in seq_along(grupos)) {
+  d  <- subset(W, Grupo == grupos[i])
+  x1 <- d$Gusto[d$Aut == "No se percibe lector"]
+  x2 <- d$Gusto[d$Aut == "Se percibe lector"]
+  p1 <- mean(x1); p2 <- mean(x2)
+  ee <- sqrt(p1 * (1 - p1) / length(x1) + p2 * (1 - p2) / length(x2))
+  p11[i, c("n_NL", "p_NL", "n_L", "p_L")] <- c(length(x1), p1, length(x2), p2)
+  p11$Dif[i]   <- p1 - p2
+  p11$LI[i]    <- p1 - p2 - z_c * ee
+  p11$LS[i]    <- p1 - p2 + z_c * ee
+  p11$p_chi[i] <- chisq.test(table(d$Aut, d$Gusto), correct = FALSE)$p.value
+}
+
+kable(data.frame(Grupo = p11$Grupo,
+                 `No se percibe lector` = paste0(fmt(100 * p11$p_NL, 1), " % (n = ", p11$n_NL, ")"),
+                 `Se percibe lector`    = paste0(fmt(100 * p11$p_L, 1), " % (n = ", p11$n_L, ")"),
+                 `Diferencia (pp)`      = fmt(100 * p11$Dif, 1),
+                 `IC 96 %`              = paste0(fmt(100 * p11$LI, 1), " a ", fmt(100 * p11$LS, 1)),
+                 `p (ji cuadrada)`      = fp(p11$p_chi), check.names = FALSE),
+      row.names = FALSE,
+      caption = "Proporción que lee revistas por gusto y diferencia (no lectores - lectores), con IC al 96 % y prueba ji cuadrada")
+
+# ¿La brecha cambia entre grupos? IC de la diferencia entre las brechas de dos grupos
+ee_g    <- sqrt(p11$p_NL * (1 - p11$p_NL) / p11$n_NL + p11$p_L * (1 - p11$p_L) / p11$n_L)
+pares_g <- combn(3, 2)
+brechas <- data.frame(Comparacion = paste(grupos[pares_g[1, ]], "-", grupos[pares_g[2, ]]),
+                      Dif = p11$Dif[pares_g[1, ]] - p11$Dif[pares_g[2, ]],
+                      EE  = sqrt(ee_g[pares_g[1, ]]^2 + ee_g[pares_g[2, ]]^2))
+brechas$LI <- brechas$Dif - z_c * brechas$EE
+brechas$LS <- brechas$Dif + z_c * brechas$EE
+
+kable(data.frame(Comparacion = brechas$Comparacion,
+                 `Diferencia de brechas (pp)` = fmt(100 * brechas$Dif, 1),
+                 `IC 96 %` = paste0(fmt(100 * brechas$LI, 1), " a ", fmt(100 * brechas$LS, 1)),
+                 check.names = FALSE),
+      row.names = FALSE, caption = "Diferencia entre las brechas de dos grupos en P11")
+```
+
+```{r interp-p11, results="asis"}
+cat("**Interpretación.**\n\n")
+for (i in seq_along(grupos)) {
+  r <- p11[i, ]
+  cat("- **", r$Grupo, ".** Lee por gusto el ", fmt(100 * r$p_NL, 1), " % de quienes no se perciben lectores frente al ",
+      fmt(100 * r$p_L, 1), " % de quienes sí: diferencia de ", fmt(100 * r$Dif, 1), " puntos porcentuales (IC 96 %: ",
+      fmt(100 * r$LI, 1), " a ", fmt(100 * r$LS, 1), "; ",
+      if (r$LI > 0 | r$LS < 0) "el intervalo no incluye el 0" else "el intervalo incluye el 0",
+      "; ji cuadrada, ", fpt(r$p_chi), ").\n\n", sep = "")
+}
+sig_b <- brechas$LI > 0 | brechas$LS < 0
+cat("- **¿La brecha cambia según el grupo?** ",
+    if (any(sig_b)) paste0("Sí en: ", paste(brechas$Comparacion[sig_b], collapse = "; "), " (el IC de la diferencia de brechas no incluye el 0).")
+    else "Ningún intervalo de la diferencia de brechas excluye el 0, por lo que no hay evidencia de que la brecha en el motivo cambie entre grupos.",
+    "\n\n", sep = "")
+```
+
 ## Verificación de supuestos
 
 ```{r fig-supuestos, fig.width=7, fig.height=6, fig.cap="Diagnóstico de los residuos de los modelos finales: normalidad (arriba) y residuos contra valores ajustados (abajo)."}
@@ -703,7 +683,13 @@ cat("**4. Consumo no reconocido en mujeres del hogar.** Las mujeres del hogar qu
     else "no se distingue claramente de la de las mujeres del hogar que sí se perciben lectoras.",
     "\n\n", sep = "")
 
-cat("**5. Poder explicativo.** Los factores incluidos explican poco de la variación individual (revistas: ", txt_ve(res10$ve_F),
+s11 <- p11$LI > 0 | p11$LS < 0
+cat("**5. Motivo de lectura.** Quienes no se perciben lectores leen revistas por gusto en mayor proporción que quienes sí; la diferencia es significativa en ",
+    sum(s11 & p11$Dif > 0), " de 3 grupos", lista(p11$Grupo[s11 & p11$Dif > 0]), ". ",
+    if (any(brechas$LI > 0 | brechas$LS < 0)) "La brecha en el motivo cambia según el grupo." else "No hay evidencia de que esa brecha cambie entre grupos.",
+    "\n\n", sep = "")
+
+cat("**6. Poder explicativo.** Los factores incluidos explican poco de la variación individual (revistas: ", txt_ve(res10$ve_F),
     "; minutos continuos: ", txt_ve(res26$ve_F), "); la mayor parte de la variabilidad depende de otros factores no incluidos en este análisis.\n\n", sep = "")
 ```
 
