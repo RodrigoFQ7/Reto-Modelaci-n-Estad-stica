@@ -692,17 +692,3 @@ cat("**5. Motivo de lectura.** Quienes no se perciben lectores leen revistas por
 cat("**6. Poder explicativo.** Los factores incluidos explican poco de la variación individual (revistas: ", txt_ve(res10$ve_F),
     "; minutos continuos: ", txt_ve(res26$ve_F), "); la mayor parte de la variabilidad depende de otros factores no incluidos en este análisis.\n\n", sep = "")
 ```
-
-## Limitaciones {-}
-
-- Los datos no están ponderados (sin factor de expansión) y juntan 2022-2024, por lo que los resultados describen la muestra y no se generalizan directamente a la población.
-- `H_LEC`, `P10` y `P26` son autorreportes y pueden estar afectados por deseabilidad social.
-- Los resultados indican asociación, no causalidad.
-- `P10` y `P26` son muy asimétricas y no cumplen bien la normalidad; los valores p y los intervalos son aproximados.
-- Los grupos más pequeños (por ejemplo, mujeres del hogar que no se perciben lectoras) generan intervalos más amplios.
-
-```{r limitacion-p10, results="asis"}
-if (SOLO_LECTORES_REVISTAS) {
-  cat("- El análisis se restringe a quienes leen al menos una revista (`P10 > 0`), así que las conclusiones aplican solo a lectores de revistas.\n")
-}
-```
