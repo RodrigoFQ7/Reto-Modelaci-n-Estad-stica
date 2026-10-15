@@ -23,8 +23,8 @@ options(knitr.kable.NA = "")
 # ---------------------------------------------------------------
 # Paquetes, parámetros y preparación de los datos
 # ---------------------------------------------------------------
-library(ggplot2)   # gráficos
-library(knitr)     # función kable() para las tablas
+library(ggplot2)
+library(knitr) 
 
 # ---- Parámetros del análisis ----
 alpha_val  <- 0.04                           # nivel de significancia
@@ -243,7 +243,9 @@ res10 <- analiza_anova("P10")   # número de revistas
 res26 <- analiza_anova("P26")   # minutos continuos de lectura
 ```
 
-# Datos y métodos
+# Objetivos, datos y métodos
+
+## Objetivos
 
 ## Datos y variables
 
