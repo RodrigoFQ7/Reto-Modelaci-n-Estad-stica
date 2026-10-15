@@ -343,7 +343,7 @@ kable(vis, digits = 3, row.names = FALSE,
       caption = "Intervalos de confianza al 96 % para la diferencia de medias (celda a - celda b)")
 ```
 
-```{r fig-forest, fig.width=6.5, fig.height=3.5, out.width="100%", fig.align="center", fig.cap="Diferencias de medias con IC al 96 %. En rojo, los intervalos que no incluyen el 0."}
+```{r fig-forest, fig.width=6.5, fig.height=3.5, out.width="100%", fig.align="center", fig.cap="Diferencias de medias con IC al 96 %. En rojo, los intervalos que no incluyen el 0.", fig.pos="H"}
 # Gráfico de los intervalos: cada línea es un IC; la línea punteada marca el 0
 fd <- tabla_ic
 fd$etq <- factor(paste0(fd$IC, "  ", spec$comp), levels = rev(paste0(fd$IC, "  ", spec$comp)))
