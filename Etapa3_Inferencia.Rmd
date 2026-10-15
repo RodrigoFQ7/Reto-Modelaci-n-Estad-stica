@@ -3,22 +3,19 @@ title: "Autopercepción lectora y práctica de lectura según sexo y ocupación"
 subtitle: "Análisis inferencial de los datos MOLEC 2022-2024"
 date: "`r format(Sys.Date(), '%Y-%m-%d')`"
 lang: es
+geometry: "left=3cm, right=3cm, top=2.5cm, bottom=2.5cm"
 header-includes:
   - \renewcommand{\spanishtablename}{Tabla}
+  - \usepackage{setspace}
+  - \setstretch{1}
 output:
   pdf_document:
     number_sections: true
-  html_document:
-    df_print: paged
 ---
+
 ```{r opciones, include=FALSE}
-# Opciones generales de todos los chunks:
-#   echo = FALSE        -> el código no se muestra en el reporte (solo tablas y gráficos)
-#   message/warning     -> se ocultan avisos de R
-#   fig.*               -> tamaño y alineación por defecto de los gráficos
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
                       fig.align = "center", fig.width = 6.5, fig.height = 3.8)
-# Las celdas vacías (NA) de las tablas se imprimen en blanco
 options(knitr.kable.NA = "")
 ```
 
@@ -531,7 +528,3 @@ par(mfrow = c(1, 1))   # regresa a un gráfico por página
 # Conclusiones
 
 <!-- Escribe aquí tus conclusiones. -->
-
-## Limitaciones {-}
-
-<!-- Escribe aquí las limitaciones del análisis. -->
