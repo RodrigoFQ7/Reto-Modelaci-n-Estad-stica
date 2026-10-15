@@ -11,7 +11,6 @@ output:
   html_document:
     df_print: paged
 ---
-
 ```{r opciones, include=FALSE}
 # Opciones generales de todos los chunks:
 #   echo = FALSE        -> el código no se muestra en el reporte (solo tablas y gráficos)
@@ -179,18 +178,11 @@ vec <- function(clave, v) {
   d[[v]]
 }
 
-# comparar: para la variable v y las celdas ka y kb calcula
-#   1) el IC del cociente de varianzas (distribución F)
-#   2) el IC de la diferencia de medias (celda a - celda b)
+# comparar: para la variable v y las celdas ka y kb calcula el IC de la
+# diferencia de medias (celda a - celda b)
 comparar <- function(v, ka, kb) {
   x <- vec(ka, v); y <- vec(kb, v)
   n1 <- length(x); n2 <- length(y)
-
-  # IC del cociente de varianzas: (s_X^2/s_Y^2) / f(1-alpha/2) y (s_X^2/s_Y^2) / f(alpha/2)
-  razon <- var(x) / var(y)
-  li_v  <- razon / qf(1 - alpha_val / 2, n1 - 1, n2 - 1)
-  ls_v  <- razon / qf(alpha_val / 2, n1 - 1, n2 - 1)
-  iguales <- li_v <= 1 && ls_v >= 1      # TRUE si el IC incluye el 1 (varianzas iguales)
 
   if (n1 >= 40 && n2 >= 40) {
     # Muestras grandes (n, m >= 40): aproximación normal con las varianzas muestrales
@@ -199,14 +191,14 @@ comparar <- function(v, ka, kb) {
     li <- mean(x) - mean(y) - E
     ls <- mean(x) - mean(y) + E
   } else {
-    # Muestras pequeñas: t de Student, con varianzas iguales o distintas (Welch)
-    tt <- t.test(x, y, var.equal = iguales, conf.level = conf_val)
+    # Muestras pequeñas: t de Student con varianzas distintas (Welch-Satterthwaite).
+    # No se usa con estos datos porque todas las celdas tienen al menos 40 casos
+    tt <- t.test(x, y, var.equal = FALSE, conf.level = conf_val)
     li <- tt$conf.int[1]; ls <- tt$conf.int[2]
   }
   data.frame(v = v, ka = ka, kb = kb, n1 = n1, n2 = n2,
              Media_1 = mean(x), Media_2 = mean(y),
-             Dif = mean(x) - mean(y), LI = li, LS = ls,
-             Razon = razon, LI_v = li_v, LS_v = ls_v, stringsAsFactors = FALSE)
+             Dif = mean(x) - mean(y), LI = li, LS = ls, stringsAsFactors = FALSE)
 }
 
 # tabla_ic: resultados de las 8 comparaciones de spec
@@ -215,7 +207,6 @@ tabla_ic <- do.call(rbind, lapply(seq_len(nrow(spec)), function(i) {
 }))
 tabla_ic$Variable  <- spec$variable
 tabla_ic$Incluye_0 <- tabla_ic$LI <= 0 & tabla_ic$LS >= 0      # el IC de la diferencia incluye el 0
-tabla_ic$Incluye_1 <- tabla_ic$LI_v <= 1 & tabla_ic$LS_v >= 1  # el IC del cociente incluye el 1
 
 # =====================  ANOVA de dos factores  =====================
 # analiza_anova: para una variable respuesta v (P10 o P26) hace el procedimiento completo
@@ -292,7 +283,7 @@ kable(data.frame(Clave = cel$clave, Grupo = cel$grupo, Autopercepción = cel$aut
 
 ## Estrategia analítica
 
-<!-- Escribe aquí tu descripción de los métodos: intervalos de confianza (cociente de varianzas y diferencia de medias), ANOVA de dos factores y prueba de independencia. -->
+<!-- Escribe aquí tu descripción de los métodos: intervalos de confianza para la diferencia de medias, ANOVA de dos factores y prueba de independencia. -->
 
 # Resultados
 
@@ -304,25 +295,6 @@ kable(data.frame(IC = spec$id, Variable = spec$variable, Comparacion = spec$desc
       format = "pipe", col.names = c("IC", "Variable", "Comparación (celda a - celda b)", "Claves"),
       caption = "Comparaciones evaluadas")
 ```
-
-## Comparación de la variabilidad entre grupos
-
-<!-- Escribe aquí por qué se compara primero la variabilidad. -->
-
-```{r tabla-varianzas}
-# Tabla con el IC al 96 % del cociente de varianzas de cada comparación
-visv <- tabla_ic[, c("IC", "Variable", "Razon", "LI_v", "LS_v")]
-visv$Comparacion <- spec$comp
-visv <- visv[, c("IC", "Variable", "Comparacion", "Razon", "LI_v", "LS_v")]
-names(visv) <- c("IC", "Variable", "Comparación", "Cociente", "LI", "LS")
-visv$`Incluye 1` <- ifelse(tabla_ic$Incluye_1, "Sí", "No")   # Sí = no hay evidencia de varianzas distintas
-kable(visv, digits = 3, row.names = FALSE,
-      caption = "IC al 96 % para el cociente de varianzas (celda a / celda b)")
-```
-
-### Interpretación
-
-<!-- Mira la tabla "IC al 96 % para el cociente de varianzas (celda a / celda b)", sobre todo la columna "Incluye 1". Escribe aquí tu interpretación. -->
 
 ## Intervalos de confianza para la diferencia de medias
 
