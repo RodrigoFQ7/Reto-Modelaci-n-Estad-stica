@@ -1,17 +1,67 @@
 ---
-title: "Autopercepción lectora y práctica de lectura según sexo y ocupación"
-subtitle: "Análisis inferencial de los datos MOLEC 2022-2024"
-date: "`r format(Sys.Date(), '%Y-%m-%d')`"
-lang: es
-geometry: "left=3cm, right=3cm, top=2.5cm, bottom=2.5cm"
-header-includes:
-  - \renewcommand{\spanishtablename}{Tabla}
-  - \usepackage{setspace}
-  - \setstretch{1}
+documentclass: extarticle
 output:
   pdf_document:
     number_sections: true
+    toc: false
+  word_document:
+    toc: false
+  html_document:
+    toc: false
+    df_print: paged
+lang: es
+fontsize: 12pt
+geometry: "left=3cm, right=3cm, top=2.5cm, bottom=2.5cm"
+urlcolor: blue
+linkcolor: black
+header-includes:
+  - \usepackage{graphicx}
+  - \usepackage{float}
+  - \usepackage{amssymb}
+  - \usepackage{caption}
+  - \usepackage{esint}
+  - \usepackage{setspace}
+  - \captionsetup[figure]{name=Figura,labelsep=period}
+  - \captionsetup[table]{name=Tabla,labelsep=period}
+  - \setlength{\parskip}{0.5em}
+  - \usepackage{array}
+  - \usepackage{ragged2e}
+  - \usepackage{longtable}
+  - \usepackage{booktabs}
+  - \newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+  - \usepackage{etoolbox}
+  - \AtBeginEnvironment{longtable}{\footnotesize}
+  - \AtBeginEnvironment{table}{\footnotesize}
 ---
+
+\begin{titlepage}
+		\centering
+		
+		\vspace{1cm}
+		
+		
+		\includegraphics[width=\textwidth]{imagenes/tecnologico-de-monterrey-blue.png}
+		
+		\vspace{2cm}
+		
+		{\LARGE\bfseries Etapa 3: Análisis Inferencial\par}
+		
+		\vspace{3cm}
+		
+		{\LARGE\bfseries Modelación estadística para la toma de decisiones \par}
+		
+		{\Large Fernanda Meléndez Banda A00843603\par}
+		{\Large Carlos Emilio Escobedo Castillo A00843640\par}
+		{\Large Eduardo David Vargas Herrera A00843714\par}
+		{\Large Rodrigo Fuentes Quintana A00843675\par}
+		
+		\vspace{0.5cm}
+		
+		\vfill
+		
+		{\large `r format(Sys.Date(), '%Y-%m-%d')`\par}
+		
+\end{titlepage}
 
 ```{r opciones, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
@@ -305,7 +355,7 @@ kable(vis, digits = 3, row.names = FALSE,
       caption = "Intervalos de confianza al 96 % para la diferencia de medias (celda a - celda b)")
 ```
 
-```{r fig-forest, fig.width=7, fig.height=4.6, fig.cap="Diferencias de medias con IC al 96 %. En rojo, los intervalos que no incluyen el 0."}
+```{r fig-forest, fig.width=6.5, fig.height=3.5, out.width="100%", fig.align="center", fig.cap="Diferencias de medias con IC al 96 %. En rojo, los intervalos que no incluyen el 0."}
 # Gráfico de los intervalos: cada línea es un IC; la línea punteada marca el 0
 fd <- tabla_ic
 fd$etq <- factor(paste0(fd$IC, "  ", spec$comp), levels = rev(paste0(fd$IC, "  ", spec$comp)))
@@ -316,10 +366,16 @@ ggplot(fd, aes(x = Dif, y = etq, color = Incluye)) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   geom_linerange(aes(xmin = LI, xmax = LS), orientation = "y", linewidth = 0.9) +
   geom_point(size = 2.5) +
-  facet_wrap(~ Variable, scales = "free", ncol = 1) +          # un panel por variable (P26 y P10)
+  facet_wrap(~ Variable, scales = "free", ncol = 2) +
   scale_color_manual(values = c("Incluye 0" = "grey50", "No incluye 0" = "firebrick")) +
   labs(x = "Diferencia estimada", y = NULL, color = NULL) +
-  theme_minimal() + theme(legend.position = "bottom")
+  theme_minimal() + 
+  theme(
+    legend.position = "bottom",
+    axis.text.y = element_text(size = 7.5),
+    axis.text.x = element_text(size = 7.5),
+    strip.text = element_text(size = 9, face = "bold")
+  )
 ```
 
 ### Interpretación
@@ -403,10 +459,6 @@ if (!is.null(res26$tk_g)) {
 if (!is.null(res26$tk_i)) {
   kable(disp_tukey(res26$tk_i), row.names = FALSE, caption = "Comparaciones de Tukey para la interacción: P26")
 }
-```
-
-```{r fig-tukey-p26, fig.height=2.8, fig.cap="Comparaciones de Tukey entre grupos: minutos continuos de lectura (P26)."}
-if (!is.null(res26$tk_g)) plot_tukey(res26$tk_g, "Minutos continuos de lectura (P26)")
 ```
 
 #### Interpretación
@@ -507,17 +559,17 @@ kable(data.frame(Prueba = t11$Prueba, n = t11$n, gl = t11$gl,
 
 ## Verificación de supuestos
 
-```{r fig-supuestos, fig.width=7, fig.height=6, fig.cap="Diagnóstico de los residuos de los modelos finales: normalidad (arriba) y residuos contra valores ajustados (abajo)."}
+```{r fig-supuestos, fig.width=6, fig.height=4.5, out.width="100%", fig.align="center", fig.pos="H", fig.cap="Diagnóstico de los residuos de los modelos finales: normalidad (arriba) y residuos contra valores ajustados (abajo)."}
 # Arriba: gráficos de normalidad (QQ-plot) de los residuos de P10 y P26
 # Abajo: residuos contra valores ajustados (para revisar la homocedasticidad)
-par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+par(mfrow = c(2, 2), mar = c(4, 4, 2.5, 1))
 for (r in list(res10, res26)) {
-  qqnorm(resid(r$diag), main = paste("QQ-plot de residuos:", r$v), pch = 16, col = rgb(0, 0, 0, 0.4))
+  qqnorm(resid(r$diag), main = paste("QQ-plot:", r$v), pch = 16, col = rgb(0, 0, 0, 0.4), cex.main = 0.9)
   qqline(resid(r$diag), col = "firebrick", lwd = 2)
 }
 for (r in list(res10, res26)) {
   plot(fitted(r$diag), resid(r$diag), main = paste("Residuos vs. ajustados:", r$v),
-       xlab = "Ajustados", ylab = "Residuos", pch = 16, col = rgb(0, 0, 0, 0.4))
+       xlab = "Ajustados", ylab = "Residuos", pch = 16, col = rgb(0, 0, 0, 0.4), cex.main = 0.9)
   abline(h = 0, lty = 2)
 }
 par(mfrow = c(1, 1))   # regresa a un gráfico por página
