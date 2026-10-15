@@ -10,8 +10,8 @@ output:
     toc: false
     df_print: paged
 lang: es
-fontsize: 12pt
-geometry: "left=3cm, right=3cm, top=2.5cm, bottom=2.5cm"
+fontsize: 11pt
+geometry: "left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm"
 urlcolor: blue
 linkcolor: black
 header-includes:
@@ -293,50 +293,38 @@ res10 <- analiza_anova("P10")   # número de revistas
 res26 <- analiza_anova("P26")   # minutos continuos de lectura
 ```
 
-# Objetivos, datos y métodos
+# Objetivo del análisis y enfoque inferencial
 
-## Objetivos
+El objetivo principal del estudio no cambió respecto al análisis descriptivo, ya que se mantuvo el propósito de describir y comparar la práctica de lectura de revistas ($P10$, $P26$ y $P11$) entre quienes acostumbraban leer materiales considerados por la MOLEC ($H\_LEC = 1$) y quienes no acostumbraban leer pero habían leído en los últimos meses dichos materiales ($H\_LEC = 3$), segmentados por sexo y condición de actividad (mujeres dedicadas al hogar [MH], mujeres que trabajan [MT] y hombres que trabajan [HT]). Sin embargo, el enfoque cambió a una prueba estadística con datos de la MOLEC 2022-2024. Para lograrlo, se combinó el tipo de ocupación con si la persona se consideraba lectora (lector/a [L] frente a no se percibía [NL]), formando grupos (como MH-NL o MH-L) que se evaluaron con los métodos estadísticos explicados a continuación.
 
-## Datos y variables
+# Técnicas estadísticas
 
-```{r tabla-variables}
-# Tabla con la descripción de las variables usadas (texto fijo)
-vars <- data.frame(
-  Variable = c("`H_LEC`", "`SEXO` y `COND_ACT`", "`P10`", "`P26`", "`P11`"),
-  Descripcion = c("Autopercepción lectora: 1 = se percibe lector, 3 = no se percibe lector",
-                  "Sexo y condición de actividad. Grupos: mujer hogar (mujer, quehaceres del hogar), mujer trabaja y hombre trabaja (condición de actividad 1 a 3)",
-                  "Número de revistas leídas",
-                  "Minutos continuos de lectura",
-                  "Motivo principal de lectura de revistas (4 = gusto o entretenimiento)"),
-  Papel = c("Factor 2 (autopercepción)", "Factor 1 (grupo ocupacional)", "Variable respuesta", "Variable respuesta",
-            "Variable categórica (por gusto u otro motivo)"),
-  stringsAsFactors = FALSE)
-# format = "pipe" permite que el texto largo se acomode en varias líneas
-kable(vars, format = "pipe", col.names = c("Variable", "Descripción", "Papel en el análisis"),
-      caption = "Variables utilizadas")
-```
+Para evaluar rigurosamente las diferencias entre grupos y celdas, se emplearon las siguientes herramientas de estadística inferencial:
 
-```{r tabla-n}
-# Número de casos en cada combinación de grupo y autopercepción, con totales
-tn <- as.data.frame.matrix(table(W$Grupo, W$Aut))
-tn$Total <- rowSums(tn)
-tn <- rbind(tn, Total = colSums(tn))
-kable(tn, caption = paste0("Casos analizados por grupo y autopercepción lectora", if (SOLO_LECTORES_REVISTAS) " (solo lectores de revistas, P10 > 0)" else ""))
-```
+## Intervalos de confianza para la diferencia de medias
 
-```{r tabla-claves}
-# Claves abreviadas de las 6 celdas, que se usan en las tablas y gráficos de los intervalos
-kable(data.frame(Clave = cel$clave, Grupo = cel$grupo, Autopercepción = cel$aut),
-      row.names = FALSE, caption = "Claves de las celdas (grupo y autopercepción)")
-```
+Se utilizaron para estimar la diferencia entre los promedios de lectores y no lectores en cada grupo, evaluando el tiempo de lectura ($P26$) y el número de revistas leídas ($P10$). Al tratarse de muestras grandes ($n, m \ge 40$) con varianzas poblacionales desconocidas, se aplicó la distribución normal estándar ($Z$) con un nivel de confianza del 96%:
 
-## Estrategia analítica
+$$Z = \frac{(\bar{X} - \bar{Y}) - (\mu_X - \mu_Y)}{\sqrt{S_X^2/n + S_Y^2/m}} \approx \mathcal{N}(0, 1)$$
 
-<!-- Escribe aquí tu descripción de los métodos: intervalos de confianza para la diferencia de medias, ANOVA de dos factores y prueba de independencia. -->
+## Análisis de varianza (ANOVA de dos factores con interacción)
+
+Permitió evaluar simultáneamente si el tipo de ocupación, la autopercepción lectora y la interacción entre ambos factores generaron diferencias significativas en las variables cuantitativas ($P10$ y $P26$). La variabilidad total se desglosó y las medias se contrastaron mediante el estadístico $F$ de Snedecor.
+
+## Prueba de independencia de Chi-cuadrada ($\chi^2$)
+
+Evaluó la existencia de asociación significativa entre variables cualitativas, cruzando la autopercepción lectora y el grupo ocupacional en relación con la lectura ($P11$). La técnica contrastó las frecuencias observadas ($O_{ij}$) frente a las esperadas ($E_{ij}$) a través del estadístico:
+
+$$Q = \sum_{i=1}^{r} \sum_{j=1}^{c} \frac{(O_{ij} - E_{ij})^2}{E_{ij}} \approx \chi^2_{(r-1)(c-1)}$$
+
+## Verificación de supuestos del modelo
+
+Se validaron los requisitos teóricos del ANOVA a través del análisis de los residuos. La normalidad se comprobó mediante gráficos de cuantiles teóricos (QQ-plots) para $P10$ y $P26$, mientras que la homogeneidad de varianza y la independencia se evaluaron mediante diagramas de dispersión de los propios residuos.
 
 # Resultados
 
 ## Comparaciones evaluadas
+
 
 ```{r tabla-leyenda}
 # Lista de las 8 comparaciones (celda a - celda b) con su variable y claves
