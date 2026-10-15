@@ -1,14 +1,14 @@
 ---
 documentclass: extarticle
 output:
-  pdf_document:
-    number_sections: true
-    toc: false
-  word_document:
-    toc: false
   html_document:
     toc: false
     df_print: paged
+  word_document:
+    toc: false
+  pdf_document:
+    number_sections: true
+    toc: false
 lang: es
 fontsize: 11pt
 geometry: "left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm"
