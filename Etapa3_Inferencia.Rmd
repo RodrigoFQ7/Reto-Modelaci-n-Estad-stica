@@ -363,7 +363,7 @@ Al comparar a quienes se consideran lectores ($H\_LEC = 1$) con quienes no se co
 
 En el número de revistas leídas (P10), las mujeres del grupo $H\_LEC = 1$ también superan a las de $H\_LEC = 3$, tanto en el hogar (IC6: -1.02, [-1.94, -0.09]) como en el trabajo (IC7: -0.95, [-1.48, -0.41]). En cambio, en los hombres que trabajan no hay evidencia de diferencia (IC8: -0.55, [-1.53, 0.43]), donde la inclusión del cero responde al menor tamaño de muestra y mayor dispersión en los hombres no lectores. 
 
-## Efecto del grupo y de la autopercepción: ANOVA de dos factores
+## Efecto del grupo y de la autopercepción
 
 ```{r funciones-anova}
 # plot_tukey: gráfico de las comparaciones de Tukey (diferencia de medias con su intervalo);
@@ -384,14 +384,27 @@ plot_tukey <- function(tk, titulo) {
 
 ### Número de revistas (`P10`)
 
+A continuación se presentan la Tabla 2 con el ANOVA de dos factores y la Tabla 3 que muestra los efectos estimados por autopercepción.
+
+Se ajustó un modelo de análisis de varianza (ANOVA) de dos factores con interacción para evaluar el número de revistas leídas ($P10$), considerando como factores el grupo ocupacional y la autopercepción lectora. Para ello, se plantearon formalmente las siguientes hipótesis:
+
+1. **Interacción (Grupo $\times$ Autopercepción):**
+   * $H_0$: El efecto de la autopercepción lectora sobre el número de revistas es el mismo en todos los grupos ocupacionales.
+   * $H_1$: El efecto de la autopercepción lectora varía según el grupo ocupacional.
+
+2. **Efecto principal del Grupo Ocupacional:**
+   * $H_0$: No hay diferencias en el número medio de revistas leídas entre los distintos grupos ocupacionales.
+   * $H_1$: Al menos un grupo ocupacional tiene una media de revistas leídas diferente.
+
+3. **Efecto principal de la Autopercepción Lectora:**
+   * $H_0$: No hay diferencias en el número medio de revistas leídas entre quienes se consideran lectores y quienes no.
+   * $H_1$: Al menos una categoría de autopercepción lectora tiene una media diferente.
+
 ```{r anova-p10}
-# 1) ANOVA con interacción (siempre se muestra)
+# 1) ANOVA con interacción para P10
 kable(disp_aov(res10$tab_A), row.names = FALSE, caption = "ANOVA con interacción: número de revistas (P10)")
-# 2) Si no hay interacción, modelo final con solo los factores significativos
-if (!res10$inter_sig && !is.null(res10$final)) {
-  kable(disp_aov(res10$tab_F), row.names = FALSE, caption = "Modelo final (solo factores significativos): P10")
-}
-# 3) Efectos estimados de los factores que quedaron en el modelo final
+
+# 2) Efectos estimados de los factores que quedaron en el modelo final (P10)
 if ("Grupo" %in% res10$terminos && !res10$inter_sig) {
   kable(efectos(res10$dat, "P10", "Grupo"), digits = 3, row.names = FALSE,
         caption = "Efecto estimado por grupo ocupacional (media del grupo - media general): P10")
@@ -400,7 +413,8 @@ if ("Aut" %in% res10$terminos && !res10$inter_sig) {
   kable(efectos(res10$dat, "P10", "Aut"), digits = 3, row.names = FALSE,
         caption = "Efecto estimado por autopercepción (media del nivel - media general): P10")
 }
-# 4) Comparaciones de Tukey (solo si el grupo es significativo o hay interacción)
+
+# 3) Comparaciones de Tukey (P10)
 if (!is.null(res10$tk_g)) {
   kable(disp_tukey(res10$tk_g), row.names = FALSE, caption = "Comparaciones de Tukey entre grupos: P10")
 }
@@ -414,20 +428,19 @@ if (!is.null(res10$tk_i)) {
 if (!is.null(res10$tk_g)) plot_tukey(res10$tk_g, "Revistas leídas (P10)")
 ```
 
-#### Interpretación
+Los resultados del modelo completo (Tabla 2) muestran que la interacción entre ambos factores no es significativa ($p = 0.8646$), por lo que no se rechaza $H_0$ para la interacción y se concluye que el efecto de la autopercepción es similar en los tres grupos. Tampoco resulta significativo el efecto principal del grupo ocupacional ($p = 0.2362$). 
 
-Se ajustó un ANOVA de dos factores con interacción entre grupo ocupacional y autopercepción lectora (Tabla 3). La interacción entre ambos no es significativa (p = 0.8646), por lo que el efecto de la autopercepción sobre el número de revistas leídas es similar en los tres grupos. Tampoco es significativo el efecto principal del grupo (p = 0.2362). Solo la autopercepción lectora resulta significativa (p = 0.0264 < 0.04), por lo que el modelo final (Tabla 4) conserva únicamente ese factor (F = 5.566, p = 0.0185).
+Por el contrario, únicamente la autopercepción lectora muestra un efecto estadísticamente significativo ($p = 0.0264$), motivo por el cual se ajustó y conserva un modelo final (Tabla 2) que incluye exclusivamente este factor ($F = 5.566$, $p = 0.0185$). 
 
-Quienes se perciben lectores leen en promedio 3.42 revistas, contra 2.54 de quienes no se perciben lectores (Tabla 5), una diferencia de aproximadamente 0.88 revistas. Esto coincide con los intervalos de confianza de la sección 3.2: IC6 e IC7 no incluyen el 0 (mujeres del hogar y mujeres que trabajan), mientras que IC8 (hombres que trabajan) sí lo incluye. Sin embargo, el efecto es pequeño en términos prácticos: el modelo explica solo 0.48 % de la variabilidad del número de revistas.
+De acuerdo con las estimaciones del modelo (Tabla 3), quienes se perciben lectores leen en promedio $3.42$ revistas, frente a $2.54$ de quienes no se perciben lectores, lo que representa una diferencia aproximada de $0.88$ revistas. Este resultado es consistente con los intervalos de confianza evaluados previamente, donde las diferencias de las mujeres excluyen el cero y la de los hombres lo incluye. No obstante, el impacto práctico de este factor es limitado, ya que el modelo explica únicamente el el 0.48\% de la variabilidad total en el número de revistas leídas.
 
 ### Minutos continuos de lectura (`P26`)
 
 ```{r anova-p26}
-# Mismo procedimiento que para P10 (ver comentarios del chunk anova-p10)
+# 1) ANOVA con interacción (siempre se muestra)
 kable(disp_aov(res26$tab_A), row.names = FALSE, caption = "ANOVA con interacción: minutos continuos de lectura (P26)")
-if (!res26$inter_sig && !is.null(res26$final)) {
-  kable(disp_aov(res26$tab_F), row.names = FALSE, caption = "Modelo final (solo factores significativos): P26")
-}
+
+# 2) Efectos estimados de los factores que quedaron en el modelo final
 if ("Grupo" %in% res26$terminos && !res26$inter_sig) {
   kable(efectos(res26$dat, "P26", "Grupo"), digits = 3, row.names = FALSE,
         caption = "Efecto estimado por grupo ocupacional (media del grupo - media general): P26")
@@ -436,6 +449,8 @@ if ("Aut" %in% res26$terminos && !res26$inter_sig) {
   kable(efectos(res26$dat, "P26", "Aut"), digits = 3, row.names = FALSE,
         caption = "Efecto estimado por autopercepción (media del nivel - media general): P26")
 }
+
+# 3) Comparaciones de Tukey (solo si el grupo es significativo o hay interacción)
 if (!is.null(res26$tk_g)) {
   kable(disp_tukey(res26$tk_g), row.names = FALSE, caption = "Comparaciones de Tukey entre grupos: P26")
 }
@@ -443,6 +458,14 @@ if (!is.null(res26$tk_i)) {
   kable(disp_tukey(res26$tk_i), row.names = FALSE, caption = "Comparaciones de Tukey para la interacción: P26")
 }
 ```
+
+```{r fig-tukey-p26, fig.height=2, fig.cap="Comparaciones de Tukey entre grupos: minutos continuos de lectura (P26)."}
+# Gráfico de Tukey para P26
+if (!is.null(res26$tk_g)) {
+  plot_tukey(res26$tk_g, "Minutos continuos de lectura (P26)")
+}
+```
+
 
 #### Interpretación
 
