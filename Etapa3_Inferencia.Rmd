@@ -48,6 +48,10 @@ header-includes:
 		
 		\vspace{3cm}
 		
+		{\LARGE\bfseries Autopercepción lectora y práctica real de lectura de revistas en México, 2022-2024\par}
+		
+		\vspace{3cm}
+		
 		{\LARGE\bfseries Modelación estadística para la toma de decisiones \par}
 		
 		{\Large Fernanda Meléndez Banda A00843603\par}
