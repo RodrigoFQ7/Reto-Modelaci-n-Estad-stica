@@ -1,0 +1,498 @@
+---
+title: "Autopercepción lectora y práctica de lectura según sexo y ocupación"
+subtitle: "Análisis inferencial de los datos MOLEC 2022-2024"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+lang: es
+header-includes:
+  - \renewcommand{\spanishtablename}{Tabla}
+  - \usepackage{float}
+output:
+  pdf_document:
+    toc: true
+    number_sections: true
+  html_document:
+    toc: true
+    df_print: paged
+---
+
+```{r opciones, include=FALSE}
+# Opciones generales de todos los chunks:
+#   echo = FALSE        -> el código no se muestra en el reporte (solo tablas y gráficos)
+#   message/warning     -> se ocultan avisos de R
+#   fig.*               -> tamaño y alineación por defecto de los gráficos
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.align = "center", fig.width = 6.5, fig.height = 3.8)
+# Las celdas vacías (NA) de las tablas se imprimen en blanco
+options(knitr.kable.NA = "")
+```
+
+```{r setup}
+# ---------------------------------------------------------------
+# Paquetes, parámetros y preparación de los datos
+# ---------------------------------------------------------------
+library(ggplot2)   # gráficos
+library(knitr)     # función kable() para las tablas
+library(ARTool)    # ANOVA con ajuste ART (Aligned Rank Transform); instalar con install.packages("ARTool")
+
+# ---- Parámetros del análisis ----
+alpha_val  <- 0.04                           # nivel de significancia
+conf_val   <- 1 - alpha_val                  # nivel de confianza (96 %)
+ruta_datos <- "datos/DatosEquipo6_v2.csv"    # archivo con los datos
+
+# TRUE  = solo lectores de revistas (P10 > 0), como en la etapa descriptiva
+# FALSE = todo el universo con grupo y autopercepción válidos
+SOLO_LECTORES_REVISTAS <- TRUE
+
+# ---- Carga y validación ----
+stopifnot(file.exists(ruta_datos))           # se detiene si no encuentra el archivo
+raw <- read.csv(ruta_datos)
+stopifnot(ncol(raw) == 7)                    # verifica que haya las 7 columnas esperadas
+names(raw) <- c("anio", "H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")
+datos <- raw
+
+# ---- Factor 2: autopercepción lectora (H_LEC: 1 = sí, 3 = no) ----
+datos$Aut <- NA
+datos$Aut[datos$H_LEC %in% 1] <- "Se percibe lector"
+datos$Aut[datos$H_LEC %in% 3] <- "No se percibe lector"
+datos$Aut <- factor(datos$Aut, levels = c("Se percibe lector", "No se percibe lector"))
+
+# ---- Factor 1: grupo ocupacional (sexo + condición de actividad) ----
+# SEXO: 1 = hombre, 2 = mujer. COND_ACT: 7 = quehaceres del hogar, 1 a 3 = trabaja
+datos$Grupo <- NA
+datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 7]   <- "Mujer hogar"
+datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 1:3] <- "Mujer trabaja"
+datos$Grupo[datos$SEXO %in% 1 & datos$COND_ACT %in% 1:3] <- "Hombre trabaja"
+datos$Grupo <- factor(datos$Grupo,
+                      levels = c("Mujer hogar", "Mujer trabaja", "Hombre trabaja"))
+
+# ---- Subconjuntos de datos ----
+V <- subset(datos, !is.na(Aut))     # casos con autopercepción válida (H_LEC = 1 o 3)
+U <- subset(V, !is.na(Grupo))       # además con grupo ocupacional definido
+W <- if (SOLO_LECTORES_REVISTAS) subset(U, P10 > 0) else U   # base de trabajo final
+W$Grupo <- droplevels(W$Grupo)      # quita niveles sin casos
+W$Aut   <- droplevels(W$Aut)
+N_total <- nrow(W)                  # número de personas analizadas
+```
+
+```{r helpers}
+# ---------------------------------------------------------------
+# Funciones auxiliares (formato de números y tablas del ANOVA ART)
+# ---------------------------------------------------------------
+
+# fmt: número con d decimales como texto
+fmt <- function(x, d = 2) formatC(x, format = "f", digits = d)
+
+# fp: valor p con 4 decimales ("< 0.0001" si es muy pequeño)
+fp  <- function(p) ifelse(p < 0.0001, "< 0.0001", formatC(p, format = "f", digits = 4))
+
+# dec: decisión de la prueba con el nivel de significancia alpha_val
+dec <- function(p) ifelse(p < alpha_val, "Rechaza H0", "No rechaza H0")
+
+# pterm: valor p de un efecto ("Grupo", "Aut" o "Grupo:Aut") en la tabla ANOVA ART
+pterm <- function(res, term) res$tabla$`Pr(>F)`[res$tabla$Term == term]
+
+# disp_art: arregla la tabla del ANOVA ART para imprimirla
+# (eta2_p = eta cuadrada parcial: proporción de variación que explica cada efecto)
+disp_art <- function(a) {
+  data.frame(Efecto = gsub(":", " x ", a$Term), gl = a$Df, gl_residual = a$Df.res,
+             F = round(a$`F value`, 3), p = fp(a$`Pr(>F)`),
+             eta2_parcial = round(a$eta2_p, 4), Decision = dec(a$`Pr(>F)`),
+             stringsAsFactors = FALSE)
+}
+
+# posthoc_art: comparaciones por pares de un efecto con el procedimiento ART-C
+# (ajuste de Tukey). Los estimados están en la escala de rangos alineados
+posthoc_art <- function(m, efecto) {
+  d <- as.data.frame(art.con(m, efecto, adjust = "tukey"))
+  data.frame(Comparacion = d$contrast, Estimado = round(d$estimate, 2),
+             p_ajustado = fp(d$p.value), stringsAsFactors = FALSE)
+}
+```
+
+```{r analisis}
+# ---------------------------------------------------------------
+# Cálculos principales (no imprimen nada; las tablas y gráficos
+# se muestran más abajo)
+# ---------------------------------------------------------------
+
+# =====================  1) ANOVA clásico (solo para revisar supuestos)  =====================
+# Se ajusta el ANOVA de dos factores con interacción; sus residuos se usan para
+# revisar normalidad y homocedasticidad antes de decidir qué ANOVA reportar
+mod_clasico <- list(
+  P10 = aov(P10 ~ Grupo * Aut, data = W[!is.na(W$P10), ]),
+  P26 = aov(P26 ~ Grupo * Aut, data = W[!is.na(W$P26), ])
+)
+
+# =====================  2) ANOVA con ajuste ART  =====================
+# art_anova: para la variable v (P10 o P26)
+#   1) ajusta el modelo ART con Grupo, Aut e interacción (alinea y ordena por rangos)
+#   2) obtiene la tabla ANOVA sobre los rangos alineados
+#   3) calcula la eta cuadrada parcial de cada efecto = SC efecto / (SC efecto + SC residual)
+art_anova <- function(v) {
+  dat <- W[!is.na(W[[v]]), ]
+  m   <- art(as.formula(paste0(v, " ~ Grupo * Aut")), data = dat)
+  a   <- as.data.frame(anova(m))
+  stopifnot(all(c("Sum Sq", "Sum Sq.res") %in% names(a)))
+  a$eta2_p <- a$`Sum Sq` / (a$`Sum Sq` + a$`Sum Sq.res`)
+  list(v = v, dat = dat, m = m, tabla = a)
+}
+
+art10 <- art_anova("P10")   # número de revistas
+art26 <- art_anova("P26")   # minutos continuos de lectura
+art_res <- list(P10 = art10, P26 = art26)
+
+# =====================  3) Intervalos que importan según el ANOVA ART (con Bonferroni)  =====================
+a_no <- "No se percibe lector"
+a_si <- "Se percibe lector"
+
+# cel: las 6 celdas (grupo x autopercepción) con su clave abreviada
+#   MH = mujer hogar, MT = mujer trabaja, HT = hombre trabaja
+#   NL = no se percibe lector, L = se percibe lector
+cel <- data.frame(clave = c("MH-NL", "MT-NL", "HT-NL", "MH-L", "MT-L", "HT-L"),
+                  grupo = rep(c("Mujer hogar", "Mujer trabaja", "Hombre trabaja"), 2),
+                  aut   = rep(c(a_no, a_si), each = 3), stringsAsFactors = FALSE)
+
+# etq_celda: nombre legible de una celda a partir de su clave
+etq_celda <- function(k) {
+  paste0(cel$grupo[cel$clave == k], " (", ifelse(cel$aut[cel$clave == k] == a_no, "no lector", "lector"), ")")
+}
+
+# cand: comparaciones candidatas = la brecha entre quienes no se perciben lectores y
+# quienes sí (no lector - lector) dentro de cada grupo, para cada variable (3 x 2 = 6).
+# Las diferencias entre grupos se dejan fuera del diseño de intervalos; se revisan de
+# forma exploratoria con las comparaciones por pares del ANOVA ART
+cand <- do.call(rbind, lapply(c("P26", "P10"), function(v) {
+  data.frame(v = v,
+             ka = c("MH-NL", "MT-NL", "HT-NL"),
+             kb = c("MH-L",  "MT-L",  "HT-L"),
+             stringsAsFactors = FALSE)
+}))
+cand$desc <- paste(unname(sapply(cand$ka, etq_celda)), "-", unname(sapply(cand$kb, etq_celda)))
+
+# Regla de relevancia: la brecha de una variable se calcula si el ANOVA ART encontró
+# efecto de la autopercepción o de la interacción para esa variable
+cand$relevante <- unname(sapply(cand$v, function(v) {
+  r <- art_res[[v]]
+  pterm(r, "Aut") < alpha_val || pterm(r, "Grupo:Aut") < alpha_val
+}))
+
+# spec: comparaciones relevantes, con identificador IC1, IC2, ...
+spec <- cand[cand$relevante, ]
+rownames(spec) <- NULL
+if (nrow(spec) > 0) {
+  spec$id       <- paste0("IC", seq_len(nrow(spec)))
+  spec$variable <- ifelse(spec$v == "P26", "P26 (min)", "P10 (revistas)")
+  spec$comp     <- paste(spec$ka, spec$kb, sep = " - ")
+}
+
+# Ajuste de Bonferroni: como se calculan k intervalos a la vez, cada uno se construye
+# con nivel de significancia alpha/k, de modo que la confianza conjunta sea de al menos 96 %
+k_ic     <- max(nrow(spec), 1)     # número de intervalos que se calculan
+alpha_ic <- alpha_val / k_ic       # significancia de cada intervalo
+conf_ic  <- 1 - alpha_ic           # confianza de cada intervalo
+
+# vec: valores de una variable (P10 o P26) para las personas de una celda
+vec <- function(clave, v) {
+  g <- cel$grupo[cel$clave == clave]
+  a <- cel$aut[cel$clave == clave]
+  d <- W[W$Grupo == g & W$Aut == a & !is.na(W[[v]]), ]
+  d[[v]]
+}
+
+# comparar: para la variable v y las celdas ka y kb calcula el IC de la
+# diferencia de medias (celda a - celda b) con la confianza ajustada por Bonferroni (conf_ic)
+comparar <- function(v, ka, kb) {
+  x <- vec(ka, v); y <- vec(kb, v)
+  n1 <- length(x); n2 <- length(y)
+
+  if (n1 >= 40 && n2 >= 40) {
+    # Muestras grandes (n, m >= 40): aproximación normal con las varianzas muestrales
+    z  <- qnorm(1 - alpha_ic / 2)
+    E  <- z * sqrt(var(x) / n1 + var(y) / n2)
+    li <- mean(x) - mean(y) - E
+    ls <- mean(x) - mean(y) + E
+  } else {
+    # Muestras pequeñas: t de Student con varianzas distintas (Welch-Satterthwaite).
+    # No se usa con estos datos porque todas las celdas tienen al menos 40 casos
+    tt <- t.test(x, y, var.equal = FALSE, conf.level = conf_ic)
+    li <- tt$conf.int[1]; ls <- tt$conf.int[2]
+  }
+  data.frame(v = v, ka = ka, kb = kb, n1 = n1, n2 = n2,
+             Media_1 = mean(x), Media_2 = mean(y),
+             Dif = mean(x) - mean(y), LI = li, LS = ls, stringsAsFactors = FALSE)
+}
+
+# tabla_ic: resultados de las comparaciones relevantes (NULL si ninguna es relevante)
+tabla_ic <- NULL
+if (nrow(spec) > 0) {
+  tabla_ic <- do.call(rbind, lapply(seq_len(nrow(spec)), function(i) {
+    data.frame(IC = spec$id[i], comparar(spec$v[i], spec$ka[i], spec$kb[i]), stringsAsFactors = FALSE)
+  }))
+  tabla_ic$Variable  <- spec$variable
+  tabla_ic$Incluye_0 <- tabla_ic$LI <= 0 & tabla_ic$LS >= 0   # el IC de la diferencia incluye el 0
+}
+
+# Pie de figura de los intervalos (incluye el nivel de confianza ajustado)
+cap_forest <- paste0("Diferencias de medias con IC ajustados por Bonferroni (", fmt(100 * conf_ic, 2),
+                     " % por intervalo). En rojo, los intervalos que no incluyen el 0.")
+
+# Alto del gráfico de intervalos: crece con el número de comparaciones por variable
+fig_h_forest <- if (nrow(spec) > 0) max(2.5, 0.3 * max(table(spec$variable)) + 1.2) else 2.5
+```
+
+# Datos y métodos
+
+## Datos y variables
+
+```{r tabla-variables}
+# Tabla con la descripción de las variables usadas (texto fijo)
+vars <- data.frame(
+  Variable = c("`H_LEC`", "`SEXO` y `COND_ACT`", "`P10`", "`P26`", "`P11`"),
+  Descripcion = c("Autopercepción lectora: 1 = se percibe lector, 3 = no se percibe lector",
+                  "Sexo y condición de actividad. Grupos: mujer hogar (mujer, quehaceres del hogar), mujer trabaja y hombre trabaja (condición de actividad 1 a 3)",
+                  "Número de revistas leídas",
+                  "Minutos continuos de lectura",
+                  "Motivo principal de lectura de revistas (4 = gusto o entretenimiento)"),
+  Papel = c("Factor 2 (autopercepción)", "Factor 1 (grupo ocupacional)", "Variable respuesta", "Variable respuesta",
+            "Variable categórica (por gusto u otro motivo)"),
+  stringsAsFactors = FALSE)
+# format = "pipe" permite que el texto largo se acomode en varias líneas
+kable(vars, format = "pipe", col.names = c("Variable", "Descripción", "Papel en el análisis"),
+      caption = "Variables utilizadas")
+```
+
+```{r tabla-n}
+# Número de casos en cada combinación de grupo y autopercepción, con totales
+tn <- as.data.frame.matrix(table(W$Grupo, W$Aut))
+tn$Total <- rowSums(tn)
+tn <- rbind(tn, Total = colSums(tn))
+kable(tn, caption = paste0("Casos analizados por grupo y autopercepción lectora", if (SOLO_LECTORES_REVISTAS) " (solo lectores de revistas, P10 > 0)" else ""))
+```
+
+```{r tabla-claves}
+# Claves abreviadas de las 6 celdas, que se usan en las tablas y gráficos de los intervalos
+kable(data.frame(Clave = cel$clave, Grupo = cel$grupo, Autopercepción = cel$aut),
+      row.names = FALSE, caption = "Claves de las celdas (grupo y autopercepción)")
+```
+
+## Estrategia analítica
+
+<!-- Escribe aquí tu descripción de los métodos: intervalos de confianza para la diferencia de medias, ANOVA de dos factores y prueba de independencia. -->
+
+# Resultados
+
+## Verificación de supuestos del ANOVA
+
+```{r fig-supuestos, fig.width=7, fig.height=6, fig.cap="Diagnóstico de los residuos del ANOVA clásico con interacción: normalidad (arriba) y residuos contra valores ajustados (abajo)."}
+# Se revisan los residuos del ANOVA clásico de P10 y P26
+# Arriba: gráficos de normalidad (QQ-plot); los puntos deben seguir la línea roja
+# Abajo: residuos contra valores ajustados (la dispersión debe ser similar en todo el eje)
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+for (v in names(mod_clasico)) {
+  qqnorm(resid(mod_clasico[[v]]), main = paste("QQ-plot de residuos:", v), pch = 16, col = rgb(0, 0, 0, 0.4))
+  qqline(resid(mod_clasico[[v]]), col = "firebrick", lwd = 2)
+}
+for (v in names(mod_clasico)) {
+  plot(fitted(mod_clasico[[v]]), resid(mod_clasico[[v]]), main = paste("Residuos vs. ajustados:", v),
+       xlab = "Ajustados", ylab = "Residuos", pch = 16, col = rgb(0, 0, 0, 0.4))
+  abline(h = 0, lty = 2)
+}
+par(mfrow = c(1, 1))   # regresa a un gráfico por página
+```
+
+### Interpretación
+
+<!-- Mira la figura "Diagnóstico de los residuos del ANOVA clásico con interacción". Escribe aquí tu interpretación sobre normalidad y homocedasticidad y por qué decides usar el ANOVA con ajuste ART. -->
+
+## ANOVA con ajuste ART
+
+<!-- Escribe aquí una breve explicación del ANOVA con ajuste ART (Aligned Rank Transform) y de la eta cuadrada parcial. -->
+
+### Número de revistas (`P10`)
+
+```{r anova-art-p10}
+# Tabla ANOVA con ajuste ART para P10: efectos de Grupo, Aut y su interacción
+# eta2_parcial = qué proporción de la variación explica cada efecto
+kable(disp_art(art10$tabla), row.names = FALSE,
+      caption = "ANOVA con ajuste ART: número de revistas (P10)")
+
+# Comparaciones por pares (ART-C): solo aparecen si el efecto es significativo
+if (pterm(art10, "Grupo") < alpha_val) {
+  kable(posthoc_art(art10$m, "Grupo"), format = "pipe",
+        caption = "Comparaciones por pares entre grupos (ART-C, ajuste de Tukey): P10")
+}
+if (pterm(art10, "Grupo:Aut") < alpha_val) {
+  kable(posthoc_art(art10$m, "Grupo:Aut"), format = "pipe",
+        caption = "Comparaciones por pares de la interacción (ART-C, ajuste de Tukey): P10")
+}
+```
+
+#### Interpretación
+
+<!-- Mira la tabla "ANOVA con ajuste ART: número de revistas (P10)" (valores p y eta2_parcial) y las comparaciones por pares, si aparecen. Escribe aquí tu interpretación. -->
+
+### Minutos continuos de lectura (`P26`)
+
+```{r anova-art-p26}
+# Mismo procedimiento que para P10 (ver comentarios del chunk anova-art-p10)
+kable(disp_art(art26$tabla), row.names = FALSE,
+      caption = "ANOVA con ajuste ART: minutos continuos de lectura (P26)")
+
+if (pterm(art26, "Grupo") < alpha_val) {
+  kable(posthoc_art(art26$m, "Grupo"), format = "pipe",
+        caption = "Comparaciones por pares entre grupos (ART-C, ajuste de Tukey): P26")
+}
+if (pterm(art26, "Grupo:Aut") < alpha_val) {
+  kable(posthoc_art(art26$m, "Grupo:Aut"), format = "pipe",
+        caption = "Comparaciones por pares de la interacción (ART-C, ajuste de Tukey): P26")
+}
+```
+
+#### Interpretación
+
+<!-- Mira la tabla "ANOVA con ajuste ART: minutos continuos de lectura (P26)" (valores p y eta2_parcial) y las comparaciones por pares, si aparecen. Escribe aquí tu interpretación. -->
+
+## Intervalos de confianza según el ANOVA con ajuste
+
+<!-- Escribe aquí por qué solo se calcula la brecha entre quienes se perciben lectores y quienes no, solo cuando el ANOVA con ajuste ART lo respalda, y por qué se usa el ajuste de Bonferroni (la regla y el ajuste están en el chunk "analisis"). -->
+
+```{r tabla-leyenda}
+# Lista de las comparaciones calculadas (celda a - celda b)
+if (!is.null(tabla_ic)) {
+  kable(data.frame(IC = spec$id, Variable = spec$variable, Comparacion = spec$desc, Claves = spec$comp),
+        format = "pipe", col.names = c("IC", "Variable", "Comparación (celda a - celda b)", "Claves"),
+        caption = "Comparaciones calculadas: brecha entre quienes no se perciben lectores y quienes sí, por grupo")
+}
+```
+
+```{r tabla-medias}
+# Tabla con el IC al 96 % de la diferencia de medias de cada comparación relevante
+if (!is.null(tabla_ic)) {
+  vis <- tabla_ic[, c("IC", "Variable", "n1", "n2", "Media_1", "Media_2", "Dif", "LI", "LS")]
+  vis$`Incluye 0` <- ifelse(tabla_ic$Incluye_0, "Sí", "No")    # Sí = no hay evidencia de diferencia
+  kable(vis, digits = 3, row.names = FALSE,
+        caption = paste0("Intervalos de confianza para la diferencia de medias (celda a - celda b) con ajuste de Bonferroni: ",
+                         fmt(100 * conf_ic, 2), " % de confianza por intervalo (", k_ic, " intervalos; confianza conjunta de al menos 96 %)"))
+}
+```
+
+```{r fig-forest, fig.width=6.5, fig.height=fig_h_forest, out.width="100%", fig.align="center", fig.cap=cap_forest, fig.pos="H"}
+# Gráfico de los intervalos: cada línea es un IC; la línea punteada marca el 0
+if (!is.null(tabla_ic)) {
+  fd <- tabla_ic
+  fd$etq <- factor(paste0(fd$IC, "  ", spec$comp), levels = rev(paste0(fd$IC, "  ", spec$comp)))
+  fd$Variable <- factor(fd$Variable, levels = unique(fd$Variable))
+  fd$Incluye <- ifelse(fd$Incluye_0, "Incluye 0", "No incluye 0")
+
+  ggplot(fd, aes(x = Dif, y = etq, color = Incluye)) +
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_linerange(aes(xmin = LI, xmax = LS), orientation = "y", linewidth = 0.9) +
+    geom_point(size = 2.5) +
+    facet_wrap(~ Variable, scales = "free", ncol = 2) +          # un panel por variable (P26 y P10)
+    scale_color_manual(values = c("Incluye 0" = "grey50", "No incluye 0" = "firebrick")) +
+    labs(x = "Diferencia estimada", y = NULL, color = NULL) +
+    theme_minimal() +
+    theme(legend.position = "bottom",
+          axis.text.y = element_text(size = 7.5),
+          axis.text.x = element_text(size = 7.5),
+          strip.text = element_text(size = 9, face = "bold"))
+}
+```
+
+### Interpretación
+
+<!-- Mira la tabla "Intervalos de confianza para la diferencia de medias ... con ajuste de Bonferroni" (columna "Incluye 0") y la figura de diferencias de medias. Escribe aquí tu interpretación. -->
+
+## Motivo de lectura (`P11`): independencia de dos variables categóricas
+
+<!-- Escribe aquí tu planteamiento de la prueba de independencia (hipótesis, estadístico, región de rechazo y decisión). -->
+
+```{r p11-calculo}
+# Motivo de lectura en dos categorías: por gusto (P11 = 4) u otro motivo
+W11 <- W[!is.na(W$P11), ]
+W11$Gusto  <- W11$P11 == 4
+W11$Motivo <- factor(ifelse(W11$Gusto, "Por gusto", "Otro motivo"), levels = c("Por gusto", "Otro motivo"))
+grupos11 <- levels(W11$Grupo)
+
+# prueba_indep: prueba ji cuadrada de independencia entre dos variables categóricas
+#   O = frecuencias observadas, E = esperadas (total de fila x total de columna / n)
+#   q = estadístico, crit = valor crítico, p = valor p, Esp_min = menor frecuencia esperada
+prueba_indep <- function(f1, f2, dat, etiqueta) {
+  O  <- table(dat[[f1]], dat[[f2]])
+  n  <- sum(O)
+  E  <- outer(rowSums(O), colSums(O)) / n
+  q  <- sum((O - E)^2 / E)
+  gl <- (nrow(O) - 1) * (ncol(O) - 1)
+  data.frame(Prueba = etiqueta, n = n, gl = gl,
+             crit = qchisq(1 - alpha_val, gl), q = q,
+             p = pchisq(q, gl, lower.tail = FALSE), Esp_min = min(E), stringsAsFactors = FALSE)
+}
+
+# Cinco pruebas: autopercepción x motivo (todos), grupo x motivo (todos)
+# y autopercepción x motivo dentro de cada grupo
+t11 <- rbind(
+  prueba_indep("Aut", "Motivo", W11, "Autopercepción x motivo (todos los grupos)"),
+  prueba_indep("Grupo", "Motivo", W11, "Grupo x motivo (todos los casos)"),
+  do.call(rbind, lapply(grupos11, function(g) {
+    prueba_indep("Aut", "Motivo", W11[W11$Grupo == g, ], paste0("Autopercepción x motivo: ", g))
+  })))
+t11$Decision <- ifelse(t11$p <= alpha_val, "Rechaza H0", "No rechaza H0")   # se rechaza si p <= alpha
+
+# pct11: porcentaje que lee por gusto en cada celda (grupo x autopercepción)
+pct11 <- do.call(rbind, lapply(seq_len(nrow(cel)), function(i) {
+  d <- W11[W11$Grupo == cel$grupo[i] & W11$Aut == cel$aut[i], ]
+  data.frame(Grupo = cel$grupo[i], Aut = cel$aut[i], n = nrow(d), pct = 100 * mean(d$Gusto),
+             stringsAsFactors = FALSE)
+}))
+pct11$Grupo <- factor(pct11$Grupo, levels = grupos11)
+
+# Frecuencias observadas y esperadas de la prueba global (autopercepción x motivo)
+O_g <- table(Autopercepción = W11$Aut, Motivo = W11$Motivo)
+E_g <- outer(rowSums(O_g), colSums(O_g)) / sum(O_g)
+```
+
+```{r p11-tablas}
+# Tablas de frecuencias de la prueba global
+kable(as.data.frame.matrix(O_g), caption = "Frecuencias observadas: autopercepción x motivo de lectura")
+kable(as.data.frame.matrix(round(E_g, 2)), caption = "Frecuencias esperadas bajo independencia")
+
+# Porcentaje que lee por gusto en cada celda, con su tamaño de muestra
+cel_txt <- function(g, a) {
+  r <- pct11[pct11$Grupo == g & pct11$Aut == a, ]
+  paste0(fmt(r$pct, 1), " % (n = ", r$n, ")")
+}
+kable(data.frame(Grupo = grupos11,
+                 `No se percibe lector` = sapply(grupos11, cel_txt, a = a_no),
+                 `Se percibe lector`    = sapply(grupos11, cel_txt, a = a_si),
+                 check.names = FALSE),
+      row.names = FALSE, caption = "Porcentaje que lee revistas por gusto o entretenimiento, por grupo y autopercepción")
+
+# Resultados de las cinco pruebas ji cuadrada
+kable(data.frame(Prueba = t11$Prueba, n = t11$n, gl = t11$gl,
+                 `Valor crítico` = round(t11$crit, 3), q = round(t11$q, 3),
+                 p = fp(t11$p), `Esperada mínima` = round(t11$Esp_min, 1),
+                 Decisión = t11$Decision, check.names = FALSE),
+      format = "pipe", caption = "Pruebas ji cuadrada de independencia con el motivo de lectura (P11)")
+```
+
+```{r fig-p11, fig.width=7, fig.height=3.6, fig.cap="Porcentaje que lee revistas por gusto o entretenimiento, por grupo y autopercepción lectora."}
+# Gráfico de barras con el porcentaje que lee por gusto en cada celda
+ggplot(pct11, aes(x = Grupo, y = pct, fill = Aut)) +
+  geom_col(position = position_dodge(0.8), width = 0.7) +
+  geom_text(aes(label = paste0(fmt(pct, 1), " %")), position = position_dodge(0.8), vjust = -0.4, size = 3.3) +
+  scale_y_continuous(limits = c(0, max(pct11$pct) * 1.15)) +
+  labs(x = NULL, y = "% que lee por gusto", fill = NULL) +
+  theme_minimal() + theme(legend.position = "bottom")
+```
+
+### Interpretación
+
+<!-- Mira las tablas de frecuencias observadas y esperadas, el porcentaje que lee por gusto, la tabla "Pruebas ji cuadrada de independencia con el motivo de lectura (P11)" y la figura de barras. Escribe aquí tu interpretación. -->
+
+# Conclusiones
+
+<!-- Escribe aquí tus conclusiones. -->
+
+## Limitaciones {-}
+
+<!-- Escribe aquí las limitaciones del análisis. -->
