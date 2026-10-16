@@ -323,12 +323,9 @@ Se validaron los requisitos teóricos del ANOVA a través del análisis de los r
 
 # Resultados
 
-## Comparaciones evaluadas
-
-A continuación se presentan la Tabla~\ref{tab:tabla-medias} con los intervalos de confianza evaluados y la Figura~\ref{fig:fig-forest} que sintetiza gráficamente las diferencias entre grupos (la clave de cada comparación se encuentra en el Anexo 1). Los intervalos se construyeron con la distribución normal estándar ($Z$) al 96 % de confianza, lo cual es adecuado porque todas las muestras tienen al menos 40 observaciones.   
-
-
 ## Intervalos de confianza para la diferencia de medias
+
+A continuación se presentan la Tabla 1 con los intervalos de confianza evaluados y la Figura 1 que sintetiza gráficamente las diferencias entre grupos (la clave de cada comparación se encuentra en el Anexo 1). Los intervalos se construyeron con la distribución normal estándar ($Z$) al 96 % de confianza, lo cual es adecuado porque todas las muestras tienen al menos 40 observaciones.   
 
 
 ```{r tabla-medias}
