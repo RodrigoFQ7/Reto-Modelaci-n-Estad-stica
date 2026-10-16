@@ -295,7 +295,7 @@ res26 <- analiza_anova("P26")   # minutos continuos de lectura
 
 # Objetivo del análisis y enfoque inferencial
 
-El objetivo principal del estudio no cambió respecto al análisis descriptivo, ya que se mantuvo el propósito de describir y comparar la práctica de lectura de revistas ($P10$, $P26$ y $P11$) entre quienes acostumbraban leer materiales considerados por la MOLEC ($H\_LEC = 1$) y quienes no se consideran lectores pero habían leído en los últimos meses dichos materiales ($H\_LEC = 3$), segmentados por sexo y condición de actividad (mujeres dedicadas al hogar [MH], mujeres que trabajan [MT] y hombres que trabajan [HT]). Sin embargo, el enfoque cambió a una prueba estadística con datos de la MOLEC 2022-2024. Para lograrlo, se combinó el tipo de ocupación con si la persona se consideraba lectora (lector/a [L] frente a no se percibía [NL]), formando grupos (como MH-NL o MH-L) que se evaluaron con los métodos estadísticos explicados a continuación.
+El objetivo principal del estudio no cambió respecto al análisis descriptivo, ya que se mantuvo el propósito de describir y comparar la práctica de lectura de revistas ($P10$, $P26$ y $P11$) entre quienes acostumbraban leer materiales considerados por la MOLEC ($H\_LEC = 1$) y quienes no se consideran lectores pero habían leído en los últimos meses dichos materiales ($H\_LEC = 3$), segmentados por sexo y condición de actividad (mujeres dedicadas al hogar [MH], mujeres que trabajan [MT] y hombres que trabajan [HT]). Sin embargo, el enfoque cambió a una prueba estadística con datos de la MOLEC 2022-2024. Para lograrlo, se combinó el tipo de ocupación con si la persona se consideraba lectora (lector/a [L] frente a no se percibía [NL]), formando grupos (como MH-NL o MH-L) (véase Anexo 1) que se evaluaron con los métodos estadísticos explicados a continuación.
 
 # Técnicas estadísticas
 
@@ -309,17 +309,14 @@ $$Z = \frac{(\bar{X} - \bar{Y}) - (\mu_X - \mu_Y)}{\sqrt{S_X^2/n + S_Y^2/m}} \ap
 
 ## Análisis de varianza (ANOVA de dos factores con interacción)
 
-Permitió evaluar simultáneamente si el tipo de ocupación, la autopercepción lectora y la interacción entre ambos factores generaron diferencias significativas en las variables cuantitativas ($P10$ y $P26$). La variabilidad total se desglosó y las medias se contrastaron mediante el estadístico $F$ de Snedecor.
+Permitió evaluar simultáneamente si el tipo de ocupación, la autopercepción lectora y la interacción entre ambos factores generaron diferencias significativas en las variables cuantitativas ($P10$ y $P26$), utilizando un nivel de significancia de $\alpha = 0.04$ (con intervalos de confianza simultáneos al $96\%$ para las comparaciones múltiples de Tukey). La variabilidad total se desglosó y las medias se contrastaron mediante el estadístico $F$ de Snedecor, verificándose el cumplimiento de sus supuestos analíticos en el Anexo 2.
 
 ## Prueba de independencia de Chi-cuadrada ($\chi^2$)
 
-Evaluó la existencia de asociación significativa entre variables cualitativas, cruzando la autopercepción lectora y el grupo ocupacional en relación con la lectura ($P11$). La técnica contrastó las frecuencias observadas ($O_{ij}$) frente a las esperadas ($E_{ij}$) a través del estadístico:
+Evaluó la existencia de asociación significativa entre variables cualitativas, cruzando la autopercepción lectora y el grupo ocupacional en relación con la lectura ($P11$), utilizando un nivel de significancia de $\alpha = 0.04$. La técnica contrastó las frecuencias observadas ($O_{ij}$) frente a las esperadas ($E_{ij}$) a través del estadístico:
 
 $$Q = \sum_{i=1}^{r} \sum_{j=1}^{c} \frac{(O_{ij} - E_{ij})^2}{E_{ij}} \approx \chi^2_{(r-1)(c-1)}$$
 
-## Verificación de supuestos del modelo
-
-Se validaron los requisitos teóricos del ANOVA a través del análisis de los residuos. La normalidad se comprobó mediante gráficos de cuantiles teóricos (QQ-plots) para $P10$ y $P26$, mientras que la homogeneidad de varianza y la independencia se evaluaron mediante diagramas de dispersión de los propios residuos.
 
 # Resultados
 
@@ -336,7 +333,7 @@ kable(vis, digits = 3, row.names = FALSE,
       caption = "Intervalos de confianza al 96 % para la diferencia de medias (celda a - celda b)")
 ```
 
-```{r fig-forest, fig.width=6.5, fig.height=3.5, out.width="100%", fig.align="center", fig.cap="Diferencias de medias con IC al 96 %. En rojo, los intervalos que no incluyen el 0.", fig.pos="H"}
+```{r fig-forest, fig.width=6.5, fig.height=2.5, out.width="100%", fig.align="center", fig.cap="Diferencias de medias con IC al 96 %. En rojo, los intervalos que no incluyen el 0.", fig.pos="H"}
 # Gráfico de los intervalos: cada línea es un IC; la línea punteada marca el 0
 fd <- tabla_ic
 fd$etq <- factor(paste0(fd$IC, "  ", spec$comp), levels = rev(paste0(fd$IC, "  ", spec$comp)))
@@ -384,7 +381,7 @@ plot_tukey <- function(tk, titulo) {
 
 ### Número de revistas (`P10`)
 
-A continuación se presentan la Tabla 2 con el ANOVA de dos factores y la Tabla 3 que muestra los efectos estimados por autopercepción.
+A continuación se presentan la Tabla 2 con el ANOVA de dos factores (evaluado a un nivel de significancia de $\alpha = 0.04$ y cuyos supuestos se validan en el Anexo 2) y la Tabla 3 que muestra los efectos estimados por autopercepción.
 
 Se ajustó un modelo de análisis de varianza (ANOVA) de dos factores con interacción para evaluar el número de revistas leídas ($P10$), considerando como factores el grupo ocupacional y la autopercepción lectora. Para ello, se plantearon formalmente las siguientes hipótesis:
 
@@ -428,15 +425,15 @@ if (!is.null(res10$tk_i)) {
 if (!is.null(res10$tk_g)) plot_tukey(res10$tk_g, "Revistas leídas (P10)")
 ```
 
-Los resultados del modelo completo (Tabla 2) muestran que la interacción entre ambos factores no es significativa ($p = 0.8646$), por lo que no se rechaza $H_0$ para la interacción y se concluye que el efecto de la autopercepción es similar en los tres grupos. Tampoco resulta significativo el efecto principal del grupo ocupacional ($p = 0.2362$). 
+La Tabla 2 muestra que la interacción entre ambos factores no es significativa ($p = 0.8646$), por lo que no se rechaza $H_0$ para la interacción y se concluye que el efecto de la autopercepción es similar en los tres grupos. Tampoco resulta significativo el efecto principal del grupo ocupacional ($p = 0.2362$). 
 
 Por el contrario, únicamente la autopercepción lectora muestra un efecto estadísticamente significativo ($p = 0.0264$), motivo por el cual se ajustó y conserva un modelo final (Tabla 2) que incluye exclusivamente este factor ($F = 5.566$, $p = 0.0185$). 
 
-De acuerdo con las estimaciones del modelo (Tabla 3), quienes se perciben lectores leen en promedio $3.42$ revistas, frente a $2.54$ de quienes no se perciben lectores, lo que representa una diferencia aproximada de $0.88$ revistas. Este resultado es consistente con los intervalos de confianza evaluados previamente, donde las diferencias de las mujeres excluyen el cero y la de los hombres lo incluye. No obstante, el impacto práctico de este factor es limitado, ya que el modelo explica únicamente el el 0.48\% de la variabilidad total en el número de revistas leídas.
+De acuerdo con las estimaciones del modelo (Tabla 3), quienes se perciben lectores leen en promedio $3.42$ revistas, frente a $2.54$ de quienes no se perciben lectores, lo que representa una diferencia aproximada de $0.88$ revistas. Este resultado es consistente con los intervalos de confianza evaluados previamente, donde las diferencias de las mujeres excluyen el cero y la de los hombres lo incluye. No obstante, el impacto práctico de este factor es limitado, ya que el modelo explica únicamente el 0.48\% de la variabilidad total en el número de revistas leídas.
 
 ### Minutos continuos de lectura (`P26`)
 
-A continuación se presentan la Tabla 4 con el ANOVA de dos factores, las tablas de efectos estimados (Tabla 5 y Tabla 6), las comparaciones múltiples de Tukey (Tabla 7) y su respectiva representación gráfica (Figura 2).
+A continuación se presentan la Tabla 4 con el ANOVA de dos factores (evaluado a un nivel de significancia de $\alpha = 0.04$ y cuyos supuestos se validan en el Anexo 2), las tablas de efectos estimados (Tabla 5 y Tabla 6), las comparaciones múltiples de Tukey (Tabla 7) y su respectiva representación gráfica (Figura 2).
 
 Se ajustó un modelo de análisis de varianza (ANOVA) de dos factores con interacción para evaluar los minutos continuos de lectura ($P26$), considerando como factores el grupo ocupacional y la autopercepción lectora. Para ello, se plantearon formalmente las siguientes hipótesis:
 
@@ -485,16 +482,20 @@ Los resultados del modelo completo (Tabla 4) muestran que no hay una combinació
 
 Al analizar cada factor por separado, se aprecian diferencias claras en el tiempo de lectura:
 
-* La autopercepción (Tabla 6): Es lo que más marca la diferencia en el tiempo. Las personas que se consideran lectoras leen en promedio $42.2$ minutos, frente a los $26.3$ minutos de quienes no se perciben así (una brecha de casi $16$ minutos). Esto muestra que sentirse lector ayuda a mantener la concentración por más tiempo.
+La autopercepción (Tabla 6): Es lo que más marca la diferencia en el tiempo. Las personas que se consideran lectoras leen en promedio $42.2$ minutos, frente a los $26.3$ minutos de quienes no se perciben así (una brecha de casi $16$ minutos).
 
-* El grupo ocupacional (Tabla 5, Tabla 7 y Figura 2): El tiempo de lectura no se reparte por igual entre los diferentes roles. Los hombres que trabajan son quienes más tiempo leen de forma continua ($44.47$ min), superando de manera notable a las mujeres que trabajan ($38.13$ min) y a las mujeres dedicadas al hogar ($33.53$ min). En cambio, la diferencia entre las mujeres trabajadoras y las del hogar no es significativa ($p = 0.1492$), lo que indica que la disponibilidad de tiempo para leer profundamente está muy ligada tanto al género como al trabajo.
+El grupo ocupacional (Tabla 5, Tabla 7 y Figura 2): El tiempo de lectura no se reparte por igual entre los diferentes roles. Los hombres que trabajan son quienes más tiempo leen de forma continua ($44.47$ min), superando de manera notable a las mujeres que trabajan ($38.13$ min) y a las mujeres dedicadas al hogar ($33.53$ min). En cambio, la diferencia entre las mujeres trabajadoras y las del hogar no es significativa ($p = 0.1492$), lo que indica que la disponibilidad de tiempo para leer profundamente está muy ligada tanto al género como al trabajo.
 
 En general, este modelo explica el $4.82\%$ de las diferencias en los minutos de lectura. Aunque es un avance frente a P10, demuestra que la mayor parte del tiempo que se dedica a leer depende de otros motivos o situaciones que este modelo no alcanza a medir.
 
 
 ## Motivo de lectura (`P11`): independencia de dos variables categóricas
 
-<!-- Escribe aquí tu planteamiento de la prueba de independencia (hipótesis, estadístico, región de rechazo y decisión). -->
+Para evaluar la relación entre el motivo de lectura ($P11$) y las variables categóricas, considerando un nivel de significancia de $\alpha = 0.04$, se plantearon las siguientes pruebas de independencia de Chi-cuadrada ($\chi^2$):
+
+* **Hipótesis nula ($H_0$):** Las variables son independientes (no existe asociación entre ellas).
+* **Hipótesis alternativa ($H_1$):** Las variables son dependientes (existe asociación).
+
 
 ```{r p11-calculo}
 # Motivo de lectura en dos categorías: por gusto (P11 = 4) u otro motivo
@@ -541,10 +542,6 @@ E_g <- outer(rowSums(O_g), colSums(O_g)) / sum(O_g)
 ```
 
 ```{r p11-tablas}
-# Tablas de frecuencias de la prueba global
-kable(as.data.frame.matrix(O_g), caption = "Frecuencias observadas: autopercepción x motivo de lectura")
-kable(as.data.frame.matrix(round(E_g, 2)), caption = "Frecuencias esperadas bajo independencia")
-
 # Porcentaje que lee por gusto en cada celda, con su tamaño de muestra
 cel_txt <- function(g, a) {
   r <- pct11[pct11$Grupo == g & pct11$Aut == a, ]
@@ -564,15 +561,36 @@ kable(data.frame(Prueba = t11$Prueba, n = t11$n, gl = t11$gl,
       format = "pipe", caption = "Pruebas ji cuadrada de independencia con el motivo de lectura (P11)")
 ```
 
-### Interpretación
+Los resultados de las pruebas (Tabla 9) muestran que se rechaza la independencia entre la autopercepción y el motivo de lectura ($q = 18.239$, $p < 0.0001$). Al analizar las frecuencias, quienes no se consideran lectores muestran una mayor inclinación a leer por entretenimiento: el $71.5\%$ de ellos lee por gusto ($133$ de $186$), en comparación con el $54.6\%$ de quienes sí se perciben lectores ($524$ de $960$). Esto se confirma en las tablas de frecuencias detalladas del Anexo 3. Asimismo, se rechaza la independencia entre el grupo ocupacional y el motivo de lectura ($q = 26.689$, $gl = 2$, $p < 0.0001$; Tabla 9). De acuerdo con la Tabla 8, la proporción de lectura por gusto varía según el grupo: $70.0\%$ en mujeres del hogar, $56.9\%$ en mujeres que trabajan y $50.4\%$ en hombres que trabajan.
 
-Se rechaza la independencia entre autopercepción y motivo de lectura (q = 18.239, p < 0.0001; Tabla 15). Entre quienes se perciben lectores, 54.6 % lee revistas por gusto (524 de 960), contra 71.5 % de quienes no se perciben lectores (133 de 186). La Tabla 13 lo confirma: en los no lectores, la lectura por gusto tiene 133 casos observados contra 106.6 esperados. Este resultado va en sentido opuesto a lo que podría suponerse, porque quienes no se consideran lectores son los más inclinados a leer revistas por entretenimiento.
+Al desglosar por grupo ocupacional (Tabla 9), la asociación con la autopercepción resulta significativa en las mujeres del hogar ($q = 4.930$, $p = 0.0264$) y en las mujeres que trabajan ($q = 13.284$, $p = 0.0003$), pero no en los hombres que trabajan ($q = 1.108$, $p = 0.2924$). La brecha porcentual de lectura por gusto entre no lectores y lectores es de $16.2$ puntos en mujeres del hogar, $22.5$ en mujeres que trabajan y solo $7.4$ en hombres. En todas las pruebas, la frecuencia esperada mínima ($14.4$) supera el límite recomendado de $5$, lo que valida la adecuación de la aproximación de Ji cuadrada.
 
-También se rechaza la independencia entre grupo y motivo (q = 26.689, gl = 2, p < 0.0001). Por gusto leen 70.0 % de las mujeres del hogar, 56.9 % de las mujeres que trabajan y 50.4 % de los hombres que trabajan (calculado a partir de la Tabla 14).
 
-Al separar por grupo, la asociación con la autopercepción es significativa en mujeres del hogar (q = 4.930, p = 0.0264) y en mujeres que trabajan (q = 13.284, p = 0.0003). En hombres que trabajan no lo es (q = 1.108, p = 0.2924). La brecha de lectura por gusto entre no lectores y lectores es de 16.2 puntos porcentuales en mujeres del hogar, 22.5 en mujeres que trabajan y solo 7.4 en hombres que trabajan, lo que concuerda con las pruebas. En todas las pruebas la frecuencia esperada mínima (14.4) supera ampliamente 5, así que la aproximación ji cuadrada es adecuada.
+# Conclusiones
 
-## Verificación de supuestos
+La autopercepción lectora se corresponde solo en parte con la práctica real. Quienes no se perciben lectores sí leen: en promedio 2.54 revistas y 26.3 minutos continuos, es decir, cerca del 74 % de las revistas y del 62 % del tiempo continuo de quienes sí se perciben lectores (Tablas 3 y 6). La brecha es de intensidad, no de ausencia de práctica, y es más clara en el tiempo (IC1 a IC3, Figura 1; Tabla 4, $F = 35.9$) que en el volumen (Tabla 2, $p = 0.0264$, un margen estrecho frente a $\alpha = 0.04$).
+
+El motivo de lectura añade una señal que no se anticipaba desde el análisis descriptivo. Quienes no se perciben lectores leen más por gusto (71.5 % frente a 54.6 %, Tabla 11), pero por menos tiempo y menos revistas. Esto sugiere que la etiqueta “lector” no depende tanto del disfrute como de otras razones que P11 no distingue, porque “otro motivo” agrupa categorías distintas. Esa agrupación es hoy el principal límite para explicar por qué algunas personas con práctica real de lectura no se identifican como lectoras.
+
+El sexo y la condición de actividad definen el nivel de lectura más que la brecha de autopercepción. Las interacciones no fueron significativas ($p = 0.8646$ en P10 y $p = 0.6322$ en P26), así que el efecto de percibirse lector tiene la misma dirección en los tres grupos. Lo que cambia es el punto de partida. Los hombres lectores que trabajan promedian 46.8 minutos, casi el doble que las mujeres del hogar que no se perciben lectoras (23.5 minutos, Tabla 1), una diferencia de 23.2 minutos que combina ambos factores. Entre lectores, la diferencia entre hombres y mujeres que trabajan (IC5, 5.9 minutos) tiene un límite inferior de apenas 0.67, por lo que es una diferencia real pero pequeña. En los hombres, la autopercepción se refleja en el tiempo (IC3) pero no en el número de revistas (IC8) ni en el motivo ($p = 0.2924$). Con solo 58 hombres que no se perciben lectores, la muestra no permite afirmar si el efecto realmente es distinto o si falta precisión.
+
+No obstante, pese a ser estadísticamente significativos, los modelos explican poco: 0.48 % de la variabilidad en P10 y 4.82 % en P26. Más del 95 % de las diferencias en la práctica lectora sigue sin explicarse con autopercepción, sexo y condición de actividad. Además, los hallazgos en P10 son frágiles por la asimetría y la heterocedasticidad (Figura 3), y no hay hombres dedicados al hogar en el diseño, por lo que sexo y ocupación no pueden separarse. Los resultados describen la muestra de 1,146 casos, sin ponderar, y no se extrapolan a la población.
+
+\newpage
+
+# Anexos
+
+## Anexo 1: Leyenda y descripción de comparaciones
+```{r tabla-leyenda}
+# Lista de las 8 comparaciones (celda a - celda b) con su variable y claves
+kable(data.frame(IC = spec$id, Variable = spec$variable, Comparacion = spec$desc, Claves = spec$comp),
+      format = "pipe", col.names = c("IC", "Variable", "Comparación (celda a - celda b)", "Claves"),
+      caption = "Comparaciones evaluadas")
+```
+
+## Anexo 2: Verificación de supuestos para ANOVA de dos factores
+
+A partir de los gráficos de diagnóstico de la Figura 3, se evaluó el cumplimiento de los supuestos del modelo para las variables analizadas.
 
 ```{r fig-supuestos, fig.width=6, fig.height=4.5, out.width="100%", fig.align="center", fig.pos="H", fig.cap="Diagnóstico de los residuos de los modelos finales: normalidad (arriba) y residuos contra valores ajustados (abajo)."}
 # Arriba: gráficos de normalidad (QQ-plot) de los residuos de P10 y P26
@@ -590,28 +608,34 @@ for (r in list(res10, res26)) {
 par(mfrow = c(1, 1))   # regresa a un gráfico por página
 ```
 
-### Interpretación
+En las gráficas superiores de normalidad, los puntos se alejan de la línea diagonal hacia la derecha, lo que refleja que los datos tienen valores muy altos poco frecuentes, tanto en la cantidad de revistas como en los minutos de lectura. Esto es común en este tipo de variables, especialmente en $P10$ debido a que la mayoría concentra valores bajos.
 
-Normalidad. En los QQ-plots de ambos modelos (Figura 2) los puntos siguen la recta solo en la zona central y se separan fuertemente en la cola derecha. Esto indica residuos con asimetría positiva y valores extremos, algo esperable en variables como el número de revistas (hasta cerca de 65) y los minutos de lectura (hasta cerca de 250). En P10 el problema es más marcado, porque es una variable de conteo con muchos valores bajos.
+Por otro lado, al observar las gráficas inferiores de residuos frente a valores ajustados, se nota que la dispersión de los puntos cambia según el grupo, mostrando varianzas desiguales. En $P26$ se aprecia una forma de embudo que indica mayor dispersión en los valores más altos.
 
-Homocedasticidad. En P10 solo hay dos valores ajustados (2.54 y 3.42, uno por nivel de autopercepción). Los residuos del nivel con media mayor se extienden mucho más, lo que sugiere varianzas distintas entre niveles. En P26 hay seis valores ajustados (uno por combinación de grupo y autopercepción) y la dispersión de los residuos aumenta con el valor ajustado, un patrón de embudo que indica heterocedasticidad.
+A pesar de estas desviaciones, el tamaño grande de la muestra ayuda a que el análisis de varianza sea resistente ante la falta de normalidad, por lo que las diferencias encontradas en $P26$ son firmes. De todas formas, conviene tomar con reserva los resultados de $P10$ por tener un efecto más pequeño y sensible a los valores extremos, pudiendo explorarse en el futuro.
 
-Consecuencia. Los supuestos no se cumplen de forma estricta. Con n = 1,146 el ANOVA tiende a ser robusto a la falta de normalidad, y las diferencias de P26 son claras (p < 0.0001). Aun así, las conclusiones deben tomarse con cautela, sobre todo las de P10, cuyo efecto es pequeño y cuyo p-valor (0.0185) está más expuesto a verse afectado por los valores extremos. Como alternativa convendría una transformación logarítmica, una prueba no paramétrica (Kruskal-Wallis) o un modelo para datos de conteo.
 
-# Conclusiones
+## Anexo 3: Tablas de frecuencias para la prueba de independencia (P11)
 
-La autopercepción lectora es el factor más consistente. Quienes no se perciben lectores leen menos revistas (2.54 contra 3.42) y menos minutos continuos (26.3 contra 42.2), y esto se mantiene en los tres grupos, ya que ninguna interacción fue significativa. El grupo ocupacional solo influye en los minutos continuos: los hombres que trabajan leen más tiempo seguido que las mujeres del hogar (+10.9 min) y que las mujeres que trabajan (+6.3 min), mientras que entre las mujeres no hay diferencia significativa.
+```{r p11-tablas-anexos}
+# Tablas de frecuencias de la prueba global P11
+kable(as.data.frame.matrix(O_g), caption = "Frecuencias observadas: autopercepción x motivo de lectura")
+kable(as.data.frame.matrix(round(E_g, 2)), caption = "Frecuencias esperadas bajo independencia")
 
-El motivo de lectura también depende de la autopercepción y del grupo. Los no lectores leen revistas por gusto en mayor proporción, sobre todo las mujeres, y en hombres que trabajan esa asociación no es significativa.
-
-Los modelos explican poca variabilidad (0.48 % en P10 y 4.82 % en P26), por lo que la mayor parte de la variación depende de factores no incluidos. Además, los supuestos de normalidad y varianza constante no se cumplen del todo. Los resultados son asociaciones observacionales en personas que ya leen revistas, con una autopercepción declarada por ellas mismas, y no deben interpretarse como relaciones causales ni generalizarse a quienes no leen revistas.
-
-# Anexos
-
-## Anexo 1
-```{r tabla-leyenda}
-# Lista de las 8 comparaciones (celda a - celda b) con su variable y claves
-kable(data.frame(IC = spec$id, Variable = spec$variable, Comparacion = spec$desc, Claves = spec$comp),
-      format = "pipe", col.names = c("IC", "Variable", "Comparación (celda a - celda b)", "Claves"),
-      caption = "Comparaciones evaluadas")
 ```
+
+\newpage
+
+# Bibliografía
+
+Fuentes, R. [RodrigoFQ7]. (2026). Reto-Modelaci-n-Estad-stica [Repositorio de código].
+GitHub. https://github.com/RodrigoFQ7/Reto-Modelaci-n-Estad-stica 
+
+Ruiz Hernández, B. R. (s. f.). 2.4 Diferencias de medias y Proporciones. Distribuciones e Intervalos [Diapositivas de presentación].
+
+Ruiz Hernández, B. R. (s. f.). 2.8 Pruebas de hipótesis dos poblaciones [Diapositivas de presentación].
+
+Ruiz Hernández, B. R. (s. f.). 2.9 Pruebas de Hipótesis de Homogeneidad, Independencia y Ajuste [Diapositivas de presentación].
+
+Ruiz Hernández, B. R. (s. f.). Tema 3.2 ANÁLISIS DE VARIANZA Dos factores [Diapositivas de presentación].
+
