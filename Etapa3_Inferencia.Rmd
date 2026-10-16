@@ -436,6 +436,20 @@ De acuerdo con las estimaciones del modelo (Tabla 3), quienes se perciben lector
 
 ### Minutos continuos de lectura (`P26`)
 
+A continuación se presentan la Tabla 4 con el ANOVA de dos factores, las tablas de efectos estimados (Tabla 5 y Tabla 6), las comparaciones múltiples de Tukey (Tabla 7) y su respectiva representación gráfica (Figura 2).
+
+Se ajustó un modelo de análisis de varianza (ANOVA) de dos factores con interacción para evaluar los minutos continuos de lectura ($P26$), considerando como factores el grupo ocupacional y la autopercepción lectora. Para ello, se plantearon formalmente las siguientes hipótesis:
+
+1. **Interacción (Grupo $\times$ Autopercepción):**
+   * $H_0$: El efecto de la autopercepción lectora sobre los minutos de lectura es el mismo en todos los grupos ocupacionales.
+   * $H_1$: El efecto de la autopercepción lectora varía según el grupo ocupacional.
+2. **Efecto principal del Grupo Ocupacional:**
+   * $H_0$: No hay diferencias en el tiempo medio de lectura continua entre los distintos grupos ocupacionales.
+   * $H_1$: Al menos un grupo ocupacional tiene una media de lectura diferente.
+3. **Efecto principal de la Autopercepción Lectora:**
+   * $H_0$: No hay diferencias en el tiempo medio de lectura continua entre quienes se consideran lectores y quienes no.
+   * $H_1$: Al menos una categoría de autopercepción lectora tiene una media diferente.
+
 ```{r anova-p26}
 # 1) ANOVA con interacción (siempre se muestra)
 kable(disp_aov(res26$tab_A), row.names = FALSE, caption = "ANOVA con interacción: minutos continuos de lectura (P26)")
@@ -467,38 +481,16 @@ if (!is.null(res26$tk_g)) {
 ```
 
 
-#### Interpretación
+Los resultados del modelo completo (Tabla 4) muestran que no hay una combinación entre el grupo y la autopercepción ($p = 0.6322$); esto significa que considerarse lector afecta por igual a todos los grupos ocupacionales, sin sumar ni restar un efecto especial en alguno en particular. En contraste, las dos variables por separado sí influyen de forma muy importante ($p < 0.0001$).
 
-En el ANOVA con interacción (Tabla 6), la interacción no es significativa (p = 0.6322), es decir, la brecha entre lectores y no lectores es similar en los tres grupos. Los dos efectos principales sí son significativos (p < 0.0001 en ambos), por lo que el modelo final (Tabla 7) conserva grupo ocupacional y autopercepción.
+Al analizar cada factor por separado, se aprecian diferencias claras en el tiempo de lectura:
 
-- Autopercepción (Tabla 9): quienes se perciben lectores leen en promedio 42.2 minutos continuos, contra 26.3 de quienes no se perciben lectores, una diferencia de casi 16 minutos. Es el factor con mayor efecto (-13.3 min respecto a la media general para los no lectores).
-- Grupo ocupacional (Tabla 8): las medias son 33.5 min (mujer hogar), 38.1 min (mujer trabaja) y 44.5 min (hombre trabaja).
+* La autopercepción (Tabla 6): Es lo que más marca la diferencia en el tiempo. Las personas que se consideran lectoras leen en promedio $42.2$ minutos, frente a los $26.3$ minutos de quienes no se perciben así (una brecha de casi $16$ minutos). Esto muestra que sentirse lector ayuda a mantener la concentración por más tiempo.
 
-Las comparaciones múltiples de Tukey (Tabla 10, IC simultáneos al 96 %) muestran que:
+* El grupo ocupacional (Tabla 5, Tabla 7 y Figura 2): El tiempo de lectura no se reparte por igual entre los diferentes roles. Los hombres que trabajan son quienes más tiempo leen de forma continua ($44.47$ min), superando de manera notable a las mujeres que trabajan ($38.13$ min) y a las mujeres dedicadas al hogar ($33.53$ min). En cambio, la diferencia entre las mujeres trabajadoras y las del hogar no es significativa ($p = 0.1492$), lo que indica que la disponibilidad de tiempo para leer profundamente está muy ligada tanto al género como al trabajo.
 
-- Hombre trabaja – Mujer hogar: +10.93 min, IC [5.06, 16.81], p < 0.0001. Es significativa.
-- Hombre trabaja – Mujer trabaja: +6.33 min, IC [1.17, 11.50], p = 0.0082. Es significativa.
-- Mujer trabaja – Mujer hogar: +4.60 min, IC [-1.40, 10.60], p = 0.1492. No es significativa.
+En general, este modelo explica el $4.82\%$ de las diferencias en los minutos de lectura. Aunque es un avance frente a P10, demuestra que la mayor parte del tiempo que se dedica a leer depende de otros motivos o situaciones que este modelo no alcanza a medir.
 
-Los hombres que trabajan leen más tiempo continuo que los otros dos grupos, mientras que no se detecta diferencia entre las mujeres que trabajan y las del hogar. El modelo explica 4.82 % de la variabilidad, un efecto modesto, pero mayor que en P10.
-
-### Resumen de los modelos
-
-```{r resumen-modelos}
-# Tabla que junta, para P10 y P26: valores p, factores del modelo final y varianza explicada
-term_txt <- function(t) if (length(t) == 0) "ninguno" else gsub(":", " x ", paste(t, collapse = ", "))
-pf <- function(res, f) res$tab_main$p[res$tab_main$Fuente == f]   # valor p de un factor
-kable(data.frame(Variable = c("P10 (revistas)", "P26 (minutos)"),
-                 p_interaccion = fp(c(pval(res10$A, "Grupo:Aut"), pval(res26$A, "Grupo:Aut"))),
-                 p_grupo = fp(c(pf(res10, "Grupo"), pf(res26, "Grupo"))),
-                 p_autopercepcion = fp(c(pf(res10, "Aut"), pf(res26, "Aut"))),
-                 Modelo_final = c(term_txt(res10$terminos), term_txt(res26$terminos)),
-                 Varianza_explicada = c(txt_ve(res10$ve_F), txt_ve(res26$ve_F))),
-      row.names = FALSE,
-      caption = paste0("Resumen de los modelos de dos factores (alpha = ", alpha_val, ")"))
-```
-
-La Tabla 11 resume ambos modelos. En ninguno de los dos la interacción grupo-autopercepción es significativa, así que en ambos casos se descartó la interacción y se ajustó un modelo sin ella; el modelo final conserva solo los factores significativos. La autopercepción lectora es significativa tanto para el número de revistas (P10) como para los minutos continuos de lectura (P26). El grupo ocupacional solo influye en P26, donde la diferencia se concentra en los hombres que trabajan frente a los otros dos grupos. La varianza explicada es baja en ambos casos (0.48 % para P10 y 4.82 % para P26), por lo que la mayor parte de la variabilidad depende de factores que no están en el modelo. Además, los supuestos del ANOVA no se cumplen del todo (sección 3.5), así que estos resultados deben tomarse con cautela.
 
 ## Motivo de lectura (`P11`): independencia de dos variables categóricas
 
