@@ -295,7 +295,7 @@ res26 <- analiza_anova("P26")   # minutos continuos de lectura
 
 # Objetivo del análisis y enfoque inferencial
 
-El objetivo principal del estudio no cambió respecto al análisis descriptivo, ya que se mantuvo el propósito de describir y comparar la práctica de lectura de revistas ($P10$, $P26$ y $P11$) entre quienes acostumbraban leer materiales considerados por la MOLEC ($H\_LEC = 1$) y quienes no acostumbraban leer pero habían leído en los últimos meses dichos materiales ($H\_LEC = 3$), segmentados por sexo y condición de actividad (mujeres dedicadas al hogar [MH], mujeres que trabajan [MT] y hombres que trabajan [HT]). Sin embargo, el enfoque cambió a una prueba estadística con datos de la MOLEC 2022-2024. Para lograrlo, se combinó el tipo de ocupación con si la persona se consideraba lectora (lector/a [L] frente a no se percibía [NL]), formando grupos (como MH-NL o MH-L) que se evaluaron con los métodos estadísticos explicados a continuación.
+El objetivo principal del estudio no cambió respecto al análisis descriptivo, ya que se mantuvo el propósito de describir y comparar la práctica de lectura de revistas ($P10$, $P26$ y $P11$) entre quienes acostumbraban leer materiales considerados por la MOLEC ($H\_LEC = 1$) y quienes no se consideran lectores pero habían leído en los últimos meses dichos materiales ($H\_LEC = 3$), segmentados por sexo y condición de actividad (mujeres dedicadas al hogar [MH], mujeres que trabajan [MT] y hombres que trabajan [HT]). Sin embargo, el enfoque cambió a una prueba estadística con datos de la MOLEC 2022-2024. Para lograrlo, se combinó el tipo de ocupación con si la persona se consideraba lectora (lector/a [L] frente a no se percibía [NL]), formando grupos (como MH-NL o MH-L) que se evaluaron con los métodos estadísticos explicados a continuación.
 
 # Técnicas estadísticas
 
@@ -325,15 +325,11 @@ Se validaron los requisitos teóricos del ANOVA a través del análisis de los r
 
 ## Comparaciones evaluadas
 
+A continuación se presentan la Tabla~\ref{tab:tabla-medias} con los intervalos de confianza evaluados y la Figura~\ref{fig:fig-forest} que sintetiza gráficamente las diferencias entre grupos (la clave de cada comparación se encuentra en el Anexo 1). Los intervalos se construyeron con la distribución normal estándar ($Z$) al 96 % de confianza, lo cual es adecuado porque todas las muestras tienen al menos 40 observaciones.   
 
-```{r tabla-leyenda}
-# Lista de las 8 comparaciones (celda a - celda b) con su variable y claves
-kable(data.frame(IC = spec$id, Variable = spec$variable, Comparacion = spec$desc, Claves = spec$comp),
-      format = "pipe", col.names = c("IC", "Variable", "Comparación (celda a - celda b)", "Claves"),
-      caption = "Comparaciones evaluadas")
-```
 
 ## Intervalos de confianza para la diferencia de medias
+
 
 ```{r tabla-medias}
 # Tabla con el IC al 96 % de la diferencia de medias de cada comparación
@@ -366,15 +362,9 @@ ggplot(fd, aes(x = Dif, y = etq, color = Incluye)) +
   )
 ```
 
-### Interpretación
+Al comparar a quienes se consideran lectores ($H\_LEC = 1$) con quienes no se consideran lectores pero leyeron recientemente ($H\_LEC = 3$), los lectores habituales dedican significativamente más minutos continuos a la lectura (P26): 12.2 minutos más en mujeres del hogar (IC1: [-16.34, -8.02]), 14.4 en mujeres que trabajan (IC2: [-21.08, -7.74]) y 18.4 en hombres que trabajan (IC3: [-26.46, -10.27]). Por su parte, la comparación entre no lectoras del hogar y no lectoras que trabajan no muestra diferencia significativa (IC4: -2.96, [-9.43, 3.51]). Ninguno de los tres primeros intervalos incluye el cero, lo que confirma una brecha clara a favor del grupo $H\_LEC = 1$.
 
-Los intervalos se construyeron con la distribución normal estándar (Z) al 96 % de confianza, lo que es adecuado porque todas las muestras tienen al menos 40 observaciones.
-
-Minutos continuos de lectura (P26). En los tres grupos, quienes no se perciben lectores leen menos minutos continuos que quienes sí se perciben lectores. La diferencia es de 12.2 minutos en mujeres del hogar (IC1: [-16.34, -8.02]), de 14.4 en mujeres que trabajan (IC2: [-21.08, -7.74]) y de 18.4 en hombres que trabajan (IC3: [-26.46, -10.27]). Ninguno de estos intervalos incluye el 0.
-
-Entre las no lectoras, mujeres del hogar y mujeres que trabajan no difieren de forma significativa (IC4: -2.96 min, [-9.43, 3.51]). Entre los lectores, los hombres que trabajan leen en promedio 5.85 minutos más que las mujeres que trabajan (IC5: [0.67, 11.04]). El límite inferior queda muy cerca de 0, así que la diferencia es significativa pero de magnitud incierta.
-
-Número de revistas (P10). Quienes no se perciben lectoras leen menos revistas que las lectoras, tanto en mujeres del hogar (IC6: -1.02, [-1.94, -0.09]) como en mujeres que trabajan (IC7: -0.95, [-1.48, -0.41]). En hombres que trabajan el intervalo sí incluye el 0 (IC8: -0.55, [-1.53, 0.43]), por lo que no hay evidencia de diferencia. Que un intervalo incluya el 0 no prueba que las medias sean iguales. En IC8 el intervalo es ancho por el tamaño de muestra de los hombres no lectores (n = 58) y por la alta variabilidad del conteo, y el IC6 queda casi pegado al 0.
+En el número de revistas leídas (P10), las mujeres del grupo $H\_LEC = 1$ también superan a las de $H\_LEC = 3$, tanto en el hogar (IC6: -1.02, [-1.94, -0.09]) como en el trabajo (IC7: -0.95, [-1.48, -0.41]). En cambio, en los hombres que trabajan no hay evidencia de diferencia (IC8: -0.55, [-1.53, 0.43]), donde la inclusión del cero responde al menor tamaño de muestra y mayor dispersión en los hombres no lectores. 
 
 ## Efecto del grupo y de la autopercepción: ANOVA de dos factores
 
@@ -603,3 +593,13 @@ La autopercepción lectora es el factor más consistente. Quienes no se perciben
 El motivo de lectura también depende de la autopercepción y del grupo. Los no lectores leen revistas por gusto en mayor proporción, sobre todo las mujeres, y en hombres que trabajan esa asociación no es significativa.
 
 Los modelos explican poca variabilidad (0.48 % en P10 y 4.82 % en P26), por lo que la mayor parte de la variación depende de factores no incluidos. Además, los supuestos de normalidad y varianza constante no se cumplen del todo. Los resultados son asociaciones observacionales en personas que ya leen revistas, con una autopercepción declarada por ellas mismas, y no deben interpretarse como relaciones causales ni generalizarse a quienes no leen revistas.
+
+# Anexos
+
+## Anexo 1
+```{r tabla-leyenda}
+# Lista de las 8 comparaciones (celda a - celda b) con su variable y claves
+kable(data.frame(IC = spec$id, Variable = spec$variable, Comparacion = spec$desc, Claves = spec$comp),
+      format = "pipe", col.names = c("IC", "Variable", "Comparación (celda a - celda b)", "Claves"),
+      caption = "Comparaciones evaluadas")
+```
