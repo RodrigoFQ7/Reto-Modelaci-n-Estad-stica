@@ -299,7 +299,7 @@ res26 <- analiza_anova("P26")   # minutos continuos de lectura
 
 # Objetivo del análisis y enfoque inferencial
 
-El objetivo principal del estudio no cambió respecto al análisis descriptivo, ya que se mantuvo el propósito de describir y comparar la práctica de lectura de revistas ($P10$, $P26$ y $P11$) entre quienes acostumbraban leer materiales considerados por la MOLEC ($H\_LEC = 1$) y quienes no se consideran lectores pero habían leído en los últimos meses dichos materiales ($H\_LEC = 3$), segmentados por sexo y condición de actividad (mujeres dedicadas al hogar [MH], mujeres que trabajan [MT] y hombres que trabajan [HT]). Sin embargo, el enfoque cambió a una prueba estadística con datos de la MOLEC 2022-2024. Para lograrlo, se combinó el tipo de ocupación con si la persona se consideraba lectora (lector/a [L] frente a no se percibía [NL]), formando grupos (como MH-NL o MH-L) (véase Anexo 1) que se evaluaron con los métodos estadísticos explicados a continuación.
+El objetivo no cambió respecto al análisis descriptivo: describir y comparar la práctica de lectura de revistas (P10, P26 y P11) entre quienes se consideran lectores ($H\_LEC = 1$) y quienes no se consideran lectores pero leyeron en los últimos meses ($H\_LEC = 3$). La comparación se segmenta por sexo y condición de actividad: mujeres dedicadas al hogar [MH], mujeres que trabajan [MT] y hombres que trabajan [HT]. El cambio está en el enfoque, que ahora es de prueba estadística con datos de la MOLEC 2022-2024. Para ello se cruzó la ocupación con la autopercepción lectora (lector/a [L] o no se percibe [NL]), formando grupos como MH-NL o MH-L (Anexo 1).
 
 # Técnicas estadísticas
 
