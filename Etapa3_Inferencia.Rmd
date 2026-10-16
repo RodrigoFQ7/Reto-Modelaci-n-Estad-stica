@@ -74,35 +74,29 @@ options(knitr.kable.NA = "")
 ```
 
 ```{r setup}
-# ---------------------------------------------------------------
-# Paquetes, parámetros y preparación de los datos
-# ---------------------------------------------------------------
 library(ggplot2)
 library(knitr) 
 
-# ---- Parámetros del análisis ----
-alpha_val  <- 0.04                           # nivel de significancia
-conf_val   <- 1 - alpha_val                  # nivel de confianza (96 %)
-ruta_datos <- "datos/DatosEquipo6_v2.csv"    # archivo con los datos
+alpha_val  <- 0.04 # nivel de significancia
+conf_val   <- 1 - alpha_val # nivel de confianza
+ruta_datos <- "datos/DatosEquipo6_v2.csv" # archivo con los datos
 
-# TRUE  = solo lectores de revistas (P10 > 0), como en la etapa descriptiva
-# FALSE = todo el universo con grupo y autopercepción válidos
 SOLO_LECTORES_REVISTAS <- TRUE
 
-# ---- Carga y validación ----
-stopifnot(file.exists(ruta_datos))           # se detiene si no encuentra el archivo
+# Carga y validación
+stopifnot(file.exists(ruta_datos))
 raw <- read.csv(ruta_datos)
-stopifnot(ncol(raw) == 7)                    # verifica que haya las 7 columnas esperadas
+stopifnot(ncol(raw) == 7) 
 names(raw) <- c("anio", "H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")
 datos <- raw
 
-# ---- Factor 2: autopercepción lectora (H_LEC: 1 = sí, 3 = no) ----
+# Factor 2 Autopercepción lectora (H_LEC: 1 = sí, 3 = no)
 datos$Aut <- NA
 datos$Aut[datos$H_LEC %in% 1] <- "Se percibe lector"
 datos$Aut[datos$H_LEC %in% 3] <- "No se percibe lector"
 datos$Aut <- factor(datos$Aut, levels = c("Se percibe lector", "No se percibe lector"))
 
-# ---- Factor 1: grupo ocupacional (sexo + condición de actividad) ----
+# Factor 1: grupo ocupacional
 # SEXO: 1 = hombre, 2 = mujer. COND_ACT: 7 = quehaceres del hogar, 1 a 3 = trabaja
 datos$Grupo <- NA
 datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 7]   <- "Mujer hogar"
@@ -111,7 +105,7 @@ datos$Grupo[datos$SEXO %in% 1 & datos$COND_ACT %in% 1:3] <- "Hombre trabaja"
 datos$Grupo <- factor(datos$Grupo,
                       levels = c("Mujer hogar", "Mujer trabaja", "Hombre trabaja"))
 
-# ---- Subconjuntos de datos ----
+# Subconjuntos de datos
 V <- subset(datos, !is.na(Aut))     # casos con autopercepción válida (H_LEC = 1 o 3)
 U <- subset(V, !is.na(Grupo))       # además con grupo ocupacional definido
 W <- if (SOLO_LECTORES_REVISTAS) subset(U, P10 > 0) else U   # base de trabajo final
@@ -121,9 +115,8 @@ N_total <- nrow(W)                  # número de personas analizadas
 ```
 
 ```{r helpers}
-# ---------------------------------------------------------------
+
 # Funciones auxiliares (formato de números y tablas ANOVA)
-# ---------------------------------------------------------------
 
 # fmt: número con d decimales como texto
 fmt <- function(x, d = 2) formatC(x, format = "f", digits = d)
@@ -187,12 +180,9 @@ disp_tukey <- function(tk) {
 ```
 
 ```{r analisis}
-# ---------------------------------------------------------------
-# Cálculos principales (no imprimen nada; las tablas y gráficos
-# se muestran más abajo)
-# ---------------------------------------------------------------
+# Cálculos principales
 
-# =====================  Comparaciones por celda  =====================
+# Comparaciones por celda
 a_no <- "No se percibe lector"
 a_si <- "Se percibe lector"
 
@@ -259,30 +249,30 @@ tabla_ic <- do.call(rbind, lapply(seq_len(nrow(spec)), function(i) {
 tabla_ic$Variable  <- spec$variable
 tabla_ic$Incluye_0 <- tabla_ic$LI <= 0 & tabla_ic$LS >= 0      # el IC de la diferencia incluye el 0
 
-# =====================  ANOVA de dos factores  =====================
+# ANOVA de dos factores
 # analiza_anova: para una variable respuesta v (P10 o P26) hace el procedimiento completo
 #   1) ajusta el modelo con interacción (Grupo * Aut)
 #   2) si la interacción NO es significativa, ajusta el modelo con efectos principales
 #      y conserva solo los factores significativos (modelo final)
 #   3) calcula las comparaciones de Tukey y la varianza explicada
 analiza_anova <- function(v) {
-  dat <- W[!is.na(W[[v]]), ]                                   # casos con dato en v
-  fml <- function(rhs) as.formula(paste0(v, " ~ ", rhs))       # arma la fórmula del modelo
-  A   <- aov(fml("Grupo * Aut"), data = dat)                   # modelo con interacción
+  dat <- W[!is.na(W[[v]]), ] # casos con dato en v
+  fml <- function(rhs) as.formula(paste0(v, " ~ ", rhs))# arma la fórmula del modelo
+  A   <- aov(fml("Grupo * Aut"), data = dat) # modelo con interacción
   tab_A <- tabla_aov(A)
-  inter_sig <- pval(A, "Grupo:Aut") < alpha_val                # ¿interacción significativa?
+  inter_sig <- pval(A, "Grupo:Aut") < alpha_val
   if (inter_sig) {
     tab_main <- tab_A
     terminos <- c("Grupo", "Aut", "Grupo:Aut")
     final <- A
   } else {
-    B <- aov(fml("Grupo + Aut"), data = dat)                   # modelo con efectos principales
+    B <- aov(fml("Grupo + Aut"), data = dat) # modelo con efectos principales
     tab_main <- tabla_aov(B)
-    # factores significativos (se conservan en el modelo final)
+    # factores significativos
     terminos <- tab_main$Fuente[tab_main$Fuente %in% c("Grupo", "Aut") & tab_main$p < alpha_val]
     final <- if (length(terminos) > 0) aov(fml(paste(terminos, collapse = " + ")), data = dat) else NULL
   }
-  diag <- if (is.null(final)) A else final                     # modelo para los residuos
+  diag <- if (is.null(final)) A else final
   # Comparaciones de Tukey (solo si el grupo está en el modelo final / hay interacción)
   tk_g <- if ("Grupo" %in% terminos) TukeyHSD(final, "Grupo", conf.level = conf_val)[["Grupo"]] else NULL
   tk_i <- if (inter_sig) TukeyHSD(A, "Grupo:Aut", conf.level = conf_val)[["Grupo:Aut"]] else NULL
