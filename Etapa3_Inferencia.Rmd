@@ -370,11 +370,11 @@ ggplot(fd, aes(x = Dif, y = etq, color = Incluye)) +
 
 Los intervalos se construyeron con la distribución normal estándar (Z) al 96 % de confianza, lo que es adecuado porque todas las muestras tienen al menos 40 observaciones.
 
-Minutos continuos de lectura (P26). En los tres grupos, quienes no se perciben lectores leen menos minutos continuos que quienes sí se perciben lectores. La diferencia es de 12.2 minutos en mujeres del hogar (IC1: [−16.34, −8.02]), de 14.4 en mujeres que trabajan (IC2: [−21.08, −7.74]) y de 18.4 en hombres que trabajan (IC3: [−26.46, −10.27]). Ninguno de estos intervalos incluye el 0.
+Minutos continuos de lectura (P26). En los tres grupos, quienes no se perciben lectores leen menos minutos continuos que quienes sí se perciben lectores. La diferencia es de 12.2 minutos en mujeres del hogar (IC1: [-16.34, -8.02]), de 14.4 en mujeres que trabajan (IC2: [-21.08, -7.74]) y de 18.4 en hombres que trabajan (IC3: [-26.46, -10.27]). Ninguno de estos intervalos incluye el 0.
 
-Entre las no lectoras, mujeres del hogar y mujeres que trabajan no difieren de forma significativa (IC4: −2.96 min, [−9.43, 3.51]). Entre los lectores, los hombres que trabajan leen en promedio 5.85 minutos más que las mujeres que trabajan (IC5: [0.67, 11.04]). El límite inferior queda muy cerca de 0, así que la diferencia es significativa pero de magnitud incierta.
+Entre las no lectoras, mujeres del hogar y mujeres que trabajan no difieren de forma significativa (IC4: -2.96 min, [-9.43, 3.51]). Entre los lectores, los hombres que trabajan leen en promedio 5.85 minutos más que las mujeres que trabajan (IC5: [0.67, 11.04]). El límite inferior queda muy cerca de 0, así que la diferencia es significativa pero de magnitud incierta.
 
-Número de revistas (P10). Quienes no se perciben lectoras leen menos revistas que las lectoras, tanto en mujeres del hogar (IC6: −1.02, [−1.94, −0.09]) como en mujeres que trabajan (IC7: −0.95, [−1.48, −0.41]). En hombres que trabajan el intervalo sí incluye el 0 (IC8: −0.55, [−1.53, 0.43]), por lo que no hay evidencia de diferencia. Que un intervalo incluya el 0 no prueba que las medias sean iguales. En IC8 el intervalo es ancho por el tamaño de muestra de los hombres no lectores (n = 58) y por la alta variabilidad del conteo, y el IC6 queda casi pegado al 0.
+Número de revistas (P10). Quienes no se perciben lectoras leen menos revistas que las lectoras, tanto en mujeres del hogar (IC6: -1.02, [-1.94, -0.09]) como en mujeres que trabajan (IC7: -0.95, [-1.48, -0.41]). En hombres que trabajan el intervalo sí incluye el 0 (IC8: -0.55, [-1.53, 0.43]), por lo que no hay evidencia de diferencia. Que un intervalo incluya el 0 no prueba que las medias sean iguales. En IC8 el intervalo es ancho por el tamaño de muestra de los hombres no lectores (n = 58) y por la alta variabilidad del conteo, y el IC6 queda casi pegado al 0.
 
 ## Efecto del grupo y de la autopercepción: ANOVA de dos factores
 
