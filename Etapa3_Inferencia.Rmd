@@ -385,9 +385,7 @@ plot_tukey <- function(tk, titulo) {
 
 ### Número de revistas (`P10`)
 
-A continuación se presentan la Tabla 2 con el ANOVA de dos factores (evaluado a un nivel de significancia de $\alpha = 0.04$ y cuyos supuestos se validan en el Anexo 2) y la Tabla 3 que muestra los efectos estimados por autopercepción.
-
-Se ajustó un modelo de análisis de varianza (ANOVA) de dos factores con interacción para evaluar el número de revistas leídas ($P10$), considerando como factores el grupo ocupacional y la autopercepción lectora. Para ello, se plantearon formalmente las siguientes hipótesis:
+A continuación se presentan la Tabla 2, con el ANOVA de dos factores para el número de revistas leídas (P10), y la Tabla 3, con los efectos estimados por autopercepción. El modelo, con interacción, considera como factores el grupo ocupacional y la autopercepción lectora, se evaluó con $\alpha = 0.04$ y sus supuestos se validan en el Anexo 2. Para ello, se plantearon formalmente las siguientes hipótesis:
 
 1. **Interacción (Grupo $\times$ Autopercepción):**
    * $H_0$: El efecto de la autopercepción lectora sobre el número de revistas es el mismo en todos los grupos ocupacionales.
@@ -429,17 +427,12 @@ if (!is.null(res10$tk_i)) {
 if (!is.null(res10$tk_g)) plot_tukey(res10$tk_g, "Revistas leídas (P10)")
 ```
 
-La Tabla 2 muestra que la interacción entre ambos factores no es significativa ($p = 0.8646$), por lo que no se rechaza $H_0$ para la interacción y se concluye que el efecto de la autopercepción es similar en los tres grupos. Tampoco resulta significativo el efecto principal del grupo ocupacional ($p = 0.2362$). 
+La Tabla 2 muestra que la interacción no es significativa ($p = 0.8646$), por lo que el efecto de la autopercepción es similar en los tres grupos, y tampoco lo es el efecto del grupo ocupacional ($p = 0.2362$). Solo la autopercepción resulta significativa ($p = 0.0264$), por lo que se conserva un modelo final con este único factor ($F = 5.566$, $p = 0.0185$). Según la Tabla 3, quienes se perciben lectores leen en promedio $3.42$ revistas, frente a $2.54$ de quienes no, una diferencia de $0.88$ revistas consistente con los intervalos de confianza previos (las diferencias de las mujeres excluyen el cero y la de los hombres lo incluye). Sin embargo, el impacto práctico es limitado, pues el modelo explica solo el $0.48\%$ de la variabilidad total en P10.
 
-Por el contrario, únicamente la autopercepción lectora muestra un efecto estadísticamente significativo ($p = 0.0264$), motivo por el cual se ajustó y conserva un modelo final (Tabla 2) que incluye exclusivamente este factor ($F = 5.566$, $p = 0.0185$). 
-
-De acuerdo con las estimaciones del modelo (Tabla 3), quienes se perciben lectores leen en promedio $3.42$ revistas, frente a $2.54$ de quienes no se perciben lectores, lo que representa una diferencia aproximada de $0.88$ revistas. Este resultado es consistente con los intervalos de confianza evaluados previamente, donde las diferencias de las mujeres excluyen el cero y la de los hombres lo incluye. No obstante, el impacto práctico de este factor es limitado, ya que el modelo explica únicamente el 0.48\% de la variabilidad total en el número de revistas leídas.
 
 ### Minutos continuos de lectura (`P26`)
 
-A continuación se presentan la Tabla 4 con el ANOVA de dos factores (evaluado a un nivel de significancia de $\alpha = 0.04$ y cuyos supuestos se validan en el Anexo 2), las tablas de efectos estimados (Tabla 5 y Tabla 6), las comparaciones múltiples de Tukey (Tabla 7) y su respectiva representación gráfica (Figura 2).
-
-Se ajustó un modelo de análisis de varianza (ANOVA) de dos factores con interacción para evaluar los minutos continuos de lectura ($P26$), considerando como factores el grupo ocupacional y la autopercepción lectora. Para ello, se plantearon formalmente las siguientes hipótesis:
+A continuación se presentan la Tabla 4, con el ANOVA de dos factores para los minutos continuos de lectura (P26), las tablas de efectos estimados (Tablas 5 y 6), las comparaciones múltiples de Tukey (Tabla 7) y su representación gráfica (Figura 2). El modelo, con interacción, considera como factores el grupo ocupacional y la autopercepción lectora, se evaluó con $\alpha = 0.04$ y sus supuestos se validan en el Anexo 2. Para ello, se plantearon formalmente las siguientes hipótesis:
 
 1. **Interacción (Grupo $\times$ Autopercepción):**
    * $H_0$: El efecto de la autopercepción lectora sobre los minutos de lectura es el mismo en todos los grupos ocupacionales.
@@ -482,16 +475,7 @@ if (!is.null(res26$tk_g)) {
 ```
 
 
-Los resultados del modelo completo (Tabla 4) muestran que no hay una combinación entre el grupo y la autopercepción ($p = 0.6322$); esto significa que considerarse lector afecta por igual a todos los grupos ocupacionales, sin sumar ni restar un efecto especial en alguno en particular. En contraste, las dos variables por separado sí influyen de forma muy importante ($p < 0.0001$).
-
-Al analizar cada factor por separado, se aprecian diferencias claras en el tiempo de lectura:
-
-La autopercepción (Tabla 6): Es lo que más marca la diferencia en el tiempo. Las personas que se consideran lectoras leen en promedio $42.2$ minutos, frente a los $26.3$ minutos de quienes no se perciben así (una brecha de casi $16$ minutos).
-
-El grupo ocupacional (Tabla 5, Tabla 7 y Figura 2): El tiempo de lectura no se reparte por igual entre los diferentes roles. Los hombres que trabajan son quienes más tiempo leen de forma continua ($44.47$ min), superando de manera notable a las mujeres que trabajan ($38.13$ min) y a las mujeres dedicadas al hogar ($33.53$ min). En cambio, la diferencia entre las mujeres trabajadoras y las del hogar no es significativa ($p = 0.1492$), lo que indica que la disponibilidad de tiempo para leer profundamente está muy ligada tanto al género como al trabajo.
-
-En general, este modelo explica el $4.82\%$ de las diferencias en los minutos de lectura. Aunque es un avance frente a P10, demuestra que la mayor parte del tiempo que se dedica a leer depende de otros motivos o situaciones que este modelo no alcanza a medir.
-
+El modelo completo (Tabla 4) no muestra interacción entre grupo y autopercepción ($p = 0.6322$), así que considerarse lector afecta de forma similar a todos los grupos ocupacionales. Ambos factores, por separado, sí influyen de forma muy importante ($p < 0.0001$). La autopercepción es lo que más marca la diferencia (Tabla 6): quienes se consideran lectores leen $42.2$ minutos en promedio, frente a $26.3$ de quienes no se perciben así, una brecha de casi $16$ minutos. Por grupo ocupacional (Tablas 5 y 7, Figura 2), los hombres que trabajan leen más tiempo de forma continua ($44.47\text{ min}$) que las mujeres que trabajan ($38.13\text{ min}$) y las del hogar ($33.53\text{ min}$), mientras que la diferencia entre estas dos últimas no es significativa ($p = 0.1492$). Esto sugiere que el tiempo disponible para leer está ligado tanto al género como al trabajo. En conjunto, el modelo explica el $4.82\%$ de la variabilidad en P26, más que en P10, pero la mayor parte del tiempo de lectura depende de factores que no se midieron.
 
 ## Motivo de lectura (`P11`): independencia de dos variables categóricas
 
@@ -572,13 +556,13 @@ Al desglosar por grupo ocupacional (Tabla 9), la asociación con la autopercepci
 
 # Conclusiones
 
-La autopercepción lectora se corresponde solo en parte con la práctica real. Quienes no se perciben lectores sí leen: en promedio 2.54 revistas y 26.3 minutos continuos, es decir, cerca del 74 % de las revistas y del 62 % del tiempo continuo de quienes sí se perciben lectores (Tablas 3 y 6). La brecha es de intensidad, no de ausencia de práctica, y es más clara en el tiempo (IC1 a IC3, Figura 1; Tabla 4, $F = 35.9$) que en el volumen (Tabla 2, $p = 0.0264$, un margen estrecho frente a $\alpha = 0.04$).
+La autopercepción lectora se corresponde solo en parte con la práctica real. Quienes no se perciben lectores sí leen: $2.54$ revistas y $26.3$ minutos continuos en promedio, cerca del $74\%$ y $62\%$ de lo que leen quienes sí se perciben lectores (Tablas 3 y 6). La brecha es de intensidad, no de ausencia de práctica, y es más clara en el tiempo ($\text{IC1}$ a $\text{IC3}$; Tabla 4, $F = 35.9$) que en el volumen (Tabla 2, $p = 0.0264$, margen estrecho frente a $\alpha = 0.04$).
 
-El motivo de lectura añade una señal que no se anticipaba desde el análisis descriptivo. Quienes no se perciben lectores leen más por gusto (71.5 % frente a 54.6 %, Tabla 11), pero por menos tiempo y menos revistas. Esto sugiere que la etiqueta “lector” no depende tanto del disfrute como de otras razones que P11 no distingue, porque “otro motivo” agrupa categorías distintas. Esa agrupación es hoy el principal límite para explicar por qué algunas personas con práctica real de lectura no se identifican como lectoras.
+El motivo de lectura añade una señal inesperada. Quienes no se perciben lectores leen más por gusto ($71.5\%$ frente a $54.6\%$, Tabla 11), pero por menos tiempo y menos revistas. Esto sugiere que la etiqueta “lector” depende menos del disfrute que de razones que P11 no distingue, pues “otro motivo” agrupa categorías distintas. Esa agrupación es hoy el principal límite para explicar por qué personas con práctica real de lectura no se identifican como lectoras.
 
-El sexo y la condición de actividad definen el nivel de lectura más que la brecha de autopercepción. Las interacciones no fueron significativas ($p = 0.8646$ en P10 y $p = 0.6322$ en P26), así que el efecto de percibirse lector tiene la misma dirección en los tres grupos. Lo que cambia es el punto de partida. Los hombres lectores que trabajan promedian 46.8 minutos, casi el doble que las mujeres del hogar que no se perciben lectoras (23.5 minutos, Tabla 1), una diferencia de 23.2 minutos que combina ambos factores. Entre lectores, la diferencia entre hombres y mujeres que trabajan (IC5, 5.9 minutos) tiene un límite inferior de apenas 0.67, por lo que es una diferencia real pero pequeña. En los hombres, la autopercepción se refleja en el tiempo (IC3) pero no en el número de revistas (IC8) ni en el motivo ($p = 0.2924$). Con solo 58 hombres que no se perciben lectores, la muestra no permite afirmar si el efecto realmente es distinto o si falta precisión.
+El sexo y la condición de actividad definen el nivel de lectura más que la autopercepción. Como las interacciones no fueron significativas ($p = 0.8646$ en P10 y $p = 0.6322$ en P26), percibirse lector tiene el mismo efecto en los tres grupos; lo que cambia es el punto de partida. Los hombres lectores que trabajan promedian $46.8$ minutos, casi el doble que las mujeres del hogar no lectoras ($23.5$ minutos, Tabla 1). Entre lectores, la diferencia entre hombres y mujeres que trabajan ($\text{IC5}$, $5.9$ minutos) es real pero pequeña, con un límite inferior de apenas $0.67$. En los hombres, la autopercepción se refleja en el tiempo ($\text{IC3}$) pero no en el número de revistas ($\text{IC8}$) ni en el motivo ($p = 0.2924$); con solo $58$ hombres no lectores, no se puede saber si el efecto es distinto o si falta precisión.
 
-No obstante, pese a ser estadísticamente significativos, los modelos explican poco: 0.48 % de la variabilidad en P10 y 4.82 % en P26. Más del 95 % de las diferencias en la práctica lectora sigue sin explicarse con autopercepción, sexo y condición de actividad. Además, los hallazgos en P10 son frágiles por la asimetría y la heterocedasticidad (Figura 3), y no hay hombres dedicados al hogar en el diseño, por lo que sexo y ocupación no pueden separarse. Los resultados describen la muestra de 1,146 casos, sin ponderar, y no se extrapolan a la población.
+Aunque son significativos, los modelos explican poco: $0.48\%$ de la variabilidad en P10 y $4.82\%$ en P26. Los hallazgos en P10 son frágiles por la asimetría y la heterocedasticidad (Figura 3), y al no haber hombres dedicados al hogar, sexo y ocupación no pueden separarse. Los resultados describen la muestra de $1,146$ casos, sin ponderar, y no se extrapolan a la población.
 
 \newpage
 
