@@ -139,9 +139,8 @@ art_anova <- function(v) {
 
 art10 <- art_anova("P10")   # número de revistas
 art26 <- art_anova("P26")   # minutos continuos de lectura
-art_res <- list(P10 = art10, P26 = art26)
 
-# =====================  3) Intervalos que importan según el ANOVA ART (con Bonferroni)  =====================
+# =====================  3) Intervalos de confianza para la diferencia de medias  =====================
 a_no <- "No se percibe lector"
 a_si <- "Se percibe lector"
 
@@ -157,39 +156,25 @@ etq_celda <- function(k) {
   paste0(cel$grupo[cel$clave == k], " (", ifelse(cel$aut[cel$clave == k] == a_no, "no lector", "lector"), ")")
 }
 
-# cand: comparaciones candidatas = la brecha entre quienes no se perciben lectores y
-# quienes sí (no lector - lector) dentro de cada grupo, para cada variable (3 x 2 = 6).
-# Las diferencias entre grupos se dejan fuera del diseño de intervalos; se revisan de
-# forma exploratoria con las comparaciones por pares del ANOVA ART
-cand <- do.call(rbind, lapply(c("P26", "P10"), function(v) {
+# spec: las 6 comparaciones (celda a - celda b) = la brecha entre quienes no se perciben
+# lectores y quienes sí, dentro de cada grupo, para P26 (IC1 a IC3) y P10 (IC4 a IC6)
+spec <- do.call(rbind, lapply(c("P26", "P10"), function(v) {
   data.frame(v = v,
              ka = c("MH-NL", "MT-NL", "HT-NL"),
              kb = c("MH-L",  "MT-L",  "HT-L"),
              stringsAsFactors = FALSE)
 }))
-cand$desc <- paste(unname(sapply(cand$ka, etq_celda)), "-", unname(sapply(cand$kb, etq_celda)))
+spec$id       <- paste0("IC", seq_len(nrow(spec)))
+spec$desc     <- paste(unname(sapply(spec$ka, etq_celda)), "-", unname(sapply(spec$kb, etq_celda)))
+spec$variable <- ifelse(spec$v == "P26", "P26 (min)", "P10 (revistas)")
+spec$comp     <- paste(spec$ka, spec$kb, sep = " - ")
 
-# Regla de relevancia: la brecha de una variable se calcula si el ANOVA ART encontró
-# efecto de la autopercepción o de la interacción para esa variable
-cand$relevante <- unname(sapply(cand$v, function(v) {
-  r <- art_res[[v]]
-  pterm(r, "Aut") < alpha_val || pterm(r, "Grupo:Aut") < alpha_val
-}))
-
-# spec: comparaciones relevantes, con identificador IC1, IC2, ...
-spec <- cand[cand$relevante, ]
-rownames(spec) <- NULL
-if (nrow(spec) > 0) {
-  spec$id       <- paste0("IC", seq_len(nrow(spec)))
-  spec$variable <- ifelse(spec$v == "P26", "P26 (min)", "P10 (revistas)")
-  spec$comp     <- paste(spec$ka, spec$kb, sep = " - ")
-}
-
-# Ajuste de Bonferroni: como se calculan k intervalos a la vez, cada uno se construye
-# con nivel de significancia alpha/k, de modo que la confianza conjunta sea de al menos 96 %
-k_ic     <- max(nrow(spec), 1)     # número de intervalos que se calculan
-alpha_ic <- alpha_val / k_ic       # significancia de cada intervalo
-conf_ic  <- 1 - alpha_ic           # confianza de cada intervalo
+# Ajuste de Bonferroni: como se calculan k intervalos a la vez, cada uno ajustado se
+# construye con nivel de significancia alpha/k, de modo que la confianza conjunta sea de
+# al menos 96 %
+k_ic     <- nrow(spec)             # número de intervalos
+alpha_ic <- alpha_val / k_ic       # significancia de cada intervalo ajustado
+conf_ic  <- 1 - alpha_ic           # confianza de cada intervalo ajustado
 
 # vec: valores de una variable (P10 o P26) para las personas de una celda
 vec <- function(clave, v) {
@@ -199,45 +184,65 @@ vec <- function(clave, v) {
   d[[v]]
 }
 
-# comparar: para la variable v y las celdas ka y kb calcula el IC de la
-# diferencia de medias (celda a - celda b) con la confianza ajustada por Bonferroni (conf_ic)
+# comparar: para la variable v y las celdas ka y kb calcula el IC de la diferencia de
+# medias (celda a - celda b) de dos formas:
+#   LI, LS     -> con confianza de 96 % (intervalo individual)
+#   LI_b, LS_b -> con confianza ajustada por Bonferroni (conf_ic)
 comparar <- function(v, ka, kb) {
   x <- vec(ka, v); y <- vec(kb, v)
   n1 <- length(x); n2 <- length(y)
+  dif <- mean(x) - mean(y)
 
   if (n1 >= 40 && n2 >= 40) {
     # Muestras grandes (n, m >= 40): aproximación normal con las varianzas muestrales
-    z  <- qnorm(1 - alpha_ic / 2)
-    E  <- z * sqrt(var(x) / n1 + var(y) / n2)
-    li <- mean(x) - mean(y) - E
-    ls <- mean(x) - mean(y) + E
+    ee <- sqrt(var(x) / n1 + var(y) / n2)                 # error estándar de la diferencia
+    z1 <- qnorm(1 - alpha_val / 2)                        # valor z para el IC individual
+    z2 <- qnorm(1 - alpha_ic / 2)                         # valor z para el IC con Bonferroni
+    li <- dif - z1 * ee; ls <- dif + z1 * ee
+    li_b <- dif - z2 * ee; ls_b <- dif + z2 * ee
   } else {
     # Muestras pequeñas: t de Student con varianzas distintas (Welch-Satterthwaite).
     # No se usa con estos datos porque todas las celdas tienen al menos 40 casos
-    tt <- t.test(x, y, var.equal = FALSE, conf.level = conf_ic)
-    li <- tt$conf.int[1]; ls <- tt$conf.int[2]
+    t1 <- t.test(x, y, var.equal = FALSE, conf.level = conf_val)
+    t2 <- t.test(x, y, var.equal = FALSE, conf.level = conf_ic)
+    li <- t1$conf.int[1]; ls <- t1$conf.int[2]
+    li_b <- t2$conf.int[1]; ls_b <- t2$conf.int[2]
   }
   data.frame(v = v, ka = ka, kb = kb, n1 = n1, n2 = n2,
-             Media_1 = mean(x), Media_2 = mean(y),
-             Dif = mean(x) - mean(y), LI = li, LS = ls, stringsAsFactors = FALSE)
+             Media_1 = mean(x), Media_2 = mean(y), Dif = dif,
+             LI = li, LS = ls, LI_b = li_b, LS_b = ls_b, stringsAsFactors = FALSE)
 }
 
-# tabla_ic: resultados de las comparaciones relevantes (NULL si ninguna es relevante)
-tabla_ic <- NULL
-if (nrow(spec) > 0) {
-  tabla_ic <- do.call(rbind, lapply(seq_len(nrow(spec)), function(i) {
-    data.frame(IC = spec$id[i], comparar(spec$v[i], spec$ka[i], spec$kb[i]), stringsAsFactors = FALSE)
-  }))
-  tabla_ic$Variable  <- spec$variable
-  tabla_ic$Incluye_0 <- tabla_ic$LI <= 0 & tabla_ic$LS >= 0   # el IC de la diferencia incluye el 0
+# tabla_ic: resultados de las 6 comparaciones
+tabla_ic <- do.call(rbind, lapply(seq_len(nrow(spec)), function(i) {
+  data.frame(IC = spec$id[i], comparar(spec$v[i], spec$ka[i], spec$kb[i]), stringsAsFactors = FALSE)
+}))
+tabla_ic$Variable   <- spec$variable
+tabla_ic$comp       <- spec$comp
+tabla_ic$Incluye_0   <- tabla_ic$LI <= 0 & tabla_ic$LS >= 0       # el IC de 96 % incluye el 0
+tabla_ic$Incluye_0_b <- tabla_ic$LI_b <= 0 & tabla_ic$LS_b >= 0   # el IC con Bonferroni incluye el 0
+
+# plot_ic: gráfico de los intervalos (una línea por IC; la línea punteada marca el 0)
+#   li, ls   = nombres de las columnas con los límites del intervalo
+#   incluye  = nombre de la columna lógica "el intervalo incluye el 0" (define el color)
+plot_ic <- function(d, li, ls, incluye) {
+  d$LIp <- d[[li]]; d$LSp <- d[[ls]]
+  d$Incluye  <- ifelse(d[[incluye]], "Incluye 0", "No incluye 0")
+  d$etq      <- factor(paste0(d$IC, "  ", d$comp), levels = rev(paste0(d$IC, "  ", d$comp)))
+  d$Variable <- factor(d$Variable, levels = unique(d$Variable))
+  ggplot(d, aes(x = Dif, y = etq, color = Incluye)) +
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    geom_linerange(aes(xmin = LIp, xmax = LSp), orientation = "y", linewidth = 0.9) +
+    geom_point(size = 2.5) +
+    facet_wrap(~ Variable, scales = "free", ncol = 2) +          # un panel por variable (P26 y P10)
+    scale_color_manual(values = c("Incluye 0" = "grey50", "No incluye 0" = "firebrick")) +
+    labs(x = "Diferencia estimada", y = NULL, color = NULL) +
+    theme_minimal() +
+    theme(legend.position = "bottom",
+          axis.text.y = element_text(size = 7.5),
+          axis.text.x = element_text(size = 7.5),
+          strip.text = element_text(size = 9, face = "bold"))
 }
-
-# Pie de figura de los intervalos (incluye el nivel de confianza ajustado)
-cap_forest <- paste0("Diferencias de medias con IC ajustados por Bonferroni (", fmt(100 * conf_ic, 2),
-                     " % por intervalo). En rojo, los intervalos que no incluyen el 0.")
-
-# Alto del gráfico de intervalos: crece con el número de comparaciones por variable
-fig_h_forest <- if (nrow(spec) > 0) max(2.5, 0.3 * max(table(spec$variable)) + 1.2) else 2.5
 ```
 
 # Datos y métodos
@@ -280,6 +285,38 @@ kable(data.frame(Clave = cel$clave, Grupo = cel$grupo, Autopercepción = cel$aut
 <!-- Escribe aquí tu descripción de los métodos: intervalos de confianza para la diferencia de medias, ANOVA de dos factores y prueba de independencia. -->
 
 # Resultados
+
+## Intervalos de confianza para la diferencia de medias, sin y con ajuste de Bonferroni
+
+<!-- Escribe aquí por qué se calcula la brecha entre quienes se perciben lectores y quienes no en cada grupo, para ambas variables, y por qué se compara el intervalo individual con el ajustado por Bonferroni (el ajuste está en el chunk "analisis": cada intervalo usa alpha/k, con k = 6). -->
+
+```{r tabla-ic}
+# Tabla comparativa de las 6 comparaciones (celda a - celda b):
+#   LI y LS de 96 %  = intervalo individual
+#   LI y LS Bonf.    = intervalo ajustado por Bonferroni
+#   Incluye 0        = Sí si el intervalo contiene el 0 (no hay evidencia de diferencia)
+vis_b <- tabla_ic[, c("IC", "Variable", "comp", "Dif", "LI", "LS", "LI_b", "LS_b")]
+names(vis_b) <- c("IC", "Variable", "Claves", "Dif", "LI 96 %", "LS 96 %", "LI Bonf.", "LS Bonf.")
+vis_b$`Incluye 0 (96 %)`  <- ifelse(tabla_ic$Incluye_0, "Sí", "No")
+vis_b$`Incluye 0 (Bonf.)` <- ifelse(tabla_ic$Incluye_0_b, "Sí", "No")
+kable(vis_b, digits = 3, row.names = FALSE,
+      caption = paste0("Intervalos para la diferencia de medias (celda a - celda b): individuales al 96 % e intervalos con ajuste de Bonferroni (",
+                       fmt(100 * conf_ic, 2), " % por intervalo, ", k_ic, " intervalos; confianza conjunta de al menos 96 %)"))
+```
+
+```{r fig-forest, fig.width=6.5, fig.height=2.5, out.width="100%", fig.align="center", fig.cap="Diferencias de medias con IC al 96 %. En rojo, los intervalos que no incluyen el 0.", fig.pos="H"}
+# Gráfico de los intervalos individuales al 96 % (función plot_ic definida en el chunk "analisis")
+plot_ic(tabla_ic, "LI", "LS", "Incluye_0")
+```
+
+```{r fig-forest-bonferroni, fig.width=6.5, fig.height=2.5, out.width="100%", fig.align="center", fig.cap="Diferencias de medias con IC ajustados por Bonferroni. En rojo, los intervalos que no incluyen el 0.", fig.pos="H"}
+# Gráfico de los intervalos ajustados por Bonferroni
+plot_ic(tabla_ic, "LI_b", "LS_b", "Incluye_0_b")
+```
+
+### Interpretación
+
+<!-- Mira la tabla de intervalos individuales y con ajuste de Bonferroni (columnas "Incluye 0") y las dos figuras de diferencias de medias. Escribe aquí tu interpretación. -->
 
 ## Verificación de supuestos del ANOVA
 
@@ -351,57 +388,6 @@ if (pterm(art26, "Grupo:Aut") < alpha_val) {
 #### Interpretación
 
 <!-- Mira la tabla "ANOVA con ajuste ART: minutos continuos de lectura (P26)" (valores p y eta2_parcial) y las comparaciones por pares, si aparecen. Escribe aquí tu interpretación. -->
-
-## Intervalos de confianza según el ANOVA con ajuste
-
-<!-- Escribe aquí por qué solo se calcula la brecha entre quienes se perciben lectores y quienes no, solo cuando el ANOVA con ajuste ART lo respalda, y por qué se usa el ajuste de Bonferroni (la regla y el ajuste están en el chunk "analisis"). -->
-
-```{r tabla-leyenda}
-# Lista de las comparaciones calculadas (celda a - celda b)
-if (!is.null(tabla_ic)) {
-  kable(data.frame(IC = spec$id, Variable = spec$variable, Comparacion = spec$desc, Claves = spec$comp),
-        format = "pipe", col.names = c("IC", "Variable", "Comparación (celda a - celda b)", "Claves"),
-        caption = "Comparaciones calculadas: brecha entre quienes no se perciben lectores y quienes sí, por grupo")
-}
-```
-
-```{r tabla-medias}
-# Tabla con el IC al 96 % de la diferencia de medias de cada comparación relevante
-if (!is.null(tabla_ic)) {
-  vis <- tabla_ic[, c("IC", "Variable", "n1", "n2", "Media_1", "Media_2", "Dif", "LI", "LS")]
-  vis$`Incluye 0` <- ifelse(tabla_ic$Incluye_0, "Sí", "No")    # Sí = no hay evidencia de diferencia
-  kable(vis, digits = 3, row.names = FALSE,
-        caption = paste0("Intervalos de confianza para la diferencia de medias (celda a - celda b) con ajuste de Bonferroni: ",
-                         fmt(100 * conf_ic, 2), " % de confianza por intervalo (", k_ic, " intervalos; confianza conjunta de al menos 96 %)"))
-}
-```
-
-```{r fig-forest, fig.width=6.5, fig.height=fig_h_forest, out.width="100%", fig.align="center", fig.cap=cap_forest, fig.pos="H"}
-# Gráfico de los intervalos: cada línea es un IC; la línea punteada marca el 0
-if (!is.null(tabla_ic)) {
-  fd <- tabla_ic
-  fd$etq <- factor(paste0(fd$IC, "  ", spec$comp), levels = rev(paste0(fd$IC, "  ", spec$comp)))
-  fd$Variable <- factor(fd$Variable, levels = unique(fd$Variable))
-  fd$Incluye <- ifelse(fd$Incluye_0, "Incluye 0", "No incluye 0")
-
-  ggplot(fd, aes(x = Dif, y = etq, color = Incluye)) +
-    geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_linerange(aes(xmin = LI, xmax = LS), orientation = "y", linewidth = 0.9) +
-    geom_point(size = 2.5) +
-    facet_wrap(~ Variable, scales = "free", ncol = 2) +          # un panel por variable (P26 y P10)
-    scale_color_manual(values = c("Incluye 0" = "grey50", "No incluye 0" = "firebrick")) +
-    labs(x = "Diferencia estimada", y = NULL, color = NULL) +
-    theme_minimal() +
-    theme(legend.position = "bottom",
-          axis.text.y = element_text(size = 7.5),
-          axis.text.x = element_text(size = 7.5),
-          strip.text = element_text(size = 9, face = "bold"))
-}
-```
-
-### Interpretación
-
-<!-- Mira la tabla "Intervalos de confianza para la diferencia de medias ... con ajuste de Bonferroni" (columna "Incluye 0") y la figura de diferencias de medias. Escribe aquí tu interpretación. -->
 
 ## Motivo de lectura (`P11`): independencia de dos variables categóricas
 
