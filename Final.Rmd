@@ -1,19 +1,70 @@
 ---
-title: "Autopercepción lectora y práctica de lectura según sexo y ocupación"
-subtitle: "Análisis inferencial de los datos MOLEC 2022-2024"
-date: "`r format(Sys.Date(), '%Y-%m-%d')`"
-lang: es
-header-includes:
-  - \renewcommand{\spanishtablename}{Tabla}
-  - \usepackage{float}
+documentclass: extarticle
 output:
   pdf_document:
-    toc: true
     number_sections: true
+    toc: false
+  word_document:
+    toc: false
   html_document:
-    toc: true
+    toc: false
     df_print: paged
+lang: es
+fontsize: 11pt
+geometry: margin=2.5cm
+urlcolor: blue
+linkcolor: black
+header-includes:
+- \usepackage{graphicx}
+- \usepackage{float}
+- \usepackage{amssymb}
+- \usepackage{caption}
+- \usepackage{esint}
+- \usepackage{setspace}
+- \captionsetup[figure]{name=Figura,labelsep=period}
+- \captionsetup[table]{name=Tabla,labelsep=period}
+- \setlength{\parskip}{0.5em}
+- \usepackage{array}
+- \usepackage{ragged2e}
+- \usepackage{longtable}
+- \usepackage{booktabs}
+- \newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+- \usepackage{etoolbox}
+- \AtBeginEnvironment{longtable}{\footnotesize}
+- \AtBeginEnvironment{table}{\footnotesize}
 ---
+
+\begin{titlepage}
+		\centering
+		
+		\vspace{1cm}
+		
+		\includegraphics[width=\textwidth]{imagenes/tecnologico-de-monterrey-blue.png}
+		
+		\vspace{2cm}
+		
+		{\LARGE\bfseries Final final\par}
+		
+		\vspace{0.5cm}
+		
+		{\LARGE\bfseries Modelación estadística para la toma de decisiones \par}
+		
+		\vspace{3cm}
+		
+		{\Large Fernanda Meléndez Banda A00843603\par}
+		{\Large Carlos Emilio Escobedo Castillo A00843640\par}
+		{\Large Eduardo David Vargas Herrera A00843714\par}
+		{\Large Rodrigo Fuentes Quintana A00843675\par}
+		
+		\vspace{0.5cm}
+		
+		
+		\vfill
+		
+		{\large \today\par}
+		
+\end{titlepage}
+
 
 ```{r opciones, include=FALSE}
 # Opciones generales de todos los chunks:
@@ -28,27 +79,55 @@ options(knitr.kable.NA = "")
 
 ```{r setup}
 # ---------------------------------------------------------------
-# Paquetes, parámetros y preparación de los datos
+# Paquetes, parámetros, limpieza de datos y submuestras
+# (todo el filtrado se define aquí, una sola vez)
 # ---------------------------------------------------------------
 library(ggplot2)   # gráficos
 library(knitr)     # función kable() para las tablas
-library(ARTool)    # ANOVA con ajuste ART (Aligned Rank Transform); instalar con install.packages("ARTool")
+library(kableExtra)
+library(ARTool)    # ANOVA con ajuste ART (Aligned Rank Transform)
+library(e1071) # simetría y curtosis
 
 # ---- Parámetros del análisis ----
 alpha_val  <- 0.04                           # nivel de significancia
 conf_val   <- 1 - alpha_val                  # nivel de confianza (96 %)
 ruta_datos <- "datos/DatosEquipo6_v2.csv"    # archivo con los datos
 
-# TRUE  = solo lectores de revistas (P10 > 0), como en la etapa descriptiva
-# FALSE = todo el universo con grupo y autopercepción válidos
-SOLO_LECTORES_REVISTAS <- TRUE
+# pct: porcentaje con un decimal (x = casos, n = base)
+pct <- function(x, n) round(100 * x / n, 1)
 
 # ---- Carga y validación ----
 stopifnot(file.exists(ruta_datos))           # se detiene si no encuentra el archivo
 raw <- read.csv(ruta_datos)
 stopifnot(ncol(raw) == 7)                    # verifica que haya las 7 columnas esperadas
 names(raw) <- c("anio", "H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")
+vars6 <- c("H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")
+
+# ---- Calidad de los datos (sobre los registros originales, antes de recodificar) ----
+# Vacios = valores vacíos; Fuera = valores fuera del rango válido de cada variable
+# (en P10, P11 y P26 el vacío es un pase de pregunta, no un dato faltante)
+calidad <- data.frame(
+  Variable = vars6,
+  Vacios = colSums(is.na(raw[, vars6])),
+  Fuera = c(sum(!(raw$H_LEC %in% c(1:4, NA))),
+            sum(!(raw$SEXO %in% c(1:2, NA))),
+            sum(!(raw$COND_ACT %in% c(1:10, NA))),
+            sum(raw$P10 > 25, na.rm = TRUE),
+            sum(!(raw$P11 %in% c(1:6, NA))),
+            sum(raw$P26 < 2 | raw$P26 > 360, na.rm = TRUE)),
+  row.names = NULL)
+
+# ---- Recodificación: valores no identificados (0, 99, etc.) pasan a NA ----
 datos <- raw
+datos$H_LEC[!(datos$H_LEC %in% 1:4)]        <- NA
+datos$SEXO[!(datos$SEXO %in% 1:2)]          <- NA
+datos$COND_ACT[!(datos$COND_ACT %in% 1:10)] <- NA
+# P10, P11 y P26 no se recodifican: sus vacíos son pases de pregunta válidos
+
+# ---- Etiqueta de la condición lectora (H_LEC) ----
+datos$H_LEC_lbl <- factor(datos$H_LEC, levels = 1:4,
+                          labels = c("1. Habitual", "2. Otros materiales",
+                                     "3. Leyó sin percibirse lector", "4. No lector"))
 
 # ---- Factor 2: autopercepción lectora (H_LEC: 1 = sí, 3 = no) ----
 datos$Aut <- NA
@@ -58,6 +137,7 @@ datos$Aut <- factor(datos$Aut, levels = c("Se percibe lector", "No se percibe le
 
 # ---- Factor 1: grupo ocupacional (sexo + condición de actividad) ----
 # SEXO: 1 = hombre, 2 = mujer. COND_ACT: 7 = quehaceres del hogar, 1 a 3 = trabaja
+# Quedan fuera (Grupo = NA): estudiantes, jubilados, otras condiciones y hombres dedicados al hogar
 datos$Grupo <- NA
 datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 7]   <- "Mujer hogar"
 datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 1:3] <- "Mujer trabaja"
@@ -65,18 +145,21 @@ datos$Grupo[datos$SEXO %in% 1 & datos$COND_ACT %in% 1:3] <- "Hombre trabaja"
 datos$Grupo <- factor(datos$Grupo,
                       levels = c("Mujer hogar", "Mujer trabaja", "Hombre trabaja"))
 
-# ---- Subconjuntos de datos ----
-V <- subset(datos, !is.na(Aut))     # casos con autopercepción válida (H_LEC = 1 o 3)
-U <- subset(V, !is.na(Grupo))       # además con grupo ocupacional definido
-W <- if (SOLO_LECTORES_REVISTAS) subset(U, P10 > 0) else U   # base de trabajo final
-W$Grupo <- droplevels(W$Grupo)      # quita niveles sin casos
-W$Aut   <- droplevels(W$Aut)
-N_total <- nrow(W)                  # número de personas analizadas
+# ---- Submuestras (se usan en todo el documento) ----
+# U: los 3 grupos de comparación con H_LEC válido
+# A: U con autopercepción definida (H_LEC = 1 o 3)
+# L: lectores de revistas (P10 > 0): base del análisis de P10, P26, P11 y de la inferencia
+U <- subset(datos, !is.na(H_LEC) & !is.na(Grupo))
+A <- subset(U, H_LEC %in% c(1, 3))
+L <- subset(A, P10 > 0)
+L$Grupo <- droplevels(L$Grupo)
+L$Aut   <- droplevels(L$Aut)
 ```
 
 ```{r helpers}
 # ---------------------------------------------------------------
-# Funciones auxiliares (formato de números y tablas del ANOVA ART)
+# Funciones auxiliares (formato, tablas y gráficos descriptivos,
+# tablas del ANOVA ART)
 # ---------------------------------------------------------------
 
 # fmt: número con d decimales como texto
@@ -87,6 +170,73 @@ fp  <- function(p) ifelse(p < 0.0001, "< 0.0001", formatC(p, format = "f", digit
 
 # dec: decisión de la prueba con el nivel de significancia alpha_val
 dec <- function(p) ifelse(p < alpha_val, "Rechaza H0", "No rechaza H0")
+
+# desc_global: Función para calcular estadísticos descriptivos globales 
+desc_global <- function(vars, limites = NULL) {
+  
+  # Aplica la función a cada variable del vector y une los resultados en un solo data frame
+  out <- do.call(rbind, lapply(vars, function(v) {
+    
+    # Extrae los datos de la variable actual desde el data frame global 'L'
+    x <- L[[v]]
+    
+    # Aplica un filtro de límite máximo si se proporcionó y existe para esta variable
+    if (!is.null(limites) && v %in% names(limites)) {
+      x <- x[x <= limites[[v]]]
+    }
+    
+    # Elimina los valores faltantes (NA) para evitar errores en los cálculos
+    x <- x[!is.na(x)]
+    
+    # Crea un data frame con los estadísticos descriptivos de la variable procesada
+    data.frame(
+      Variable = v,                                   # Nombre de la variable
+      N = length(x),                                  # Tamaño de la muestra (casos válidos)
+      Media = round(mean(x), 1),                      # Media aritmética redondeada a 1 decimal
+      DE = round(sd(x), 1),                           # Desviación estándar redondeada a 1 decimal
+      Mín = min(x),                                   # Valor mínimo
+      Q1 = quantile(x, 0.25, names = FALSE),          # Primer cuartil (percentil 25)
+      Mediana = median(x),                            # Mediana (percentil 50)
+      Q3 = quantile(x, 0.75, names = FALSE),          # Tercer cuartil (percentil 75)
+      Máx = max(x),                                   # Valor máximo
+      Asimetría = round(e1071::skewness(x), 2),       # Asimetría
+      Curtosis = round(e1071::kurtosis(x), 2),        # Curtosis
+      stringsAsFactors = FALSE                        # Evita que las cadenas de texto se conviertan en factores
+    )
+  }))
+  
+  # Devuelve el data frame consolidado con todas las variables analizadas
+  out
+}
+
+# desc_tabla: estadísticos descriptivos de la variable v (P10 o P26) en L,
+# por grupo y autopercepción (N, media, DE, mínimo, Q1, mediana, Q3, máximo)
+desc_tabla <- function(v) {
+  r <- aggregate(L[[v]], by = list(Aut = L$Aut, Grupo = L$Grupo), FUN = function(x) {
+    x <- x[!is.na(x)]                     # ignora los vacíos de la variable
+    c(N = length(x), Media = round(mean(x), 1), DE = round(sd(x), 1), Min = min(x),
+      Q1 = quantile(x, 0.25, names = FALSE), Mediana = median(x),
+      Q3 = quantile(x, 0.75, names = FALSE), Max = max(x))
+  })
+  out <- cbind(r[, c("Grupo", "Aut")], as.data.frame(r$x))
+  names(out) <- c("Grupo", "Autopercepción", "N", "Media", "DE", "Mín", "Q1", "Mediana", "Q3", "Máx")
+  out
+}
+
+# cajas: diagramas de caja de la variable v por autopercepción, un panel por grupo
+# (sin valores atípicos en la caja; los puntos son las personas)
+cajas <- function(v, ylim, ylab) {
+  par(mfrow = c(1, 3), mar = c(5, 4, 3, 1), mgp = c(3, 2, 0))
+  for (g in levels(L$Grupo)) {
+    d <- subset(L, Grupo == g)
+    nombres <- paste0(c("Se percibe\nlector", "No se percibe\nlector"), "\n(N=", table(d$Aut), ")")
+    boxplot(d[[v]] ~ d$Aut, names = nombres, ylim = ylim, outline = FALSE,
+            col = c("#F8766D80", "#00BFC480"), main = g, xlab = "", ylab = ylab, cex.axis = 0.8)
+    stripchart(d[[v]] ~ d$Aut, vertical = TRUE, method = "jitter", jitter = 0.15,
+               pch = 16, cex = 0.4, col = rgb(0, 0, 0, 0.25), add = TRUE)
+  }
+  par(mfrow = c(1, 1))
+}
 
 # pterm: valor p de un efecto ("Grupo", "Aut" o "Grupo:Aut") en la tabla ANOVA ART
 pterm <- function(res, term) res$tabla$`Pr(>F)`[res$tabla$Term == term]
@@ -111,7 +261,7 @@ posthoc_art <- function(m, efecto) {
 
 ```{r analisis}
 # ---------------------------------------------------------------
-# Cálculos principales (no imprimen nada; las tablas y gráficos
+# Cálculos de la inferencia (no imprimen nada; las tablas y gráficos
 # se muestran más abajo)
 # ---------------------------------------------------------------
 
@@ -119,8 +269,8 @@ posthoc_art <- function(m, efecto) {
 # Se ajusta el ANOVA de dos factores con interacción; sus residuos se usan para
 # revisar normalidad y homocedasticidad antes de decidir qué ANOVA reportar
 mod_clasico <- list(
-  P10 = aov(P10 ~ Grupo * Aut, data = W[!is.na(W$P10), ]),
-  P26 = aov(P26 ~ Grupo * Aut, data = W[!is.na(W$P26), ])
+  P10 = aov(P10 ~ Grupo * Aut, data = L[!is.na(L$P10), ]),
+  P26 = aov(P26 ~ Grupo * Aut, data = L[!is.na(L$P26), ])
 )
 
 # =====================  2) ANOVA con ajuste ART  =====================
@@ -129,7 +279,7 @@ mod_clasico <- list(
 #   2) obtiene la tabla ANOVA sobre los rangos alineados
 #   3) calcula la eta cuadrada parcial de cada efecto = SC efecto / (SC efecto + SC residual)
 art_anova <- function(v) {
-  dat <- W[!is.na(W[[v]]), ]
+  dat <- L[!is.na(L[[v]]), ]
   m   <- art(as.formula(paste0(v, " ~ Grupo * Aut")), data = dat)
   a   <- as.data.frame(anova(m))
   stopifnot(all(c("Sum Sq", "Sum Sq.res") %in% names(a)))
@@ -180,7 +330,7 @@ conf_ic  <- 1 - alpha_ic           # confianza de cada intervalo ajustado
 vec <- function(clave, v) {
   g <- cel$grupo[cel$clave == clave]
   a <- cel$aut[cel$clave == clave]
-  d <- W[W$Grupo == g & W$Aut == a & !is.na(W[[v]]), ]
+  d <- L[L$Grupo == g & L$Aut == a & !is.na(L[[v]]), ]
   d[[v]]
 }
 
@@ -217,8 +367,8 @@ comparar <- function(v, ka, kb) {
 tabla_ic <- do.call(rbind, lapply(seq_len(nrow(spec)), function(i) {
   data.frame(IC = spec$id[i], comparar(spec$v[i], spec$ka[i], spec$kb[i]), stringsAsFactors = FALSE)
 }))
-tabla_ic$Variable   <- spec$variable
-tabla_ic$comp       <- spec$comp
+tabla_ic$Variable    <- spec$variable
+tabla_ic$comp        <- spec$comp
 tabla_ic$Incluye_0   <- tabla_ic$LI <= 0 & tabla_ic$LS >= 0       # el IC de 96 % incluye el 0
 tabla_ic$Incluye_0_b <- tabla_ic$LI_b <= 0 & tabla_ic$LS_b >= 0   # el IC con Bonferroni incluye el 0
 
@@ -247,48 +397,190 @@ plot_ic <- function(d, li, ls, incluye) {
 
 # Datos y métodos
 
-## Datos y variables
+<!-- Escribe aquí la fuente y el alcance de los datos, la limpieza, las submuestras (los 3 grupos y los lectores de revistas) y tu estrategia analítica (intervalos de confianza, ANOVA con ajuste ART y prueba de independencia). -->
 
-```{r tabla-variables}
-# Tabla con la descripción de las variables usadas (texto fijo)
-vars <- data.frame(
-  Variable = c("`H_LEC`", "`SEXO` y `COND_ACT`", "`P10`", "`P26`", "`P11`"),
-  Descripcion = c("Autopercepción lectora: 1 = se percibe lector, 3 = no se percibe lector",
-                  "Sexo y condición de actividad. Grupos: mujer hogar (mujer, quehaceres del hogar), mujer trabaja y hombre trabaja (condición de actividad 1 a 3)",
-                  "Número de revistas leídas",
-                  "Minutos continuos de lectura",
-                  "Motivo principal de lectura de revistas (4 = gusto o entretenimiento)"),
-  Papel = c("Factor 2 (autopercepción)", "Factor 1 (grupo ocupacional)", "Variable respuesta", "Variable respuesta",
-            "Variable categórica (por gusto u otro motivo)"),
-  stringsAsFactors = FALSE)
-# format = "pipe" permite que el texto largo se acomode en varias líneas
-kable(vars, format = "pipe", col.names = c("Variable", "Descripción", "Papel en el análisis"),
-      caption = "Variables utilizadas")
+# Resultados descriptivos
+
+## Calidad de los datos y perfil general
+
+```{r tab-variables}
+# Tabla de las variables seleccionadas
+tab_var <- data.frame(
+  Variable = vars6,
+  Descripción = c("Condición lectora construida por INEGI",
+                  "Sexo (preg. 8)", "Condición de actividad la semana pasada (preg. 15)",
+                  "Revistas leídas en tres meses (preg. 10)",
+                  "Motivo principal de lectura de revistas (preg. 11)",
+                  "Minutos continuos de lectura de algún material (preg. 26)"),
+  Tipo = c("Cat. nominal", "Cat. nominal", "Cat. nominal",
+           "Num. discreta", "Cat. nominal", "Num. continua"),
+  "Unidad o categorías" = c("1 Habitual; 2 Otros materiales; 3 Leyó sin acostumbrar; 4 No lector",
+                            "1 Hombre; 2 Mujer",
+                            "01-03 trabaja; 04-05 busca trabajo; 06 estudia; 07 hogar; 08 jubilado; 09-10 otra; 99 no especificado",
+                            "Revistas (diccionario: 1 a 25)",
+                            "1 Trabajo; 2 Estudio; 3 Cultura general; 4 Gusto; 5 Religión; 6 Otro",
+                            "Minutos (diccionario: 2 a 360)"),
+  "Falt. (n)" = calidad$Vacios,
+  "Falt. (%)" = pct(calidad$Vacios, nrow(raw)),
+  "Fuera rango (n)" = calidad$Fuera,
+  check.names = FALSE)
+
+cap_var <- "Variables seleccionadas y calidad de los datos (sobre todos los registros; en P10, P11 y P26 el vacío es un pase de pregunta)"
+
+if (knitr::is_latex_output()) {
+  kable(tab_var, format = "latex", booktabs = TRUE, caption = cap_var) %>%
+    kable_styling(
+      latex_options = c("scale_down", "hold_position"), # Escala la tabla para que quepa exacta
+      font_size = 9 # (Opcional) Reduce ligeramente la fuente si queda muy pequeña
+    ) %>%
+    column_spec(1, width = "1.5cm") %>%
+    column_spec(2, width = "3.0cm") %>%
+    column_spec(3, width = "1.5cm") %>%
+    column_spec(4, width = "3.8cm")
+} else {
+  kable(tab_var, caption = cap_var)
+}
 ```
 
-```{r tabla-n}
-# Número de casos en cada combinación de grupo y autopercepción, con totales
-tn <- as.data.frame.matrix(table(W$Grupo, W$Aut))
-tn$Total <- rowSums(tn)
-tn <- rbind(tn, Total = colSums(tn))
-kable(tn, caption = paste0("Casos analizados por grupo y autopercepción lectora", if (SOLO_LECTORES_REVISTAS) " (solo lectores de revistas, P10 > 0)" else ""))
+```{r tab-hlec-grupo}
+# Distribución porcentual de H_LEC dentro de cada grupo (personas de los 3 grupos con H_LEC válido)
+tb <- table(U$Grupo, U$H_LEC_lbl)
+pc <- round(100 * prop.table(tb, 1), 1)
+t4 <- data.frame(Grupo = rownames(tb), N = as.vector(rowSums(tb)),
+                 as.data.frame.matrix(pc), check.names = FALSE, row.names = NULL)
+names(t4)[3:6] <- c("1 Habitual", "2 Otros", "3 Leyó sin percibirse lector", "4 No lector")
+# Último dato: de quienes no acostumbran leer (H_LEC 3 o 4), % que leyó sin percibirse lector (H_LEC 3)
+t4[["% con H_LEC 3 entre quienes no acostumbran leer"]] <- pct(tb[, 3], tb[, 3] + tb[, 4])
+kable(t4, format = "pipe", caption = "Condición lectora (H_LEC) dentro de cada grupo, en %")
 ```
+
+```{r tab-cob}
+# Personas que leyeron revistas en los últimos tres meses (P10 > 0), por grupo y autopercepción:
+# define la base de lectores de revistas (L) que se usa en el resto del documento
+Ac <- A
+Ac$Leyo <- !is.na(Ac$P10) & Ac$P10 > 0
+cob <- aggregate(Ac$Leyo, by = list(Grupo = Ac$Grupo, Autopercepción = Ac$Aut),
+                 FUN = function(x) c(N = length(x), n = sum(x)))
+cob <- cbind(cob[, 1:2], as.data.frame(cob$x))
+names(cob) <- c("Grupo", "Autopercepción", "N", "Leyeron revistas")
+cob[["%"]] <- pct(cob[["Leyeron revistas"]], cob$N)
+cob <- cob[order(cob$Grupo, cob$Autopercepción), ]
+kable(cob, row.names = FALSE, caption = "Personas que leyeron revistas en los últimos tres meses, por grupo y autopercepción")
+```
+
+### Interpretación
+
+<!-- Escribe aquí tu interpretación de la calidad de los datos, de la condición lectora por grupo y de la proporción de lectores de revistas. -->
+
+## Distribución de `P10` y `P26`
+
+```{r fig-hist, fig.height=2.6, fig.cap=paste0("Distribución de P10 y P26 en lectores de revistas (se omiten ", sum(L$P10 > 15), " casos con P10 > 15 y ", sum(L$P26 > 180, na.rm = TRUE), " con P26 > 180 minutos)"), fig.pos = "H"}
+# Histogramas de P10 y P26 sin los valores atípicos extremos
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+hist(L$P10[L$P10 <= 15], breaks = seq(0.5, 15.5, 1), col = "#F8766D80",
+     main = "P10: revistas leídas", xlab = "Revistas en los últimos 3 meses", ylab = "Personas")
+hist(L$P26[L$P26 <= 180], breaks = seq(0, 180, 10), col = "#00BFC480",
+     main = "P26: minutos continuos", xlab = "Minutos continuos de lectura", ylab = "Personas")
+par(op)
+```
+
+```{r}
+# Definimos los límites (P10 <= 15, P26 <= 180)
+limites_filtro <- list(P10 = 15, P26 = 180)
+
+# Obtenemos la tabla global
+tab_global <- desc_global(c("P10", "P26"), limites = limites_filtro)
+
+# Imprimir con kable
+if (knitr::is_latex_output()) {
+  knitr::kable(tab_global, format = "latex", booktabs = TRUE,
+               caption = "Estadísticos descriptivos generales para P10 y P26") %>%
+    kableExtra::kable_styling(latex_options = c("scale_down", "hold_position"))
+} else {
+  knitr::kable(tab_global, caption = "Estadísticos descriptivos generales para P10 y P26")
+}
+```
+
+### Interpretación
+
+<!-- Escribe aquí tu interpretación de la forma de las distribuciones de P10 y P26. -->
+
+
+## Número de revistas leídas (`P10`)
+
+```{r tab-p10}
+# Estadísticos descriptivos de P10 por grupo y autopercepción (lectores de revistas)
+kable(desc_tabla("P10"), row.names = FALSE,
+      caption = "Número de revistas leídas (P10) por grupo y autopercepción")
+```
+
+```{r fig-p10, fig.height=2.4, fig.cap="Número de revistas leídas (P10) según autopercepción y grupo (se omiten del eje los valores mayores a 15; los puntos son personas)"}
+# Diagramas de caja de P10, un panel por grupo
+cajas("P10", ylim = c(0, 15), ylab = "Revistas (últimos 3 meses)")
+```
+
+### Interpretación
+
+<!-- Escribe aquí tu interpretación de la tabla y los diagramas de caja de P10. -->
+
+## Minutos continuos de lectura (`P26`)
+
+```{r tab-p26}
+# Estadísticos descriptivos de P26 por grupo y autopercepción (lectores de revistas)
+kable(desc_tabla("P26"), row.names = FALSE,
+      caption = "Minutos continuos de lectura (P26) por grupo y autopercepción (cualquier material)")
+```
+
+```{r fig-p26, fig.height=2.4, fig.cap="Minutos continuos de lectura (P26) según autopercepción y grupo (se omiten del eje los valores mayores a 120 minutos)"}
+# Diagramas de caja de P26, un panel por grupo
+cajas("P26", ylim = c(0, 120), ylab = "Minutos continuos")
+```
+
+### Interpretación
+
+<!-- Escribe aquí tu interpretación de la tabla y los diagramas de caja de P26. -->
+
+## Motivo de lectura: gusto o entretenimiento (`P11`)
+
+```{r fig-p11-gusto, fig.height=3.8, fig.cap="Lectores de revistas que leen por gusto o entretenimiento, por grupo y autopercepción (sobre las barras: % y personas/base)", fig.pos = "H"}
+# Porcentaje de lectores que leen por gusto o entretenimiento (P11 = 4) en cada grupo y autopercepción
+L$Gusto <- L$P11 == 4
+gusto_tab <- do.call(rbind, lapply(levels(L$Grupo), function(g) {
+  do.call(rbind, lapply(levels(L$Aut), function(a) {
+    d <- L[L$Grupo == g & L$Aut == a & !is.na(L$Gusto), ]
+    data.frame(Grupo = g, Aut = a, N = nrow(d), n = sum(d$Gusto), pct = pct(sum(d$Gusto), nrow(d)),
+               stringsAsFactors = FALSE)
+  }))
+}))
+gusto_tab$Grupo <- factor(gusto_tab$Grupo, levels = levels(L$Grupo))
+gusto_tab$Aut   <- factor(gusto_tab$Aut, levels = levels(L$Aut))
+
+# Barras por grupo; la etiqueta muestra el % y la base de casos (n con gusto / N)
+ggplot(gusto_tab, aes(x = Grupo, y = pct, fill = Aut)) +
+  geom_col(position = position_dodge(0.8), width = 0.7) +
+  geom_text(aes(label = paste0(fmt(pct, 1), " % (", n, "/", N, ")")),
+            position = position_dodge(0.8), vjust = -0.4, size = 2.6) +
+  scale_y_continuous(limits = c(0, 118)) +
+  labs(x = NULL, y = "% que lee por gusto", fill = NULL) +
+  theme_minimal() + theme(legend.position = "bottom")
+```
+
+### Interpretación
+
+<!-- Escribe aquí tu interpretación del gráfico de barras del motivo de lectura. -->
+
+
+# Resultados inferenciales
+
+## Intervalos de confianza para la diferencia de medias, sin y con ajuste de Bonferroni
+
+<!-- Escribe aquí por qué se calcula la brecha entre quienes se perciben lectores y quienes no en cada grupo, para ambas variables, y por qué se compara el intervalo individual con el ajustado por Bonferroni (el ajuste está en el chunk "analisis": cada intervalo usa alpha/k, con k = 6). -->
 
 ```{r tabla-claves}
 # Claves abreviadas de las 6 celdas, que se usan en las tablas y gráficos de los intervalos
 kable(data.frame(Clave = cel$clave, Grupo = cel$grupo, Autopercepción = cel$aut),
       row.names = FALSE, caption = "Claves de las celdas (grupo y autopercepción)")
 ```
-
-## Estrategia analítica
-
-<!-- Escribe aquí tu descripción de los métodos: intervalos de confianza para la diferencia de medias, ANOVA de dos factores y prueba de independencia. -->
-
-# Resultados
-
-## Intervalos de confianza para la diferencia de medias, sin y con ajuste de Bonferroni
-
-<!-- Escribe aquí por qué se calcula la brecha entre quienes se perciben lectores y quienes no en cada grupo, para ambas variables, y por qué se compara el intervalo individual con el ajustado por Bonferroni (el ajuste está en el chunk "analisis": cada intervalo usa alpha/k, con k = 6). -->
 
 ```{r tabla-ic}
 # Tabla comparativa de las 6 comparaciones (celda a - celda b):
@@ -395,10 +687,9 @@ if (pterm(art26, "Grupo:Aut") < alpha_val) {
 
 ```{r p11-calculo}
 # Motivo de lectura en dos categorías: por gusto (P11 = 4) u otro motivo
-W11 <- W[!is.na(W$P11), ]
-W11$Gusto  <- W11$P11 == 4
-W11$Motivo <- factor(ifelse(W11$Gusto, "Por gusto", "Otro motivo"), levels = c("Por gusto", "Otro motivo"))
-grupos11 <- levels(W11$Grupo)
+L11 <- L[!is.na(L$P11), ]
+L11$Motivo <- factor(ifelse(L11$P11 == 4, "Por gusto", "Otro motivo"), levels = c("Por gusto", "Otro motivo"))
+grupos11 <- levels(L11$Grupo)
 
 # prueba_indep: prueba ji cuadrada de independencia entre dos variables categóricas
 #   O = frecuencias observadas, E = esperadas (total de fila x total de columna / n)
@@ -417,23 +708,15 @@ prueba_indep <- function(f1, f2, dat, etiqueta) {
 # Cinco pruebas: autopercepción x motivo (todos), grupo x motivo (todos)
 # y autopercepción x motivo dentro de cada grupo
 t11 <- rbind(
-  prueba_indep("Aut", "Motivo", W11, "Autopercepción x motivo (todos los grupos)"),
-  prueba_indep("Grupo", "Motivo", W11, "Grupo x motivo (todos los casos)"),
+  prueba_indep("Aut", "Motivo", L11, "Autopercepción x motivo (todos los grupos)"),
+  prueba_indep("Grupo", "Motivo", L11, "Grupo x motivo (todos los casos)"),
   do.call(rbind, lapply(grupos11, function(g) {
-    prueba_indep("Aut", "Motivo", W11[W11$Grupo == g, ], paste0("Autopercepción x motivo: ", g))
+    prueba_indep("Aut", "Motivo", L11[L11$Grupo == g, ], paste0("Autopercepción x motivo: ", g))
   })))
 t11$Decision <- ifelse(t11$p <= alpha_val, "Rechaza H0", "No rechaza H0")   # se rechaza si p <= alpha
 
-# pct11: porcentaje que lee por gusto en cada celda (grupo x autopercepción)
-pct11 <- do.call(rbind, lapply(seq_len(nrow(cel)), function(i) {
-  d <- W11[W11$Grupo == cel$grupo[i] & W11$Aut == cel$aut[i], ]
-  data.frame(Grupo = cel$grupo[i], Aut = cel$aut[i], n = nrow(d), pct = 100 * mean(d$Gusto),
-             stringsAsFactors = FALSE)
-}))
-pct11$Grupo <- factor(pct11$Grupo, levels = grupos11)
-
 # Frecuencias observadas y esperadas de la prueba global (autopercepción x motivo)
-O_g <- table(Autopercepción = W11$Aut, Motivo = W11$Motivo)
+O_g <- table(Autopercepción = L11$Aut, Motivo = L11$Motivo)
 E_g <- outer(rowSums(O_g), colSums(O_g)) / sum(O_g)
 ```
 
@@ -441,17 +724,6 @@ E_g <- outer(rowSums(O_g), colSums(O_g)) / sum(O_g)
 # Tablas de frecuencias de la prueba global
 kable(as.data.frame.matrix(O_g), caption = "Frecuencias observadas: autopercepción x motivo de lectura")
 kable(as.data.frame.matrix(round(E_g, 2)), caption = "Frecuencias esperadas bajo independencia")
-
-# Porcentaje que lee por gusto en cada celda, con su tamaño de muestra
-cel_txt <- function(g, a) {
-  r <- pct11[pct11$Grupo == g & pct11$Aut == a, ]
-  paste0(fmt(r$pct, 1), " % (n = ", r$n, ")")
-}
-kable(data.frame(Grupo = grupos11,
-                 `No se percibe lector` = sapply(grupos11, cel_txt, a = a_no),
-                 `Se percibe lector`    = sapply(grupos11, cel_txt, a = a_si),
-                 check.names = FALSE),
-      row.names = FALSE, caption = "Porcentaje que lee revistas por gusto o entretenimiento, por grupo y autopercepción")
 
 # Resultados de las cinco pruebas ji cuadrada
 kable(data.frame(Prueba = t11$Prueba, n = t11$n, gl = t11$gl,
@@ -461,24 +733,14 @@ kable(data.frame(Prueba = t11$Prueba, n = t11$n, gl = t11$gl,
       format = "pipe", caption = "Pruebas ji cuadrada de independencia con el motivo de lectura (P11)")
 ```
 
-```{r fig-p11, fig.width=7, fig.height=3.6, fig.cap="Porcentaje que lee revistas por gusto o entretenimiento, por grupo y autopercepción lectora."}
-# Gráfico de barras con el porcentaje que lee por gusto en cada celda
-ggplot(pct11, aes(x = Grupo, y = pct, fill = Aut)) +
-  geom_col(position = position_dodge(0.8), width = 0.7) +
-  geom_text(aes(label = paste0(fmt(pct, 1), " %")), position = position_dodge(0.8), vjust = -0.4, size = 3.3) +
-  scale_y_continuous(limits = c(0, max(pct11$pct) * 1.15)) +
-  labs(x = NULL, y = "% que lee por gusto", fill = NULL) +
-  theme_minimal() + theme(legend.position = "bottom")
-```
-
 ### Interpretación
 
-<!-- Mira las tablas de frecuencias observadas y esperadas, el porcentaje que lee por gusto, la tabla "Pruebas ji cuadrada de independencia con el motivo de lectura (P11)" y la figura de barras. Escribe aquí tu interpretación. -->
+<!-- Mira las tablas de frecuencias observadas y esperadas, la tabla "Pruebas ji cuadrada de independencia con el motivo de lectura (P11)" y el gráfico de barras del motivo de lectura. Escribe aquí tu interpretación. -->
 
 # Conclusiones
 
 <!-- Escribe aquí tus conclusiones. -->
 
-## Limitaciones {-}
+## Limitaciones {.unnumbered}
 
 <!-- Escribe aquí las limitaciones del análisis. -->
