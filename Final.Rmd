@@ -432,9 +432,7 @@ spec$desc     <- paste(unname(sapply(spec$ka, etq_celda)), "-", unname(sapply(sp
 spec$variable <- ifelse(spec$v == "P26", "P26 (min)", "P10 (revistas)")  # etiqueta para tablas y paneles
 spec$comp     <- paste(spec$ka, spec$kb, sep = " - ")                    # p. ej. "MH-NL - MH-L"
 
-# Ajuste de Bonferroni: como se calculan k intervalos a la vez, la probabilidad de que
-# alguno falle crece. Para compensarlo, cada intervalo ajustado se construye con nivel de
-# significancia alpha/k, de modo que la confianza CONJUNTA sea de al menos 96 %
+# Ajuste de Bonferroni: como se calculan k intervalos a la vez, la probabilidad de que alguno falle crece. Para compensarlo, cada intervalo ajustado se construye con nivel de significancia alpha/k, de modo que la confianza CONJUNTA sea de al menos 96 %
 k_ic     <- nrow(spec)             # número de intervalos (6)
 alpha_ic <- alpha_val / k_ic       # significancia de cada intervalo ajustado (0.04 / 6)
 conf_ic  <- 1 - alpha_ic           # confianza de cada intervalo ajustado
@@ -958,3 +956,33 @@ kable(data.frame(Prueba = t11$Prueba, n = t11$n, gl = t11$gl,
 ## Limitaciones {.unnumbered}
 
 <!-- Escribe aquí las limitaciones del análisis. -->
+
+##  Verificacion de supuestos con ART
+
+```{r diagnostico-art, fig.width=7, fig.height=6, echo=FALSE}
+# Supón que guardas tus objetos art en una lista, por ejemplo:
+art_mods <- list(P10 = art10$m, P26 = art26$m)
+
+# Definimos el término a evaluar (ej. la interacción "Grupo:Aut" o un efecto principal)
+ter_interes <- "Grupo:Aut"
+
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+
+# Arriba: QQ-plots de los residuos del modelo ART
+for (v in names(art_mods)) {
+  m_term <- artlm(art_mods[[v]], ter_interes)
+  qqnorm(resid(m_term), main = paste("QQ-plot ART (", v, ")", sep=""), pch = 16, col = rgb(0, 0, 0, 0.4))
+  qqline(resid(m_term), col = "firebrick", lwd = 2)
+}
+
+# Abajo: Residuos vs. ajustados del modelo ART
+for (v in names(art_mods)) {
+  m_term <- artlm(art_mods[[v]], ter_interes)
+  plot(fitted(m_term), resid(m_term), main = paste("Residuos vs. ajust. ART (", v, ")", sep=""),
+       xlab = "Ajustados", ylab = "Residuos", pch = 16, col = rgb(0, 0, 0, 0.4))
+  abline(h = 0, lty = 2)
+}
+
+par(mfrow = c(1, 1))
+```
+
