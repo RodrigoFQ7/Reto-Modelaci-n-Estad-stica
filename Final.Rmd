@@ -67,45 +67,32 @@ header-includes:
 
 
 ```{r opciones, include=FALSE}
-# Opciones generales de todos los chunks:
-#   echo = FALSE        -> el código no se muestra en el reporte (solo tablas y gráficos)
-#   message/warning     -> se ocultan avisos de R
-#   fig.*               -> tamaño y alineación por defecto de los gráficos
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
                       fig.align = "center", fig.width = 6.5, fig.height = 3.8)
-# Las celdas vacías (NA) de las tablas se imprimen en blanco
 options(knitr.kable.NA = "")
 ```
 
 ```{r setup}
-# ---------------------------------------------------------------
-# Paquetes, parámetros, limpieza de datos y submuestras
-# (todo el filtrado se define aquí, una sola vez)
-# ---------------------------------------------------------------
-library(ggplot2)   # gráficos
-library(knitr)     # función kable() para las tablas
+library(ggplot2)
+library(knitr)
 library(kableExtra)
-library(ARTool)    # ANOVA con ajuste ART (Aligned Rank Transform)
-library(e1071) # simetría y curtosis
+library(ARTool)
+library(e1071)
 
-# ---- Parámetros del análisis ----
-alpha_val  <- 0.04                           # nivel de significancia
-conf_val   <- 1 - alpha_val                  # nivel de confianza (96 %)
-ruta_datos <- "datos/DatosEquipo6_v2.csv"    # archivo con los datos
+alpha_val  <- 0.04
+conf_val   <- 1 - alpha_val
+ruta_datos <- "datos/DatosEquipo6_v2.csv"
 
-# pct: porcentaje con un decimal (x = casos, n = base)
 pct <- function(x, n) round(100 * x / n, 1)
 
-# ---- Carga y validación ----
-stopifnot(file.exists(ruta_datos))           # se detiene si no encuentra el archivo
+# Carga y validación
+stopifnot(file.exists(ruta_datos))
 raw <- read.csv(ruta_datos)
-stopifnot(ncol(raw) == 7)                    # verifica que haya las 7 columnas esperadas
+stopifnot(ncol(raw) == 7)
 names(raw) <- c("anio", "H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")
 vars6 <- c("H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")
 
-# ---- Calidad de los datos (sobre los registros originales, antes de recodificar) ----
-# Vacios = valores vacíos; Fuera = valores fuera del rango válido de cada variable
-# (en P10, P11 y P26 el vacío es un pase de pregunta, no un dato faltante)
+# Calidad de los datos
 calidad <- data.frame(
   Variable = vars6,
   Vacios = colSums(is.na(raw[, vars6])),
@@ -117,27 +104,23 @@ calidad <- data.frame(
             sum(raw$P26 < 2 | raw$P26 > 360, na.rm = TRUE)),
   row.names = NULL)
 
-# ---- Recodificación: valores no identificados (0, 99, etc.) pasan a NA ----
+# Valores no identificados pasan a NA
 datos <- raw
 datos$H_LEC[!(datos$H_LEC %in% 1:4)]        <- NA
 datos$SEXO[!(datos$SEXO %in% 1:2)]          <- NA
 datos$COND_ACT[!(datos$COND_ACT %in% 1:10)] <- NA
-# P10, P11 y P26 no se recodifican: sus vacíos son pases de pregunta válidos
 
-# ---- Etiqueta de la condición lectora (H_LEC) ----
 datos$H_LEC_lbl <- factor(datos$H_LEC, levels = 1:4,
                           labels = c("1. Habitual", "2. Otros materiales",
                                      "3. Leyó sin percibirse lector", "4. No lector"))
 
-# ---- Factor 2: autopercepción lectora (H_LEC: 1 = sí, 3 = no) ----
+# -Autopercepción lectora (H_LEC: 1 = sí, 3 = no)
 datos$Aut <- NA
 datos$Aut[datos$H_LEC %in% 1] <- "Se percibe lector"
 datos$Aut[datos$H_LEC %in% 3] <- "No se percibe lector"
 datos$Aut <- factor(datos$Aut, levels = c("Se percibe lector", "No se percibe lector"))
 
-# ---- Factor 1: grupo ocupacional (sexo + condición de actividad) ----
-# SEXO: 1 = hombre, 2 = mujer. COND_ACT: 7 = quehaceres del hogar, 1 a 3 = trabaja
-# Quedan fuera (Grupo = NA): estudiantes, jubilados, otras condiciones y hombres dedicados al hogar
+# Grupo ocupacional (sexo + condición de actividad), quedan fuera estudiantes, jubilados, otras condiciones y hombres dedicados al hogar
 datos$Grupo <- NA
 datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 7]   <- "Mujer hogar"
 datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 1:3] <- "Mujer trabaja"
@@ -145,7 +128,7 @@ datos$Grupo[datos$SEXO %in% 1 & datos$COND_ACT %in% 1:3] <- "Hombre trabaja"
 datos$Grupo <- factor(datos$Grupo,
                       levels = c("Mujer hogar", "Mujer trabaja", "Hombre trabaja"))
 
-# ---- Submuestras (se usan en todo el documento) ----
+# Submuestras
 # U: los 3 grupos de comparación con H_LEC válido
 # A: U con autopercepción definida (H_LEC = 1 o 3)
 # L: lectores de revistas (P10 > 0): base del análisis de P10, P26, P11 y de la inferencia
@@ -157,10 +140,7 @@ L$Aut   <- droplevels(L$Aut)
 ```
 
 ```{r helpers}
-# ---------------------------------------------------------------
-# Funciones auxiliares (formato, tablas y gráficos descriptivos,
-# tablas del ANOVA ART)
-# ---------------------------------------------------------------
+# Funciones auxiliares
 
 # fmt: número con d decimales como texto
 fmt <- function(x, d = 2) formatC(x, format = "f", digits = d)
