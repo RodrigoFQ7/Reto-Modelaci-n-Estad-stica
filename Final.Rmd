@@ -459,7 +459,7 @@ ggplot(fd, aes(x = Dif, y = Comparacion, color = Incluye)) +
 
 Se evalúa si la proporción de personas que se perciben lectoras difiere entre grupos y entre sexos. Para cada par se plantea $H_0: p_1 = p_2$ frente a $H_1: p_1 \neq p_2$ con el estadístico
 $$Z = \frac{\hat{p}_1-\hat{p}_2}{\sqrt{\hat{p}(1-\hat{p})\left(\frac{1}{n_1}+\frac{1}{n_2}\right)}}, \qquad \hat{p}=\frac{x_1+x_2}{n_1+n_2},$$
-y se rechaza $H_0$ si $p \le \alpha = 0.04$. La proporción de quienes no se perciben lectores es el complemento, por lo que da exactamente el mismo valor $p$ y no se repite. Como las tres comparaciones entre grupos se hacen a la vez, se reporta además el valor $p$ ajustado por Holm.
+y se rechaza $H_0$ si $p \le \alpha = 0.04$. La proporción de quienes no se perciben lectores es el complemento, por lo que da exactamente el mismo valor $p$ y no se repite. Las pruebas se hacen con `prop.test(c(x1, x2), c(n1, n2), alternative = "two.sided", correct = FALSE)`.
 
 ```{r tabla-prop}
 # Tablas de contingencia en L (también se usan en la ji cuadrada)
@@ -468,25 +468,24 @@ t_sexo <- table(L$Sexo, L$Aut)        # sexo x autopercepción
 t_cond <- table(L$Cond_lab, L$Aut)    # condición laboral x autopercepción
 
 # Proporción que SE PERCIBE LECTOR en cada grupo (3 comparaciones) y por sexo
+# prueba_prop usa prop.test(c(x1, x2), c(n1, n2), alternative = "two.sided", correct = FALSE)
+# (con conf.level = conf_val para que el IC de la diferencia sea al 96 %)
 pp_grupos <- do.call(rbind, lapply(pares, function(p)
   prueba_prop(c(t_aut[p[1], si], t_aut[p[2], si]),
               c(sum(t_aut[p[1], ]), sum(t_aut[p[2], ])),
               paste(p[1], "-", p[2]))))
-pp_grupos$p_Holm <- p.adjust(pp_grupos$p, method = "holm")   # 3 pruebas a la vez
 
 pp_sexo <- prueba_prop(c(t_sexo["Mujer", si], t_sexo["Hombre", si]),
                        c(sum(t_sexo["Mujer", ]), sum(t_sexo["Hombre", ])),
                        "Mujer - Hombre")
-pp_sexo$p_Holm <- NA
 
 tp <- rbind(pp_grupos, pp_sexo)
-tp$Decision <- ifelse(is.na(tp$p_Holm), dec(tp$p), dec(tp$p_Holm))
+tp$Decision <- dec(tp$p)
 tp$p <- fp(tp$p)
-tp$p_Holm <- ifelse(is.na(tp$p_Holm), "", fp(tp$p_Holm))
 names(tp) <- c("Comparación", "n1", "n2", "% 1", "% 2", "Dif (pp)", "LI (pp)", "LS (pp)",
-               "Z", "p", "p Holm", "Decisión")
+               "Z", "p", "Decisión")
 tab_ancha(tp, paste0("Pruebas de dos proporciones: % que se percibe lector (base L: lectores de revistas). % 1 y % 2 = porcentaje en el grupo 1 y 2; Dif, LI y LS = diferencia e IC al ", ic_txt,
-                     " en puntos porcentuales (pp). La decisión entre grupos usa p Holm; la de sexo usa p"),
+                     " en puntos porcentuales (pp)"),
           digits = 2)
 ```
 
