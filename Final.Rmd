@@ -33,7 +33,7 @@ header-includes:
 - \AtBeginEnvironment{longtable}{\footnotesize}
 - \AtBeginEnvironment{table}{\footnotesize}
 ---
-
+ 
 \begin{titlepage}
 		\centering
 		
@@ -58,117 +58,90 @@ header-includes:
 		
 		\vspace{0.5cm}
 		
-		
 		\vfill
 		
 		{\large \today\par}
 		
 \end{titlepage}
-
+ 
 
 ```{r opciones, include=FALSE}
-# ---------------------------------------------------------------
-# OPCIONES GENERALES DE KNITR (se aplican a todos los chunks)
-# ---------------------------------------------------------------
-#   echo = FALSE   -> el código NO se imprime en el reporte (solo salen tablas y gráficos)
-#   message = FALSE-> se ocultan los mensajes de los paquetes (p. ej. "Loading package...")
-#   warning = FALSE-> se ocultan las advertencias de R
-#   fig.align      -> los gráficos se centran en la página
-#   fig.width/height -> tamaño por defecto de los gráficos, en pulgadas
-#                       (cada chunk puede sobrescribirlo con sus propios valores)
+# Opciones generales de los chunks: no mostrar código ni mensajes
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
                       fig.align = "center", fig.width = 6.5, fig.height = 3.8)
-
-# Las celdas vacías (NA) de las tablas hechas con kable() se imprimen en blanco
-# en lugar de escribir la palabra "NA"
 options(knitr.kable.NA = "")
 ```
 
 ```{r setup}
-# ---------------------------------------------------------------
-# PAQUETES, PARÁMETROS, LIMPIEZA DE DATOS Y SUBMUESTRAS
-# Todo el filtrado se define aquí, una sola vez; el resto del documento
-# solo usa los objetos U, A y L que se construyen al final de este chunk.
-# ---------------------------------------------------------------
+# ===============================================================
+# 1. PAQUETES Y PARÁMETROS
+# ===============================================================
+# (instalar una vez si faltan: install.packages("BSDA"))
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+library(BSDA)      # z.test para los intervalos de confianza
 
-# ---- Paquetes ----
-library(ggplot2)      # gráficos de los intervalos y de las barras de P11
-library(knitr)        # función kable() para imprimir tablas
-library(kableExtra)   # kable_styling() y column_spec() para dar formato a las tablas en LaTeX
-library(ARTool)       # ANOVA con ajuste ART (Aligned Rank Transform): art(), art.con()
-library(e1071)        # skewness() (asimetría) y kurtosis() (curtosis)
+alpha_val  <- 0.04                                  # nivel de significancia
+conf_val   <- 1 - alpha_val                         # nivel de confianza
+ic_txt     <- paste0(round(100 * conf_val), " %")   # "96 %" para títulos
+ruta_datos <- "datos/DatosEquipo6_v2.csv"
+si         <- "Se percibe lector"                   # categoría de interés de la autopercepción
+```
 
-# ---- Parámetros del análisis ----
-alpha_val  <- 0.04                           # nivel de significancia usado en TODAS las pruebas
-conf_val   <- 1 - alpha_val                  # nivel de confianza = 0.96 (96 %)
-ruta_datos <- "datos/DatosEquipo6_v2.csv"    # ruta (relativa al Rmd) del archivo con los datos
+```{r datos}
+# ===============================================================
+# 2. CARGA, CALIDAD Y PREPARACIÓN DE LOS DATOS
+# ===============================================================
+pct <- function(x, n) round(100 * x / n, 1)   # porcentaje con 1 decimal
 
-# pct: convierte una frecuencia en porcentaje con un decimal
-#   x = número de casos, n = base (total sobre el que se calcula el porcentaje)
-pct <- function(x, n) round(100 * x / n, 1)
-
-# ---- Carga y validación del archivo ----
-stopifnot(file.exists(ruta_datos))           # detiene el documento si el CSV no está en la ruta
-raw <- read.csv(ruta_datos)                  # 'raw' = datos originales, sin ninguna modificación
-stopifnot(ncol(raw) == 7)                    # verifica que el archivo tenga las 7 columnas esperadas
-# Se renombran las columnas para asegurar que tengan los nombres que usa el código:
-#   anio = año de la encuesta; H_LEC = condición lectora (INEGI); SEXO; COND_ACT = condición de actividad;
-#   P10 = revistas leídas en 3 meses; P11 = motivo de lectura de revistas; P26 = minutos continuos de lectura
+# --- Carga y validación del archivo ---
+stopifnot(file.exists(ruta_datos))
+raw <- read.csv(ruta_datos)
+stopifnot(ncol(raw) == 7)
 names(raw) <- c("anio", "H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")
-vars6 <- c("H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")   # las 6 variables de análisis
+vars5 <- c("H_LEC", "SEXO", "COND_ACT", "P10", "P26")   # variables analizadas
 
-# ---- Calidad de los datos (sobre los registros originales, antes de recodificar) ----
-# Vacios = cantidad de valores NA de cada variable
-# Fuera  = cantidad de valores fuera del rango válido de cada variable
-#   (en P10, P11 y P26 el vacío es un "pase de pregunta", no un dato faltante)
-# Cada elemento de c(...) de 'Fuera' corresponde, en orden, a una variable de vars6:
-#   H_LEC   : válidos 1 a 4            -> cuenta lo que NO esté en 1:4 (el NA se tolera)
-#   SEXO    : válidos 1 y 2
-#   COND_ACT: válidos 1 a 10
-#   P10     : el diccionario dice máximo 25 revistas -> cuenta los mayores a 25
-#   P11     : válidos 1 a 6
-#   P26     : el diccionario dice de 2 a 360 minutos -> cuenta los menores a 2 o mayores a 360
+# --- Calidad de los datos (sobre todos los registros) ---
 calidad <- data.frame(
-  Variable = vars6,
-  Vacios = colSums(is.na(raw[, vars6])),
+  Variable = vars5,
+  Vacios = colSums(is.na(raw[, vars5])),
   Fuera = c(sum(!(raw$H_LEC %in% c(1:4, NA))),
             sum(!(raw$SEXO %in% c(1:2, NA))),
             sum(!(raw$COND_ACT %in% c(1:10, NA))),
             sum(raw$P10 > 25, na.rm = TRUE),
-            sum(!(raw$P11 %in% c(1:6, NA))),
             sum(raw$P26 < 2 | raw$P26 > 360, na.rm = TRUE)),
   row.names = NULL)
 
-# ---- Recodificación: valores no identificados (0, 99, etc.) pasan a NA ----
-# Se trabaja sobre una copia ('datos') para conservar 'raw' intacto.
-# Todo valor que no esté en el rango válido se convierte en NA.
+# --- Limpieza: valores no identificados pasan a NA ---
 datos <- raw
 datos$H_LEC[!(datos$H_LEC %in% 1:4)]        <- NA
 datos$SEXO[!(datos$SEXO %in% 1:2)]          <- NA
 datos$COND_ACT[!(datos$COND_ACT %in% 1:10)] <- NA
-# P10, P11 y P26 NO se recodifican: sus vacíos son pases de pregunta válidos
-# (quien no leyó revistas no contesta P11, por ejemplo)
 
-# ---- Etiqueta de la condición lectora (H_LEC) ----
-# factor() convierte el código numérico en una variable categórica con nombres legibles
+# --- Variables construidas ---
 datos$H_LEC_lbl <- factor(datos$H_LEC, levels = 1:4,
                           labels = c("1. Habitual", "2. Otros materiales",
                                      "3. Leyó sin percibirse lector", "4. No lector"))
 
-# ---- Factor 2: autopercepción lectora ----
-# Solo se usan dos categorías de H_LEC:
-#   1 = lector habitual (se percibe lector)
-#   3 = leyó pero no se percibe lector
-# Las categorías 2 y 4 quedan como NA y se excluyen de A y L
+# Autopercepción lectora (H_LEC: 1 = se percibe lector, 3 = no se percibe lector)
 datos$Aut <- NA
 datos$Aut[datos$H_LEC %in% 1] <- "Se percibe lector"
 datos$Aut[datos$H_LEC %in% 3] <- "No se percibe lector"
 datos$Aut <- factor(datos$Aut, levels = c("Se percibe lector", "No se percibe lector"))
 
-# ---- Factor 1: grupo ocupacional (sexo + condición de actividad) ----
-# SEXO: 1 = hombre, 2 = mujer. COND_ACT: 7 = quehaceres del hogar, 1 a 3 = trabaja
-# Se usa "%in%" (en lugar de "==") porque con NA devuelve FALSE y no rompe la asignación.
-# Quedan fuera (Grupo = NA): estudiantes, jubilados, otras condiciones y hombres dedicados al hogar
+# Sexo con etiquetas
+datos$Sexo <- factor(datos$SEXO, levels = 1:2, labels = c("Hombre", "Mujer"))
+
+# Condición laboral: trabaja (hombres y mujeres) vs hogar (solo mujeres;
+# los hombres dedicados al hogar quedan fuera)
+datos$Cond_lab <- NA
+datos$Cond_lab[datos$COND_ACT %in% 1:3] <- "Trabaja"
+datos$Cond_lab[datos$COND_ACT %in% 7 & datos$SEXO %in% 2] <- "Hogar"
+datos$Cond_lab <- factor(datos$Cond_lab, levels = c("Trabaja", "Hogar"))
+
+# Grupo ocupacional (sexo + condición de actividad); quedan fuera estudiantes,
+# jubilados, otras condiciones y hombres dedicados al hogar
 datos$Grupo <- NA
 datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 7]   <- "Mujer hogar"
 datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 1:3] <- "Mujer trabaja"
@@ -176,379 +149,186 @@ datos$Grupo[datos$SEXO %in% 1 & datos$COND_ACT %in% 1:3] <- "Hombre trabaja"
 datos$Grupo <- factor(datos$Grupo,
                       levels = c("Mujer hogar", "Mujer trabaja", "Hombre trabaja"))
 
-# ---- Submuestras (anidadas; se usan en todo el documento) ----
-# U: personas de los 3 grupos con H_LEC válido
-# A: U restringida a quienes tienen autopercepción definida (H_LEC = 1 o 3)
-# L: lectores de revistas (P10 > 0) dentro de A -> base del análisis de P10, P26, P11 y de la inferencia
-U <- subset(datos, !is.na(H_LEC) & !is.na(Grupo))
-A <- subset(U, H_LEC %in% c(1, 3))
-L <- subset(A, P10 > 0)
-# droplevels() elimina niveles de factor que ya no tienen casos, para que no aparezcan celdas vacías
-L$Grupo <- droplevels(L$Grupo)
-L$Aut   <- droplevels(L$Aut)
+# --- Bases de análisis (cada sección indica cuál usa) ---
+# U: UNIVERSO = personas de los 3 grupos con H_LEC válido
+# A: UNIVERSO con autopercepción definida (H_LEC = 1 o 3)
+# L: LECTORES DE REVISTAS = personas de A con P10 > 0 (base de todas las pruebas)
+U <- droplevels(subset(datos, !is.na(H_LEC) & !is.na(Grupo)))
+A <- droplevels(subset(U, H_LEC %in% c(1, 3)))
+L <- droplevels(subset(A, P10 > 0))
 ```
 
 ```{r helpers}
-# ---------------------------------------------------------------
-# FUNCIONES AUXILIARES
-# (formato de números, tablas y gráficos descriptivos, tablas de los ANOVA)
-# Este chunk solo DEFINE funciones; no imprime nada.
-# ---------------------------------------------------------------
+# ===============================================================
+# 3. FUNCIONES AUXILIARES
+# ===============================================================
 
-# fmt: número con d decimales, devuelto como texto (por defecto 2 decimales)
+# fmt: número con d decimales como texto
 fmt <- function(x, d = 2) formatC(x, format = "f", digits = d)
 
-# fp: formatea un valor p con 4 decimales; si es menor a 0.0001 escribe "< 0.0001"
-#     (así nunca se imprime un "0.0000", que sería engañoso)
+# fp: valor p con 4 decimales ("< 0.0001" si es muy pequeño)
 fp  <- function(p) ifelse(p < 0.0001, "< 0.0001", formatC(p, format = "f", digits = 4))
 
-# dec: decisión de la prueba comparando el valor p contra alpha_val (0.04)
+# dec: decisión de la prueba con el nivel de significancia alpha_val
 dec <- function(p) ifelse(p < alpha_val, "Rechaza H0", "No rechaza H0")
 
-# desc_global: estadísticos descriptivos generales de las variables 'vars' (sobre L).
-#   vars    = vector con los nombres de las variables, p. ej. c("P10", "P26")
-#   limites = lista opcional con un valor máximo por variable para excluir valores
-#             extremos, p. ej. list(P10 = 15, P26 = 180)
-desc_global <- function(vars, limites = NULL) {
-  
-  # lapply() corre la función para cada variable y rbind() pega los resultados en un solo data frame
-  out <- do.call(rbind, lapply(vars, function(v) {
-    
-    # Extrae la columna de la variable actual desde el data frame global 'L'
-    x <- L[[v]]
-    
-    # Si se dio un límite para esta variable, descarta los valores que lo superan
-    if (!is.null(limites) && v %in% names(limites)) {
-      x <- x[x <= limites[[v]]]
-    }
-    
-    # Elimina los NA para que mean(), sd(), etc. no devuelvan NA
-    x <- x[!is.na(x)]
-    
-    # Un renglón con los estadísticos de esta variable
-    data.frame(
-      Variable = v,                                   # nombre de la variable
-      N = length(x),                                  # casos válidos
-      Media = round(mean(x), 1),                      # media aritmética
-      DE = round(sd(x), 1),                           # desviación estándar muestral
-      Mín = min(x),                                   # mínimo
-      Q1 = quantile(x, 0.25, names = FALSE),          # primer cuartil (percentil 25)
-      Mediana = median(x),                            # mediana (percentil 50)
-      Q3 = quantile(x, 0.75, names = FALSE),          # tercer cuartil (percentil 75)
-      Máx = max(x),                                   # máximo
-      Asimetría = round(e1071::skewness(x), 2),       # asimetría (>0 = cola a la derecha)
-      Curtosis = round(e1071::kurtosis(x), 2),        # curtosis en exceso (0 = como la normal)
-      stringsAsFactors = FALSE                        # no convertir texto en factores
-    )
-  }))
-  
-  out   # devuelve la tabla con todas las variables
+# tab_ancha: tabla que en PDF se reduce para caber en el ancho de la página
+tab_ancha <- function(df, caption, digits = 3) {
+  if (knitr::is_latex_output()) {
+    kable(df, format = "latex", booktabs = TRUE, digits = digits, row.names = FALSE,
+          caption = caption) %>%
+      kable_styling(latex_options = c("scale_down", "hold_position"))
+  } else {
+    kable(df, digits = digits, row.names = FALSE, caption = caption)
+  }
 }
 
-# desc_tabla: estadísticos descriptivos de la variable v (P10 o P26) en L,
-#             separados por grupo y por autopercepción (las 6 celdas del diseño)
+# ---------------- Descriptivos (base L) ----------------
+
+# desc_tabla: estadísticos descriptivos de v (P10 o P26) en L por grupo y autopercepción
 desc_tabla <- function(v) {
-  # aggregate() aplica la función a cada combinación Grupo x Aut
   r <- aggregate(L[[v]], by = list(Aut = L$Aut, Grupo = L$Grupo), FUN = function(x) {
-    x <- x[!is.na(x)]                     # ignora los vacíos de la variable
+    x <- x[!is.na(x)]
     c(N = length(x), Media = round(mean(x), 1), DE = round(sd(x), 1), Min = min(x),
       Q1 = quantile(x, 0.25, names = FALSE), Mediana = median(x),
       Q3 = quantile(x, 0.75, names = FALSE), Max = max(x))
   })
-  # aggregate() deja los estadísticos en una columna-matriz 'x'; as.data.frame() la despliega
-  out <- cbind(r[, c("Grupo", "Aut")], as.data.frame(r$x))
-  names(out) <- c("Grupo", "Autopercepción", "N", "Media", "DE", "Mín", "Q1", "Mediana", "Q3", "Máx")
-  out
+  r <- r[order(r$Grupo, r$Aut), ]
+  data.frame(Variable = v, Grupo = r$Grupo,
+             `Se percibe lector` = ifelse(r$Aut == si, "Sí", "No"),
+             as.data.frame(r$x),
+             check.names = FALSE, row.names = NULL)
 }
 
-# cajas: diagramas de caja de la variable v por autopercepción, un panel por grupo
-#   v    = nombre de la variable ("P10" o "P26")
-#   ylim = límites del eje vertical (se recortan los valores extremos solo en el dibujo)
-#   ylab = etiqueta del eje vertical
-# Los puntos grises son las personas (con "jitter" para que no se encimen)
+# cajas: diagramas de caja de v por autopercepción, un panel por grupo (base L)
 cajas <- function(v, ylim, ylab) {
-  par(mfrow = c(1, 3), mar = c(5, 4, 3, 1), mgp = c(3, 2, 0))   # 3 paneles en una fila
+  par(mfrow = c(1, 3), mar = c(5, 4, 3, 1), mgp = c(3, 2, 0))
   for (g in levels(L$Grupo)) {
-    d <- subset(L, Grupo == g)                                    # personas del grupo g
-    # Etiquetas del eje x con el tamaño de cada caja: "(N=...)"
+    d <- subset(L, Grupo == g)
     nombres <- paste0(c("Se percibe\nlector", "No se percibe\nlector"), "\n(N=", table(d$Aut), ")")
-    boxplot(d[[v]] ~ d$Aut, names = nombres, ylim = ylim, outline = FALSE,   # outline = FALSE: sin puntos atípicos en la caja
+    boxplot(d[[v]] ~ d$Aut, names = nombres, ylim = ylim, outline = FALSE,
             col = c("#F8766D80", "#00BFC480"), main = g, xlab = "", ylab = ylab, cex.axis = 0.8)
     stripchart(d[[v]] ~ d$Aut, vertical = TRUE, method = "jitter", jitter = 0.15,
-               pch = 16, cex = 0.4, col = rgb(0, 0, 0, 0.25), add = TRUE)   # add = TRUE: se dibuja encima de las cajas
+               pch = 16, cex = 0.4, col = rgb(0, 0, 0, 0.25), add = TRUE)
   }
-  par(mfrow = c(1, 1))   # restaura un gráfico por página
+  par(mfrow = c(1, 1))
 }
 
-# pterm: extrae el valor p de un efecto ("Grupo", "Aut" o "Grupo:Aut")
-#        de la tabla del ANOVA ART guardada en res$tabla
-pterm <- function(res, term) res$tabla$`Pr(>F)`[res$tabla$Term == term]
+# ---------------- Inferencia (base L) ----------------
 
-# disp_clasico: arma para imprimir la tabla del ANOVA CLÁSICO (objeto aov) con el mismo
-# formato que la del ART, para poder compararlas lado a lado.
-#   m = modelo ajustado con aov()
-# summary(m)[[1]] es una tabla con una fila por efecto y una última fila "Residuals".
-# Columnas de esa tabla: Df, Sum Sq (SC), Mean Sq (CM), F value, Pr(>F)
-disp_clasico <- function(m) {
-  a  <- summary(m)[[1]]                 # tabla ANOVA del modelo
-  n  <- nrow(a)                         # la última fila (n) son los residuales
-  ef <- a[-n, ]                         # filas de los efectos: Grupo, Aut, Grupo:Aut
-  re <- a[n, ]                          # fila de residuales (error)
-  data.frame(Efecto = gsub(":", " x ", trimws(rownames(ef))),   # trimws() quita espacios que aov() agrega al nombre
-             gl = ef$Df,                                         # grados de libertad del efecto
-             gl_residual = re$Df,                                # grados de libertad del error
-             SC = round(ef$`Sum Sq`, 2),                         # suma de cuadrados del efecto
-             CM = round(ef$`Mean Sq`, 2),                        # cuadrado medio = SC / gl
-             F = round(ef$`F value`, 3),                         # estadístico F = CM efecto / CM error
-             p = fp(ef$`Pr(>F)`),                                # valor p formateado
-             # eta cuadrada parcial = SC efecto / (SC efecto + SC residual)
-             eta2_parcial = round(ef$`Sum Sq` / (ef$`Sum Sq` + re$`Sum Sq`), 4),
-             Decision = dec(ef$`Pr(>F)`),                        # rechaza o no H0 con alpha = 0.04
+# Las tres comparaciones entre grupos (grupo 1 - grupo 2)
+pares <- list(c("Mujer hogar", "Mujer trabaja"),
+              c("Mujer hogar", "Hombre trabaja"),
+              c("Hombre trabaja", "Mujer trabaja"))
+
+# obtener_datos_intervalo: IC para la diferencia de medias (muestras grandes, varianzas
+#   desconocidas: z.test con las desviaciones estándar muestrales)
+obtener_datos_intervalo <- function(x, y, comparacion, variable) {
+  x <- x[!is.na(x)]
+  y <- y[!is.na(y)]
+  res <- z.test(x = x, y = y, sigma.x = sd(x), sigma.y = sd(y), conf.level = conf_val)
+  data.frame(Variable = variable, Comparacion = comparacion,
+             n1 = length(x), n2 = length(y),
+             Dif = unname(res$estimate[1] - res$estimate[2]),
+             LI = res$conf.int[1], LS = res$conf.int[2],
+             Incluye_0 = res$conf.int[1] <= 0 & res$conf.int[2] >= 0,
              stringsAsFactors = FALSE)
 }
 
-# disp_art: arma para imprimir la tabla del ANOVA con ajuste ART (misma estructura que disp_clasico,
-# pero sin SC ni CM). eta2_p ya viene calculada dentro de art_anova().
-#   a = data frame con la tabla ANOVA del modelo ART (art10$tabla o art26$tabla)
-disp_art <- function(a) {
-  data.frame(Efecto = gsub(":", " x ", a$Term), gl = a$Df, gl_residual = a$Df.res,
-             F = round(a$`F value`, 3), p = fp(a$`Pr(>F)`),
-             eta2_parcial = round(a$eta2_p, 4), Decision = dec(a$`Pr(>F)`),
+# ic_variable: los 3 intervalos entre grupos para la variable v (en L)
+ic_variable <- function(v, etiqueta) {
+  do.call(rbind, lapply(pares, function(p)
+    obtener_datos_intervalo(L[[v]][L$Grupo == p[1]], L[[v]][L$Grupo == p[2]],
+                            paste(p[1], "-", p[2]), etiqueta)))
+}
+
+# prueba_prop: prueba z de dos proporciones con prop.test (H0: p1 = p2), bilateral,
+#   sin corrección. x = éxitos de los dos grupos, n = tamaños. Devuelve proporciones,
+#   diferencia con su IC (confianza conf_val), Z con signo y valor p
+prueba_prop <- function(x, n, etiqueta) {
+  t   <- prop.test(x, n, alternative = "two.sided", conf.level = conf_val, correct = FALSE)
+  dif <- unname(t$estimate[1] - t$estimate[2])
+  data.frame(Comparacion = etiqueta,
+             n1 = n[1], n2 = n[2],
+             p1 = 100 * x[1] / n[1], p2 = 100 * x[2] / n[2],
+             Dif = 100 * dif, LI = 100 * t$conf.int[1], LS = 100 * t$conf.int[2],
+             Z = sign(dif) * sqrt(unname(t$statistic)), p = t$p.value,
              stringsAsFactors = FALSE)
 }
 
-# pterm_aov: valor p de un efecto ("Grupo", "Aut" o "Grupo:Aut") en un modelo aov()
-#   (se usa para decidir si se imprimen las comparaciones por pares del ANOVA con log)
-pterm_aov <- function(m, term) {
-  a <- summary(m)[[1]]                                   # tabla ANOVA del modelo
-  a[trimws(rownames(a)) == term, "Pr(>F)"]               # trimws() quita los espacios que aov() agrega a los nombres
-}
-
-# posthoc_tukey: comparaciones por pares de un efecto con la prueba de Tukey (TukeyHSD)
-# sobre un modelo aov() ajustado con la variable en escala logarítmica.
-#   m      = modelo aov (con log de la variable como respuesta)
-#   efecto = "Grupo" o "Grupo:Aut"
-# Dif está en escala log; exp(Dif) es la RAZÓN de medias geométricas (p. ej. 1.20 = 20 % más)
-posthoc_tukey <- function(m, efecto) {
-  d <- TukeyHSD(m, efecto)[[efecto]]                     # matriz con diff, lwr, upr y p adj
-  data.frame(Comparacion = rownames(d), Dif_log = round(d[, "diff"], 3),
-             Razon = round(exp(d[, "diff"]), 3),         # regresa la diferencia log a razón multiplicativa
-             p_ajustado = fp(d[, "p adj"]), stringsAsFactors = FALSE, row.names = NULL)
-}
-
-# posthoc_art: comparaciones por pares de un efecto con el procedimiento ART-C
-# (ajuste de Tukey para controlar el error en comparaciones múltiples).
-#   m      = modelo ART
-#   efecto = "Grupo" o "Grupo:Aut"
-# Los estimados están en la escala de RANGOS ALINEADOS, no en las unidades originales
-posthoc_art <- function(m, efecto) {
-  d <- as.data.frame(art.con(m, efecto, adjust = "tukey"))
-  data.frame(Comparacion = d$contrast, Estimado = round(d$estimate, 2),
-             p_ajustado = fp(d$p.value), stringsAsFactors = FALSE)
-}
-```
-
-```{r analisis}
-# ---------------------------------------------------------------
-# CÁLCULOS DE LA INFERENCIA
-# Este chunk no imprime nada; las tablas y gráficos se muestran en los chunks de abajo.
-# ---------------------------------------------------------------
-
-# =====================  1) ANOVA clásico  =====================
-# ANOVA de dos factores (Grupo y Aut) con interacción (Grupo * Aut = Grupo + Aut + Grupo:Aut).
-# Se ajusta para P10 y P26. Sirve para dos cosas:
-#   a) sus residuos se usan para revisar normalidad y homocedasticidad (gráficos de supuestos);
-#   b) su tabla se muestra junto a la del ART, para comparar ambos resultados.
-# Se excluyen los NA de la variable respuesta para que aov() trabaje con casos completos.
-mod_clasico <- list(
-  P10 = aov(P10 ~ Grupo * Aut, data = L[!is.na(L$P10), ]),
-  P26 = aov(P26 ~ Grupo * Aut, data = L[!is.na(L$P26), ])
-)
-
-# =====================  1b) ANOVA clásico con transformación logarítmica  =====================
-# Alternativa al ART: se toma el logaritmo natural de la respuesta para reducir la asimetría
-# a la derecha y estabilizar la varianza (heterocedasticidad), y luego se corre el ANOVA clásico.
-# log() solo está definido para valores > 0: P10 >= 1 (L son lectores de revistas) y
-# P26 >= 2 según el diccionario, así que no hace falta sumar una constante.
-# Los efectos se interpretan sobre la media geométrica; exp(diferencia) es una razón.
-stopifnot(all(L$P10 > 0, na.rm = TRUE), all(L$P26 > 0, na.rm = TRUE))   # verifica que el log sea válido
-mod_log <- list(
-  P10 = aov(log(P10) ~ Grupo * Aut, data = L[!is.na(L$P10), ]),
-  P26 = aov(log(P26) ~ Grupo * Aut, data = L[!is.na(L$P26), ])
-)
-
-# =====================  2) ANOVA con ajuste ART  =====================
-# El ART (Aligned Rank Transform) permite un ANOVA factorial sin exigir normalidad:
-# alinea los datos quitando los efectos que no se están probando, los convierte en rangos
-# y sobre esos rangos corre el ANOVA.
-# art_anova: para la variable v (P10 o P26)
-#   1) ajusta el modelo ART con Grupo, Aut e interacción
-#   2) obtiene la tabla ANOVA sobre los rangos alineados
-#   3) calcula la eta cuadrada parcial de cada efecto = SC efecto / (SC efecto + SC residual)
-# Devuelve una lista con la variable, los datos usados, el modelo (m) y la tabla (tabla)
-art_anova <- function(v) {
-  dat <- L[!is.na(L[[v]]), ]                                   # casos con v observada
-  m   <- art(as.formula(paste0(v, " ~ Grupo * Aut")), data = dat)   # arma la fórmula como texto y ajusta ART
-  a   <- as.data.frame(anova(m))                               # tabla ANOVA (una fila por efecto)
-  # verifica que la tabla traiga las columnas de sumas de cuadrados que se necesitan
-  stopifnot(all(c("Sum Sq", "Sum Sq.res") %in% names(a)))
-  a$eta2_p <- a$`Sum Sq` / (a$`Sum Sq` + a$`Sum Sq.res`)       # eta cuadrada parcial por efecto
-  list(v = v, dat = dat, m = m, tabla = a)
-}
-
-art10 <- art_anova("P10")   # número de revistas
-art26 <- art_anova("P26")   # minutos continuos de lectura
-
-# =====================  3) Intervalos de confianza para la diferencia de medias  =====================
-a_no <- "No se percibe lector"
-a_si <- "Se percibe lector"
-
-# cel: las 6 celdas del diseño (grupo x autopercepción) con una clave abreviada
-#   MH = mujer hogar, MT = mujer trabaja, HT = hombre trabaja
-#   NL = no se percibe lector, L = se percibe lector
-# rep(..., 2) repite los 3 grupos para cada autopercepción; rep(..., each = 3) repite cada
-# autopercepción 3 veces (una por grupo), de modo que las claves y los vectores quedan alineados
-cel <- data.frame(clave = c("MH-NL", "MT-NL", "HT-NL", "MH-L", "MT-L", "HT-L"),
-                  grupo = rep(c("Mujer hogar", "Mujer trabaja", "Hombre trabaja"), 2),
-                  aut   = rep(c(a_no, a_si), each = 3), stringsAsFactors = FALSE)
-
-# etq_celda: nombre legible de una celda a partir de su clave (para las descripciones)
-etq_celda <- function(k) {
-  paste0(cel$grupo[cel$clave == k], " (", ifelse(cel$aut[cel$clave == k] == a_no, "no lector", "lector"), ")")
-}
-
-# spec: especificación de las 6 comparaciones. Cada una es (celda a - celda b) = la brecha
-# entre quienes NO se perciben lectores y quienes SÍ, dentro de cada grupo.
-# Para cada variable (P26, luego P10) se comparan los 3 grupos -> 6 intervalos:
-#   IC1 a IC3 = P26 ; IC4 a IC6 = P10
-spec <- do.call(rbind, lapply(c("P26", "P10"), function(v) {
-  data.frame(v = v,
-             ka = c("MH-NL", "MT-NL", "HT-NL"),    # celda a (no se percibe lector)
-             kb = c("MH-L",  "MT-L",  "HT-L"),     # celda b (se percibe lector)
-             stringsAsFactors = FALSE)
-}))
-spec$id       <- paste0("IC", seq_len(nrow(spec)))                       # IC1, IC2, ..., IC6
-spec$desc     <- paste(unname(sapply(spec$ka, etq_celda)), "-", unname(sapply(spec$kb, etq_celda)))
-spec$variable <- ifelse(spec$v == "P26", "P26 (min)", "P10 (revistas)")  # etiqueta para tablas y paneles
-spec$comp     <- paste(spec$ka, spec$kb, sep = " - ")                    # p. ej. "MH-NL - MH-L"
-
-# Ajuste de Bonferroni: como se calculan k intervalos a la vez, la probabilidad de que alguno falle crece. Para compensarlo, cada intervalo ajustado se construye con nivel de significancia alpha/k, de modo que la confianza CONJUNTA sea de al menos 96 %
-k_ic     <- nrow(spec)             # número de intervalos (6)
-alpha_ic <- alpha_val / k_ic       # significancia de cada intervalo ajustado (0.04 / 6)
-conf_ic  <- 1 - alpha_ic           # confianza de cada intervalo ajustado
-
-# vec: devuelve los valores de la variable v para las personas de una celda (por su clave)
-vec <- function(clave, v) {
-  g <- cel$grupo[cel$clave == clave]     # grupo de esa celda
-  a <- cel$aut[cel$clave == clave]       # autopercepción de esa celda
-  d <- L[L$Grupo == g & L$Aut == a & !is.na(L[[v]]), ]
-  d[[v]]
-}
-
-# comparar: para la variable v y las celdas ka y kb calcula el IC de la diferencia de
-# medias (celda a - celda b) de dos formas:
-#   LI, LS     -> con confianza de 96 % (intervalo individual)
-#   LI_b, LS_b -> con confianza ajustada por Bonferroni (conf_ic)
-comparar <- function(v, ka, kb) {
-  x <- vec(ka, v); y <- vec(kb, v)      # datos de cada celda
-  n1 <- length(x); n2 <- length(y)      # tamaños de muestra
-  dif <- mean(x) - mean(y)              # estimador puntual de la diferencia de medias
-
-  if (n1 >= 40 && n2 >= 40) {
-    # Muestras grandes (n, m >= 40): aproximación normal con las varianzas muestrales
-    ee <- sqrt(var(x) / n1 + var(y) / n2)                 # error estándar de la diferencia
-    z1 <- qnorm(1 - alpha_val / 2)                        # valor z para el IC individual
-    z2 <- qnorm(1 - alpha_ic / 2)                         # valor z (mayor) para el IC con Bonferroni
-    li <- dif - z1 * ee; ls <- dif + z1 * ee              # límites del IC individual
-    li_b <- dif - z2 * ee; ls_b <- dif + z2 * ee          # límites del IC con Bonferroni
-  } else {
-    # Muestras pequeñas: t de Student con varianzas distintas (Welch-Satterthwaite).
-    # No se usa con estos datos porque todas las celdas tienen al menos 40 casos
-    t1 <- t.test(x, y, var.equal = FALSE, conf.level = conf_val)
-    t2 <- t.test(x, y, var.equal = FALSE, conf.level = conf_ic)
-    li <- t1$conf.int[1]; ls <- t1$conf.int[2]
-    li_b <- t2$conf.int[1]; ls_b <- t2$conf.int[2]
-  }
-  data.frame(v = v, ka = ka, kb = kb, n1 = n1, n2 = n2,
-             Media_1 = mean(x), Media_2 = mean(y), Dif = dif,
-             LI = li, LS = ls, LI_b = li_b, LS_b = ls_b, stringsAsFactors = FALSE)
-}
-
-# tabla_ic: resultados de las 6 comparaciones, un renglón por intervalo
-tabla_ic <- do.call(rbind, lapply(seq_len(nrow(spec)), function(i) {
-  data.frame(IC = spec$id[i], comparar(spec$v[i], spec$ka[i], spec$kb[i]), stringsAsFactors = FALSE)
-}))
-tabla_ic$Variable    <- spec$variable
-tabla_ic$comp        <- spec$comp
-tabla_ic$Incluye_0   <- tabla_ic$LI <= 0 & tabla_ic$LS >= 0       # TRUE si el IC de 96 % contiene al 0
-tabla_ic$Incluye_0_b <- tabla_ic$LI_b <= 0 & tabla_ic$LS_b >= 0   # TRUE si el IC con Bonferroni contiene al 0
-
-# plot_ic: gráfico de intervalos (una línea por IC; la línea punteada vertical marca el 0)
-#   d       = tabla_ic
-#   li, ls  = nombres de las columnas con los límites inferior y superior que se van a graficar
-#   incluye = nombre de la columna lógica "el intervalo incluye el 0" (define el color)
-plot_ic <- function(d, li, ls, incluye) {
-  d$LIp <- d[[li]]; d$LSp <- d[[ls]]                                  # copia los límites elegidos a columnas fijas
-  d$Incluye  <- ifelse(d[[incluye]], "Incluye 0", "No incluye 0")     # categoría para el color
-  # rev() para que IC1 quede arriba en el eje vertical
-  d$etq      <- factor(paste0(d$IC, "  ", d$comp), levels = rev(paste0(d$IC, "  ", d$comp)))
-  d$Variable <- factor(d$Variable, levels = unique(d$Variable))      # conserva el orden P26, P10
-  ggplot(d, aes(x = Dif, y = etq, color = Incluye)) +
-    geom_vline(xintercept = 0, linetype = "dashed") +                 # referencia: diferencia nula
-    geom_linerange(aes(xmin = LIp, xmax = LSp), orientation = "y", linewidth = 0.9) +   # el intervalo
-    geom_point(size = 2.5) +                                          # la diferencia estimada
-    facet_wrap(~ Variable, scales = "free", ncol = 2) +               # un panel por variable, cada uno con su escala
-    scale_color_manual(values = c("Incluye 0" = "grey50", "No incluye 0" = "firebrick")) +
-    labs(x = "Diferencia estimada", y = NULL, color = NULL) +
-    theme_minimal() +
-    theme(legend.position = "bottom",
-          axis.text.y = element_text(size = 7.5),
-          axis.text.x = element_text(size = 7.5),
-          strip.text = element_text(size = 9, face = "bold"))
+# chi_fila: resume un objeto de chisq.test (r) en una fila
+#   V = V de Cramér (tamaño del efecto); Esp_min = menor frecuencia esperada
+chi_fila <- function(r, etiqueta) {
+  n  <- sum(r$observed)
+  gl <- unname(r$parameter)
+  q  <- unname(r$statistic)
+  data.frame(Prueba = etiqueta, n = n, gl = gl,
+             crit = qchisq(1 - alpha_val, gl), q = q, p = r$p.value,
+             V = sqrt(q / (n * (min(dim(r$observed)) - 1))),
+             Esp_min = min(r$expected), stringsAsFactors = FALSE)
 }
 ```
 
 # Datos y métodos
 
-<!-- Escribe aquí la fuente y el alcance de los datos, la limpieza, las submuestras (los 3 grupos y los lectores de revistas) y tu estrategia analítica (intervalos de confianza, ANOVA con ajuste ART y prueba de independencia). -->
+Se utilizan los microdatos de la MOLEC 2022-2024 (archivo `DatosEquipo6_v2.csv`). Los valores no identificados de sexo y condición de actividad se tratan como faltantes. Se trabaja con tres grupos (mujer dedicada al hogar, mujer que trabaja y hombre que trabaja); quedan fuera estudiantes, jubilados, personas en otras condiciones y hombres dedicados al hogar. Todas las pruebas usan $\alpha = 0.04$ (intervalos al 96 %).
 
-# Resultados descriptivos
+Cada tabla, figura y prueba indica la **base** sobre la que se calculó:
 
-## Calidad de los datos y perfil general
+- **Base U (universo):** personas de los tres grupos con condición lectora ($H\_LEC$) válida, $n = `r nrow(U)`$.
+- **Base A (universo con autopercepción definida):** personas de U con $H\_LEC = 1$ o $3$, $n = `r nrow(A)`$.
+- **Base L (lectores de revistas):** personas de A con $P10 > 0$, $n = `r nrow(L)`$.
+
+Los descriptivos de contexto usan las bases U y A; **todas las pruebas inferenciales usan solo la base L**, porque $P10$ solo existe para quienes leen revistas.
+
+```{r tab-bases}
+# Resumen de las bases de análisis
+tab_bases <- data.frame(
+  Base = c("U", "A", "L"),
+  Definición = c("Universo: 3 grupos con H_LEC válido",
+                 "Universo con autopercepción definida (H_LEC = 1 o 3)",
+                 "Lectores de revistas: personas de A con P10 > 0"),
+  n = c(nrow(U), nrow(A), nrow(L)),
+  "Se usa en" = c("Descriptivo de H_LEC",
+                  "Descriptivo de cobertura de revistas",
+                  "Descriptivos de P10 y P26 y todas las pruebas"),
+  check.names = FALSE)
+kable(tab_bases, caption = "Bases de análisis utilizadas")
+```
+
+La estrategia analítica tiene tres partes, todas sobre la base L:
+
+1. **Intervalos de confianza para la diferencia de medias** de los minutos continuos de lectura ($P26$) y del número de revistas ($P10$) entre los tres grupos.
+2. **Pruebas de hipótesis para dos proporciones**, para comparar la proporción de personas que se perciben lectoras entre grupos y entre sexos.
+3. **Pruebas ji cuadrada de independencia** (`chisq.test`) entre la autopercepción lectora y el sexo, y entre la autopercepción lectora y la condición laboral.
 
 ```{r tab-variables}
-# Tabla de las variables seleccionadas: descripción, tipo, categorías y calidad de los datos
+# Tabla de las variables utilizadas y calidad de los datos (sobre todos los registros)
 tab_var <- data.frame(
-  Variable = vars6,
-  Descripción = c("Condición lectora construida por INEGI",
-                  "Sexo (preg. 8)", "Condición de actividad la semana pasada (preg. 15)",
-                  "Revistas leídas en tres meses (preg. 10)",
-                  "Motivo principal de lectura de revistas (preg. 11)",
-                  "Minutos continuos de lectura de algún material (preg. 26)"),
+  Variable = vars5,
+  Descripción = c("Condición lectora (INEGI)",
+                  "Sexo (preg. 8)", "Condición de actividad (preg. 15)",
+                  "Revistas leídas en 3 meses (preg. 10)",
+                  "Minutos continuos de lectura (preg. 26)"),
   Tipo = c("Cat. nominal", "Cat. nominal", "Cat. nominal",
-           "Num. discreta", "Cat. nominal", "Num. continua"),
-  "Unidad o categorías" = c("1 Habitual; 2 Otros materiales; 3 Leyó sin acostumbrar; 4 No lector",
+           "Num. discreta", "Num. continua"),
+  "Categorías o unidad" = c("1 Habitual; 2 Otros materiales; 3 Leyó sin acostumbrar; 4 No lector",
                             "1 Hombre; 2 Mujer",
                             "01-03 trabaja; 04-05 busca trabajo; 06 estudia; 07 hogar; 08 jubilado; 09-10 otra; 99 no especificado",
-                            "Revistas (diccionario: 1 a 25)",
-                            "1 Trabajo; 2 Estudio; 3 Cultura general; 4 Gusto; 5 Religión; 6 Otro",
-                            "Minutos (diccionario: 2 a 360)"),
-  "Falt. (n)" = calidad$Vacios,                       # vacíos de cada variable (viene del chunk setup)
-  "Falt. (%)" = pct(calidad$Vacios, nrow(raw)),       # el mismo dato en porcentaje de todos los registros
-  "Fuera rango (n)" = calidad$Fuera,                  # valores fuera del rango del diccionario
-  check.names = FALSE)                                # conserva los espacios y paréntesis en los nombres de columna
+                            "Revistas (1 a 25)",
+                            "Minutos (2 a 360)"),
+  "Falt. (n)" = calidad$Vacios,
+  "Falt. (%)" = pct(calidad$Vacios, nrow(raw)),
+  "Fuera (n)" = calidad$Fuera,
+  check.names = FALSE)
 
-cap_var <- "Variables seleccionadas y calidad de los datos (sobre todos los registros; en P10, P11 y P26 el vacío es un pase de pregunta)"
+cap_var <- paste0("Variables utilizadas y calidad de los datos (base: los ", nrow(raw),
+                  " registros del archivo). Falt. = valores faltantes (en P10 y P26 el vacío es un pase de pregunta); Fuera = valores fuera del rango del diccionario")
 
-# Si el reporte sale en PDF (LaTeX) se usa formato con anchos de columna fijos;
-# en HTML o Word se usa el kable simple
 if (knitr::is_latex_output()) {
   kable(tab_var, format = "latex", booktabs = TRUE, caption = cap_var) %>%
-    kable_styling(
-      latex_options = c("scale_down", "hold_position"), # escala la tabla al ancho de la página y la deja en su lugar
-      font_size = 9                                     # fuente más pequeña para que quepa
-    ) %>%
-    column_spec(1, width = "1.5cm") %>%                 # ancho de cada columna con texto largo
+    kable_styling(latex_options = c("scale_down", "hold_position"), font_size = 9) %>%
+    column_spec(1, width = "1.5cm") %>%
     column_spec(2, width = "3.0cm") %>%
     column_spec(3, width = "1.5cm") %>%
     column_spec(4, width = "3.8cm")
@@ -557,397 +337,196 @@ if (knitr::is_latex_output()) {
 }
 ```
 
+# Resultados descriptivos
+
+## Condición lectora por grupo (base U: universo)
+
 ```{r tab-hlec-grupo}
-# Distribución porcentual de H_LEC dentro de cada grupo (personas de los 3 grupos con H_LEC válido)
-tb <- table(U$Grupo, U$H_LEC_lbl)                 # conteos: filas = grupo, columnas = categoría de H_LEC
-pc <- round(100 * prop.table(tb, 1), 1)           # prop.table(tb, 1) = proporciones por fila -> porcentaje dentro de cada grupo
+# Distribución porcentual de H_LEC dentro de cada grupo (base U)
+tb <- table(U$Grupo, U$H_LEC_lbl)
+pc <- round(100 * prop.table(tb, 1), 1)
 t4 <- data.frame(Grupo = rownames(tb), N = as.vector(rowSums(tb)),
                  as.data.frame.matrix(pc), check.names = FALSE, row.names = NULL)
-names(t4)[3:6] <- c("1 Habitual", "2 Otros", "3 Leyó sin percibirse lector", "4 No lector")
-# Último dato: de quienes no acostumbran leer (H_LEC 3 o 4), % que leyó sin percibirse lector (H_LEC 3)
-t4[["% con H_LEC 3 entre quienes no acostumbran leer"]] <- pct(tb[, 3], tb[, 3] + tb[, 4])
-kable(t4, format = "pipe", caption = "Condición lectora (H_LEC) dentro de cada grupo, en %")
+names(t4)[3:6] <- c("1 Habitual (%)", "2 Otros (%)", "3 Leyó (%)", "4 No lector (%)")
+t4[["% de 3 entre 3 y 4"]] <- pct(tb[, 3], tb[, 3] + tb[, 4])
+kable(t4, caption = "Condición lectora (H_LEC) dentro de cada grupo (base U: universo). 1 = habitual; 2 = otros materiales; 3 = leyó sin percibirse lector; 4 = no lector")
 ```
+
+### Interpretación
+
+<!-- Escribe aquí tu interpretación de la condición lectora por grupo. -->
+
+## Cobertura de revistas por grupo y autopercepción (base A: universo con autopercepción)
 
 ```{r tab-cob}
-# Personas que leyeron revistas en los últimos tres meses (P10 > 0), por grupo y autopercepción.
-# Muestra qué parte de A llega a la base de lectores de revistas (L) que se usa en el resto del documento
+# Personas del universo A que leyeron revistas en los últimos tres meses (P10 > 0);
+# define la base L (lectores de revistas) que se usa en el resto del documento
 Ac <- A
-Ac$Leyo <- !is.na(Ac$P10) & Ac$P10 > 0            # TRUE si leyó al menos una revista
-# Por cada Grupo x Aut: N = personas en A, n = cuántas leyeron revistas
-cob <- aggregate(Ac$Leyo, by = list(Grupo = Ac$Grupo, Autopercepción = Ac$Aut),
+Ac$Leyo <- !is.na(Ac$P10) & Ac$P10 > 0
+cob <- aggregate(Ac$Leyo, by = list(Grupo = Ac$Grupo, Aut = Ac$Aut),
                  FUN = function(x) c(N = length(x), n = sum(x)))
-cob <- cbind(cob[, 1:2], as.data.frame(cob$x))    # despliega la columna-matriz que deja aggregate()
-names(cob) <- c("Grupo", "Autopercepción", "N", "Leyeron revistas")
-cob[["%"]] <- pct(cob[["Leyeron revistas"]], cob$N)
-cob <- cob[order(cob$Grupo, cob$Autopercepción), ]   # ordena por grupo y luego por autopercepción
-kable(cob, row.names = FALSE, caption = "Personas que leyeron revistas en los últimos tres meses, por grupo y autopercepción")
+cob <- cbind(cob[, 1:2], as.data.frame(cob$x))
+cob <- cob[order(cob$Grupo, cob$Aut), ]
+cob <- data.frame(Grupo = cob$Grupo,
+                  `Se percibe lector` = ifelse(cob$Aut == si, "Sí", "No"),
+                  N = cob$N, `Leyó revistas` = cob$n,
+                  `% leyó revistas` = pct(cob$n, cob$N),
+                  check.names = FALSE)
+kable(cob, row.names = FALSE,
+      caption = "Personas que leyeron revistas en los últimos tres meses (P10 > 0), por grupo y autopercepción (base A: universo con autopercepción). N = personas de la base A")
 ```
 
 ### Interpretación
 
-<!-- Escribe aquí tu interpretación de la calidad de los datos, de la condición lectora por grupo y de la proporción de lectores de revistas. -->
+<!-- Escribe aquí tu interpretación de la proporción de lectores de revistas. -->
 
-## Distribución de `P10` y `P26`
+## Número de revistas (`P10`) y minutos continuos (`P26`) (base L: lectores de revistas)
 
-```{r fig-hist, fig.height=2.6, fig.cap=paste0("Distribución de P10 y P26 en lectores de revistas (se omiten ", sum(L$P10 > 15), " casos con P10 > 15 y ", sum(L$P26 > 180, na.rm = TRUE), " con P26 > 180 minutos)"), fig.pos = "H"}
-# Histogramas de P10 y P26 sin los valores extremos (el caption cuenta cuántos se omiten)
-op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))    # 2 paneles en una fila; 'op' guarda la configuración anterior
-# breaks = seq(0.5, 15.5, 1): una barra por cada número entero de revistas (P10 es discreta)
+```{r fig-hist, fig.height=2.6, fig.cap=paste0("Distribución de P10 y P26 (base L: lectores de revistas; se omiten ", sum(L$P10 > 15), " casos con P10 > 15 y ", sum(L$P26 > 180, na.rm = TRUE), " con P26 > 180 minutos)"), fig.pos = "H"}
+op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
 hist(L$P10[L$P10 <= 15], breaks = seq(0.5, 15.5, 1), col = "#F8766D80",
      main = "P10: revistas leídas", xlab = "Revistas en los últimos 3 meses", ylab = "Personas")
-# breaks = seq(0, 180, 10): barras de 10 minutos
 hist(L$P26[L$P26 <= 180], breaks = seq(0, 180, 10), col = "#00BFC480",
      main = "P26: minutos continuos", xlab = "Minutos continuos de lectura", ylab = "Personas")
-par(op)                                            # restaura la configuración gráfica
+par(op)
 ```
 
-```{r tab-global}
-# Límites para excluir valores extremos en la tabla global (los mismos que en los histogramas)
-limites_filtro <- list(P10 = 15, P26 = 180)
-
-# Tabla global de estadísticos descriptivos (función desc_global del chunk helpers)
-tab_global <- desc_global(c("P10", "P26"), limites = limites_filtro)
-
-# Formato LaTeX con "scale_down" si el reporte es PDF; kable simple en los demás formatos
-if (knitr::is_latex_output()) {
-  knitr::kable(tab_global, format = "latex", booktabs = TRUE,
-               caption = "Estadísticos descriptivos generales para P10 y P26") %>%
-    kableExtra::kable_styling(latex_options = c("scale_down", "hold_position"))
-} else {
-  knitr::kable(tab_global, caption = "Estadísticos descriptivos generales para P10 y P26")
-}
+```{r tab-desc}
+# Descriptivos de P10 y P26 por grupo y autopercepción en una sola tabla (base L)
+tab_desc <- rbind(desc_tabla("P10"), desc_tabla("P26"))
+tab_ancha(tab_desc,
+          "Estadísticos descriptivos de P10 y P26 por grupo y autopercepción (base L: lectores de revistas). DE = desviación estándar; Q1 y Q3 = cuartiles",
+          digits = 1)
 ```
 
-### Interpretación
-
-<!-- Escribe aquí tu interpretación de la forma de las distribuciones de P10 y P26. -->
-
-
-## Número de revistas leídas (`P10`)
-
-```{r tab-p10}
-# Estadísticos descriptivos de P10 por grupo y autopercepción (lectores de revistas)
-kable(desc_tabla("P10"), row.names = FALSE,
-      caption = "Número de revistas leídas (P10) por grupo y autopercepción")
-```
-
-```{r fig-p10, fig.height=2.4, fig.cap="Número de revistas leídas (P10) según autopercepción y grupo (se omiten del eje los valores mayores a 15; los puntos son personas)"}
-# Diagramas de caja de P10, un panel por grupo (función cajas del chunk helpers)
+```{r fig-p10, fig.height=2.4, fig.cap="Número de revistas leídas (P10) según autopercepción y grupo (base L: lectores de revistas; se omiten del eje los valores mayores a 15; los puntos son personas)"}
 cajas("P10", ylim = c(0, 15), ylab = "Revistas (últimos 3 meses)")
 ```
 
-### Interpretación
-
-<!-- Escribe aquí tu interpretación de la tabla y los diagramas de caja de P10. -->
-
-## Minutos continuos de lectura (`P26`)
-
-```{r tab-p26}
-# Estadísticos descriptivos de P26 por grupo y autopercepción (lectores de revistas)
-kable(desc_tabla("P26"), row.names = FALSE,
-      caption = "Minutos continuos de lectura (P26) por grupo y autopercepción (cualquier material)")
-```
-
-```{r fig-p26, fig.height=2.4, fig.cap="Minutos continuos de lectura (P26) según autopercepción y grupo (se omiten del eje los valores mayores a 120 minutos)"}
-# Diagramas de caja de P26, un panel por grupo
+```{r fig-p26, fig.height=2.4, fig.cap="Minutos continuos de lectura (P26) según autopercepción y grupo (base L: lectores de revistas; se omiten del eje los valores mayores a 120 minutos)"}
 cajas("P26", ylim = c(0, 120), ylab = "Minutos continuos")
 ```
 
 ### Interpretación
 
-<!-- Escribe aquí tu interpretación de la tabla y los diagramas de caja de P26. -->
+<!-- Escribe aquí tu interpretación de la distribución, la tabla y los diagramas de caja de P10 y P26. -->
 
-## Motivo de lectura: gusto o entretenimiento (`P11`)
+# Resultados inferenciales (base L: lectores de revistas)
 
-```{r fig-p11-gusto, fig.height=3.8, fig.cap="Lectores de revistas que leen por gusto o entretenimiento, por grupo y autopercepción (sobre las barras: % y personas/base)", fig.pos = "H"}
-# Porcentaje de lectores que leen por gusto o entretenimiento (P11 = 4) en cada grupo y autopercepción
-L$Gusto <- L$P11 == 4                              # TRUE si el motivo es gusto; NA si P11 está vacío
-# Doble ciclo: para cada grupo g y cada autopercepción a se cuentan los casos (N) y los "gusto" (n)
-gusto_tab <- do.call(rbind, lapply(levels(L$Grupo), function(g) {
-  do.call(rbind, lapply(levels(L$Aut), function(a) {
-    d <- L[L$Grupo == g & L$Aut == a & !is.na(L$Gusto), ]   # solo quienes contestaron P11
-    data.frame(Grupo = g, Aut = a, N = nrow(d), n = sum(d$Gusto), pct = pct(sum(d$Gusto), nrow(d)),
-               stringsAsFactors = FALSE)
-  }))
-}))
-# Se vuelven factores con el orden original de los niveles para que las barras salgan en ese orden
-gusto_tab$Grupo <- factor(gusto_tab$Grupo, levels = levels(L$Grupo))
-gusto_tab$Aut   <- factor(gusto_tab$Aut, levels = levels(L$Aut))
+## Intervalos de confianza para la diferencia de medias entre grupos
 
-# Barras por grupo; la etiqueta muestra el % y la base de casos (n con gusto / N)
-ggplot(gusto_tab, aes(x = Grupo, y = pct, fill = Aut)) +
-  geom_col(position = position_dodge(0.8), width = 0.7) +                  # barras lado a lado
-  geom_text(aes(label = paste0(fmt(pct, 1), " % (", n, "/", N, ")")),
-            position = position_dodge(0.8), vjust = -0.4, size = 2.6) +     # etiqueta encima de cada barra
-  scale_y_continuous(limits = c(0, 118)) +                                  # deja espacio arriba para las etiquetas
-  labs(x = NULL, y = "% que lee por gusto", fill = NULL) +
-  theme_minimal() + theme(legend.position = "bottom")
-```
-
-### Interpretación
-
-<!-- Escribe aquí tu interpretación del gráfico de barras del motivo de lectura. -->
-
-
-# Resultados inferenciales
-
-## Intervalos de confianza para la diferencia de medias, sin y con ajuste de Bonferroni
-
-<!-- Escribe aquí por qué se calcula la brecha entre quienes se perciben lectores y quienes no en cada grupo, para ambas variables, y por qué se compara el intervalo individual con el ajustado por Bonferroni (el ajuste está en el chunk "analisis": cada intervalo usa alpha/k, con k = 6). -->
-
-```{r tabla-claves}
-# Claves abreviadas de las 6 celdas, que se usan en las tablas y gráficos de los intervalos
-kable(data.frame(Clave = cel$clave, Grupo = cel$grupo, Autopercepción = cel$aut),
-      row.names = FALSE, caption = "Claves de las celdas (grupo y autopercepción)")
-```
+Se comparan los tres grupos de dos en dos, tanto en minutos continuos de lectura ($P26$) como en número de revistas ($P10$). Como cada grupo tiene más de 40 casos y las varianzas poblacionales son desconocidas, el intervalo para $\mu_1-\mu_2$ usa la distribución normal estándar con las varianzas muestrales:
+$$(\bar{x}_1-\bar{x}_2) \pm z_{1-\alpha/2}\sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}}, \qquad z_{0.98} = `r fmt(qnorm(1 - alpha_val / 2), 3)`.$$
+Si el intervalo no incluye el 0, hay evidencia de que las medias difieren.
 
 ```{r tabla-ic}
-# Tabla comparativa de las 6 comparaciones (celda a - celda b):
-#   LI y LS 96 %  = intervalo individual
-#   LI y LS Bonf. = intervalo ajustado por Bonferroni
-#   Incluye 0     = "Sí" si el intervalo contiene el 0 (no hay evidencia de diferencia)
-vis_b <- tabla_ic[, c("IC", "Variable", "comp", "Dif", "LI", "LS", "LI_b", "LS_b")]
-names(vis_b) <- c("IC", "Variable", "Claves", "Dif", "LI 96 %", "LS 96 %", "LI Bonf.", "LS Bonf.")
-vis_b$`Incluye 0 (96 %)`  <- ifelse(tabla_ic$Incluye_0, "Sí", "No")
-vis_b$`Incluye 0 (Bonf.)` <- ifelse(tabla_ic$Incluye_0_b, "Sí", "No")
-kable(vis_b, digits = 3, row.names = FALSE,
-      caption = paste0("Intervalos para la diferencia de medias (celda a - celda b): individuales al 96 % e intervalos con ajuste de Bonferroni (",
-                       fmt(100 * conf_ic, 2), " % por intervalo, ", k_ic, " intervalos; confianza conjunta de al menos 96 %)"))
+# Intervalos de confianza para la diferencia de medias (grupo 1 - grupo 2), en L
+df_ic <- rbind(ic_variable("P26", "P26 (minutos)"),
+               ic_variable("P10", "P10 (revistas)"))
+df_ic$Variable <- factor(df_ic$Variable, levels = unique(df_ic$Variable))
+rownames(df_ic) <- NULL
+
+vis <- df_ic
+vis$`¿Incluye 0?` <- ifelse(vis$Incluye_0, "Sí", "No")
+vis <- vis[, c("Variable", "Comparacion", "n1", "n2", "Dif", "LI", "LS", "¿Incluye 0?")]
+names(vis) <- c("Variable", "Comparación", "n1", "n2", "Dif", "LI", "LS", "¿Incluye 0?")
+tab_ancha(vis, paste0("Intervalos de confianza al ", ic_txt,
+                      " para la diferencia de medias, grupo 1 - grupo 2 (base L: lectores de revistas). Dif = diferencia de medias; LI y LS = límites inferior y superior"),
+          digits = 3)
 ```
 
-```{r fig-forest, fig.width=6.5, fig.height=2.5, out.width="100%", fig.align="center", fig.cap="Diferencias de medias con IC al 96 %. En rojo, los intervalos que no incluyen el 0.", fig.pos="H"}
-# Gráfico de los intervalos individuales al 96 % (función plot_ic definida en el chunk "analisis")
-plot_ic(tabla_ic, "LI", "LS", "Incluye_0")
-```
-
-```{r fig-forest-bonferroni, fig.width=6.5, fig.height=2.5, out.width="100%", fig.align="center", fig.cap="Diferencias de medias con IC ajustados por Bonferroni. En rojo, los intervalos que no incluyen el 0.", fig.pos="H"}
-# Gráfico de los intervalos ajustados por Bonferroni (mismas diferencias, límites más amplios)
-plot_ic(tabla_ic, "LI_b", "LS_b", "Incluye_0_b")
-```
-
-### Interpretación
-
-<!-- Mira la tabla de intervalos individuales y con ajuste de Bonferroni (columnas "Incluye 0") y las dos figuras de diferencias de medias. Escribe aquí tu interpretación. -->
-
-## Verificación de supuestos del ANOVA
-
-```{r fig-supuestos, fig.width=7, fig.height=6, fig.cap="Diagnóstico de los residuos del ANOVA clásico con interacción: normalidad (arriba) y residuos contra valores ajustados (abajo)."}
-# Se revisan los residuos del ANOVA clásico de P10 y P26 (objetos de mod_clasico)
-# Arriba: gráficos de normalidad (QQ-plot); los puntos deben seguir la línea roja si hay normalidad
-# Abajo: residuos contra valores ajustados; la dispersión debe ser similar a lo largo del eje
-#        si hay homocedasticidad (varianzas iguales)
-par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))          # cuadrícula de 2 x 2 gráficos
-for (v in names(mod_clasico)) {                    # primer renglón: QQ-plots (P10 y P26)
-  qqnorm(resid(mod_clasico[[v]]), main = paste("QQ-plot de residuos:", v), pch = 16, col = rgb(0, 0, 0, 0.4))
-  qqline(resid(mod_clasico[[v]]), col = "firebrick", lwd = 2)   # línea teórica de la normal
-}
-for (v in names(mod_clasico)) {                    # segundo renglón: residuos vs. ajustados
-  plot(fitted(mod_clasico[[v]]), resid(mod_clasico[[v]]), main = paste("Residuos vs. ajustados:", v),
-       xlab = "Ajustados", ylab = "Residuos", pch = 16, col = rgb(0, 0, 0, 0.4))
-  abline(h = 0, lty = 2)                           # línea de referencia en 0
-}
-par(mfrow = c(1, 1))   # regresa a un gráfico por página
+```{r fig-ic, fig.height=2.8, out.width="100%", fig.pos="H", fig.cap=paste0("Diferencias de medias con IC al ", ic_txt, " (base L: lectores de revistas). En rojo, los intervalos que no incluyen el 0.")}
+fd <- df_ic
+fd$Comparacion <- factor(fd$Comparacion, levels = rev(unique(fd$Comparacion)))
+fd$Incluye <- ifelse(fd$Incluye_0, "Incluye 0", "No incluye 0")
+ggplot(fd, aes(x = Dif, y = Comparacion, color = Incluye)) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_linerange(aes(xmin = LI, xmax = LS), orientation = "y", linewidth = 0.9) +
+  geom_point(size = 2.5) +
+  facet_wrap(~ Variable, scales = "free_x", ncol = 2) +
+  scale_color_manual(values = c("Incluye 0" = "grey50", "No incluye 0" = "firebrick")) +
+  labs(x = "Diferencia estimada", y = NULL, color = NULL) +
+  theme_minimal() +
+  theme(legend.position = "bottom", axis.text.y = element_text(size = 7.5),
+        axis.text.x = element_text(size = 7.5), strip.text = element_text(size = 9, face = "bold"))
 ```
 
 ### Interpretación
 
-<!-- Mira la figura "Diagnóstico de los residuos del ANOVA clásico con interacción". Escribe aquí tu interpretación sobre normalidad y homocedasticidad y por qué decides usar el ANOVA con ajuste ART. -->
+<!-- Escribe aquí tu interpretación. Recuerda que mujer hogar vs hombre trabaja difiere a la vez en sexo y en actividad. -->
 
-## ANOVA clásico y ANOVA con ajuste ART
+## Diferencia de proporciones en la autopercepción lectora
 
-<!-- Escribe aquí una breve explicación del ANOVA con ajuste ART (Aligned Rank Transform) y de la eta cuadrada parcial. -->
+Se evalúa si la proporción de personas que se perciben lectoras difiere entre grupos y entre sexos. Para cada par se plantea $H_0: p_1 = p_2$ frente a $H_1: p_1 \neq p_2$ con el estadístico
+$$Z = \frac{\hat{p}_1-\hat{p}_2}{\sqrt{\hat{p}(1-\hat{p})\left(\frac{1}{n_1}+\frac{1}{n_2}\right)}}, \qquad \hat{p}=\frac{x_1+x_2}{n_1+n_2},$$
+y se rechaza $H_0$ si $p \le \alpha = 0.04$. La proporción de quienes no se perciben lectores es el complemento, por lo que da exactamente el mismo valor $p$ y no se repite. Como las tres comparaciones entre grupos se hacen a la vez, se reporta además el valor $p$ ajustado por Holm.
 
-### Número de revistas (`P10`)
+```{r tabla-prop}
+# Tablas de contingencia en L (también se usan en la ji cuadrada)
+t_aut  <- table(L$Grupo, L$Aut)       # grupo x autopercepción
+t_sexo <- table(L$Sexo, L$Aut)        # sexo x autopercepción
+t_cond <- table(L$Cond_lab, L$Aut)    # condición laboral x autopercepción
 
-```{r anova-clasico-p10}
-# Tabla del ANOVA CLÁSICO de P10 (modelo mod_clasico$P10). Se muestra como referencia para
-# compararla con la del ART: SC = suma de cuadrados, CM = cuadrado medio, F = CM efecto / CM error
-kable(disp_clasico(mod_clasico$P10), row.names = FALSE,
-      caption = "ANOVA clásico: número de revistas (P10)")
-```
+# Proporción que SE PERCIBE LECTOR en cada grupo (3 comparaciones) y por sexo
+pp_grupos <- do.call(rbind, lapply(pares, function(p)
+  prueba_prop(c(t_aut[p[1], si], t_aut[p[2], si]),
+              c(sum(t_aut[p[1], ]), sum(t_aut[p[2], ])),
+              paste(p[1], "-", p[2]))))
+pp_grupos$p_Holm <- p.adjust(pp_grupos$p, method = "holm")   # 3 pruebas a la vez
 
-```{r anova-art-p10}
-# Tabla del ANOVA CON AJUSTE ART para P10: efectos de Grupo, Aut y su interacción
-# eta2_parcial = qué proporción de la variación explica cada efecto
-kable(disp_art(art10$tabla), row.names = FALSE,
-      caption = "ANOVA con ajuste ART: número de revistas (P10)")
+pp_sexo <- prueba_prop(c(t_sexo["Mujer", si], t_sexo["Hombre", si]),
+                       c(sum(t_sexo["Mujer", ]), sum(t_sexo["Hombre", ])),
+                       "Mujer - Hombre")
+pp_sexo$p_Holm <- NA
 
-# Comparaciones por pares (ART-C, ajuste de Tukey): cada tabla aparece solo si su efecto fue
-# significativo (p < alpha_val); un chunk no imprime nada si el 'if' es FALSE
-if (pterm(art10, "Grupo") < alpha_val) {
-  kable(posthoc_art(art10$m, "Grupo"), format = "pipe",
-        caption = "Comparaciones por pares entre grupos (ART-C, ajuste de Tukey): P10")
-}
-if (pterm(art10, "Grupo:Aut") < alpha_val) {
-  kable(posthoc_art(art10$m, "Grupo:Aut"), format = "pipe",
-        caption = "Comparaciones por pares de la interacción (ART-C, ajuste de Tukey): P10")
-}
-```
-
-#### Interpretación
-
-<!-- Compara la tabla "ANOVA clásico: número de revistas (P10)" con la tabla "ANOVA con ajuste ART: número de revistas (P10)" (valores p y eta2_parcial) y revisa las comparaciones por pares, si aparecen. Escribe aquí tu interpretación. -->
-
-### Minutos continuos de lectura (`P26`)
-
-```{r anova-clasico-p26}
-# Tabla del ANOVA CLÁSICO de P26 (mismo procedimiento que para P10)
-kable(disp_clasico(mod_clasico$P26), row.names = FALSE,
-      caption = "ANOVA clásico: minutos continuos de lectura (P26)")
-```
-
-```{r anova-art-p26}
-# Tabla del ANOVA CON AJUSTE ART para P26 y sus comparaciones por pares
-# (mismo procedimiento que para P10; ver comentarios del chunk anova-art-p10)
-kable(disp_art(art26$tabla), row.names = FALSE,
-      caption = "ANOVA con ajuste ART: minutos continuos de lectura (P26)")
-
-if (pterm(art26, "Grupo") < alpha_val) {
-  kable(posthoc_art(art26$m, "Grupo"), format = "pipe",
-        caption = "Comparaciones por pares entre grupos (ART-C, ajuste de Tukey): P26")
-}
-if (pterm(art26, "Grupo:Aut") < alpha_val) {
-  kable(posthoc_art(art26$m, "Grupo:Aut"), format = "pipe",
-        caption = "Comparaciones por pares de la interacción (ART-C, ajuste de Tukey): P26")
-}
-```
-
-#### Interpretación
-
-<!-- Compara la tabla "ANOVA clásico: minutos continuos de lectura (P26)" con la tabla "ANOVA con ajuste ART: minutos continuos de lectura (P26)" (valores p y eta2_parcial) y revisa las comparaciones por pares, si aparecen. Escribe aquí tu interpretación. -->
-
-## ANOVA con transformación logarítmica
-
-<!-- Escribe aquí por qué se prueba la transformación log como alternativa al ART (corregir heterocedasticidad y falta de normalidad) y cómo se interpretan los resultados en escala log (razón de medias geométricas). -->
-
-### Verificación de supuestos con log
-
-```{r fig-supuestos-log, fig.width=7, fig.height=6, fig.cap="Diagnóstico de los residuos del ANOVA con log de la respuesta: normalidad (arriba) y residuos contra valores ajustados (abajo)."}
-# Mismo diagnóstico que en el ANOVA clásico, ahora con los residuos del modelo en escala log
-# Arriba: QQ-plots (los puntos deben seguir la línea roja si hay normalidad)
-# Abajo: residuos vs. ajustados (dispersión pareja = varianzas iguales)
-par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
-for (v in names(mod_log)) {
-  qqnorm(resid(mod_log[[v]]), main = paste("QQ-plot de residuos: log", v), pch = 16, col = rgb(0, 0, 0, 0.4))
-  qqline(resid(mod_log[[v]]), col = "firebrick", lwd = 2)
-}
-for (v in names(mod_log)) {
-  plot(fitted(mod_log[[v]]), resid(mod_log[[v]]), main = paste("Residuos vs. ajustados: log", v),
-       xlab = "Ajustados", ylab = "Residuos", pch = 16, col = rgb(0, 0, 0, 0.4))
-  abline(h = 0, lty = 2)
-}
-par(mfrow = c(1, 1))
-```
-
-#### Interpretación
-
-<!-- Compara esta figura con la de los residuos del ANOVA clásico sin transformar. Escribe aquí si el log corrigió la falta de normalidad y la heterocedasticidad. -->
-
-### Número de revistas (`P10`), escala log
-
-```{r anova-log-p10}
-# ANOVA clásico sobre log(P10); disp_clasico() da el mismo formato que las demás tablas
-kable(disp_clasico(mod_log$P10), row.names = FALSE,
-      caption = "ANOVA con log: número de revistas, log(P10)")
-
-# Comparaciones por pares (Tukey) solo si el efecto es significativo (p < alpha_val)
-# Razon = exp(diferencia en log) = cociente de medias geométricas
-if (pterm_aov(mod_log$P10, "Grupo") < alpha_val) {
-  kable(posthoc_tukey(mod_log$P10, "Grupo"), format = "pipe",
-        caption = "Comparaciones por pares entre grupos (Tukey, escala log): P10")
-}
-if (pterm_aov(mod_log$P10, "Grupo:Aut") < alpha_val) {
-  kable(posthoc_tukey(mod_log$P10, "Grupo:Aut"), format = "pipe",
-        caption = "Comparaciones por pares de la interacción (Tukey, escala log): P10")
-}
-```
-
-#### Interpretación
-
-<!-- Mira la tabla "ANOVA con log: número de revistas" y las comparaciones por pares, si aparecen. Escribe aquí tu interpretación. -->
-
-### Minutos continuos de lectura (`P26`), escala log
-
-```{r anova-log-p26}
-# Mismo procedimiento que para P10 (ver comentarios del chunk anova-log-p10)
-kable(disp_clasico(mod_log$P26), row.names = FALSE,
-      caption = "ANOVA con log: minutos continuos de lectura, log(P26)")
-
-if (pterm_aov(mod_log$P26, "Grupo") < alpha_val) {
-  kable(posthoc_tukey(mod_log$P26, "Grupo"), format = "pipe",
-        caption = "Comparaciones por pares entre grupos (Tukey, escala log): P26")
-}
-if (pterm_aov(mod_log$P26, "Grupo:Aut") < alpha_val) {
-  kable(posthoc_tukey(mod_log$P26, "Grupo:Aut"), format = "pipe",
-        caption = "Comparaciones por pares de la interacción (Tukey, escala log): P26")
-}
-```
-
-#### Interpretación
-
-<!-- Mira la tabla "ANOVA con log: minutos continuos de lectura" y las comparaciones por pares, si aparecen. Escribe aquí tu interpretación. -->
-
-## Motivo de lectura (`P11`): independencia de dos variables categóricas
-
-<!-- Escribe aquí tu planteamiento de la prueba de independencia (hipótesis, estadístico, región de rechazo y decisión). -->
-
-```{r p11-calculo}
-# Motivo de lectura en dos categorías: por gusto (P11 = 4) u otro motivo
-L11 <- L[!is.na(L$P11), ]                          # solo quienes contestaron P11
-L11$Motivo <- factor(ifelse(L11$P11 == 4, "Por gusto", "Otro motivo"), levels = c("Por gusto", "Otro motivo"))
-grupos11 <- levels(L11$Grupo)
-
-# prueba_indep: prueba ji cuadrada de independencia entre dos variables categóricas
-#   f1, f2   = nombres de las dos columnas categóricas de 'dat'
-#   dat      = data frame con los datos
-#   etiqueta = nombre de la prueba para la tabla de resultados
-#   O = frecuencias observadas, E = esperadas (total de fila x total de columna / n)
-#   q = estadístico sum((O - E)^2 / E), gl = (filas - 1)(columnas - 1)
-#   crit = valor crítico, p = valor p, Esp_min = menor frecuencia esperada
-#          (sirve para verificar la regla de que las esperadas no sean muy pequeñas)
-prueba_indep <- function(f1, f2, dat, etiqueta) {
-  O  <- table(dat[[f1]], dat[[f2]])
-  n  <- sum(O)
-  E  <- outer(rowSums(O), colSums(O)) / n          # outer() arma la matriz de esperadas
-  q  <- sum((O - E)^2 / E)
-  gl <- (nrow(O) - 1) * (ncol(O) - 1)
-  data.frame(Prueba = etiqueta, n = n, gl = gl,
-             crit = qchisq(1 - alpha_val, gl), q = q,
-             p = pchisq(q, gl, lower.tail = FALSE), Esp_min = min(E), stringsAsFactors = FALSE)
-}
-
-# Cinco pruebas: autopercepción x motivo (todos), grupo x motivo (todos)
-# y autopercepción x motivo dentro de cada uno de los 3 grupos
-t11 <- rbind(
-  prueba_indep("Aut", "Motivo", L11, "Autopercepción x motivo (todos los grupos)"),
-  prueba_indep("Grupo", "Motivo", L11, "Grupo x motivo (todos los casos)"),
-  do.call(rbind, lapply(grupos11, function(g) {
-    prueba_indep("Aut", "Motivo", L11[L11$Grupo == g, ], paste0("Autopercepción x motivo: ", g))
-  })))
-t11$Decision <- ifelse(t11$p <= alpha_val, "Rechaza H0", "No rechaza H0")   # se rechaza si p <= alpha
-
-# Frecuencias observadas y esperadas de la prueba global (autopercepción x motivo)
-O_g <- table(Autopercepción = L11$Aut, Motivo = L11$Motivo)
-E_g <- outer(rowSums(O_g), colSums(O_g)) / sum(O_g)
-```
-
-```{r p11-tablas}
-# Tablas de frecuencias de la prueba global
-kable(as.data.frame.matrix(O_g), caption = "Frecuencias observadas: autopercepción x motivo de lectura")
-kable(as.data.frame.matrix(round(E_g, 2)), caption = "Frecuencias esperadas bajo independencia")
-
-# Resultados de las cinco pruebas ji cuadrada
-kable(data.frame(Prueba = t11$Prueba, n = t11$n, gl = t11$gl,
-                 `Valor crítico` = round(t11$crit, 3), q = round(t11$q, 3),
-                 p = fp(t11$p), `Esperada mínima` = round(t11$Esp_min, 1),
-                 Decisión = t11$Decision, check.names = FALSE),
-      format = "pipe", caption = "Pruebas ji cuadrada de independencia con el motivo de lectura (P11)")
+tp <- rbind(pp_grupos, pp_sexo)
+tp$Decision <- ifelse(is.na(tp$p_Holm), dec(tp$p), dec(tp$p_Holm))
+tp$p <- fp(tp$p)
+tp$p_Holm <- ifelse(is.na(tp$p_Holm), "", fp(tp$p_Holm))
+names(tp) <- c("Comparación", "n1", "n2", "% 1", "% 2", "Dif (pp)", "LI (pp)", "LS (pp)",
+               "Z", "p", "p Holm", "Decisión")
+tab_ancha(tp, paste0("Pruebas de dos proporciones: % que se percibe lector (base L: lectores de revistas). % 1 y % 2 = porcentaje en el grupo 1 y 2; Dif, LI y LS = diferencia e IC al ", ic_txt,
+                     " en puntos porcentuales (pp). La decisión entre grupos usa p Holm; la de sexo usa p"),
+          digits = 2)
 ```
 
 ### Interpretación
 
-<!-- Mira las tablas de frecuencias observadas y esperadas, la tabla "Pruebas ji cuadrada de independencia con el motivo de lectura (P11)" y el gráfico de barras del motivo de lectura. Escribe aquí tu interpretación. -->
+<!-- Escribe aquí tu interpretación de las proporciones. -->
+
+## Independencia entre la autopercepción y el sexo, y entre la autopercepción y la condición laboral
+
+Con la ji cuadrada de independencia (`chisq.test`, sin corrección de continuidad) se contrasta $H_0$: la autopercepción lectora es independiente de la variable, frente a $H_1$: existe asociación. Las frecuencias esperadas son $E_{ij}=\frac{(\text{total fila } i)(\text{total columna } j)}{n}$, el estadístico es $Q=\sum\frac{(O_{ij}-E_{ij})^2}{E_{ij}}\sim\chi^2_{(r-1)(c-1)}$ y se rechaza $H_0$ si $Q>\chi^2_{0.96,\,gl}$ (equivalente a $p \le 0.04$). Se agrega la V de Cramér como medida del tamaño de la asociación.
+
+```{r tablas-chi}
+# Frecuencias observadas (base L)
+kable(as.data.frame.matrix(t_sexo),
+      caption = "Frecuencias observadas: sexo x autopercepción lectora (base L: lectores de revistas)")
+kable(as.data.frame.matrix(t_cond),
+      caption = "Frecuencias observadas: condición laboral x autopercepción lectora (base L: lectores de revistas)")
+```
+
+```{r resumen-chi}
+# Pruebas con chisq.test (base L)
+chi_sexo <- chisq.test(t_sexo, correct = FALSE)
+chi_cond <- chisq.test(t_cond, correct = FALSE)
+
+chi_aut <- rbind(chi_fila(chi_sexo, "Sexo x autopercepción"),
+                 chi_fila(chi_cond, "Condición laboral x autopercepción"))
+
+res_chi <- data.frame(Prueba = chi_aut$Prueba, n = chi_aut$n, gl = chi_aut$gl,
+                      Crítico = round(chi_aut$crit, 3), Q = round(chi_aut$q, 3),
+                      p = fp(chi_aut$p), V = round(chi_aut$V, 3),
+                      `Esp. mín.` = round(chi_aut$Esp_min, 1),
+                      Decisión = dec(chi_aut$p),
+                      check.names = FALSE, stringsAsFactors = FALSE)
+tab_ancha(res_chi, "Pruebas ji cuadrada de independencia con la autopercepción lectora (base L: lectores de revistas; alpha = 0.04). Crítico = valor crítico; Q = estadístico; V = V de Cramér; Esp. mín. = menor frecuencia esperada",
+          digits = 3)
+```
+
+### Interpretación
+
+<!-- Escribe aquí tu interpretación de las pruebas de independencia. Recuerda que "hogar" solo incluye mujeres, mientras que "trabaja" mezcla hombres y mujeres. -->
 
 # Conclusiones
 
@@ -955,34 +534,4 @@ kable(data.frame(Prueba = t11$Prueba, n = t11$n, gl = t11$gl,
 
 ## Limitaciones {.unnumbered}
 
-<!-- Escribe aquí las limitaciones del análisis. -->
-
-##  Verificacion de supuestos con ART
-
-```{r diagnostico-art, fig.width=7, fig.height=6, echo=FALSE}
-# Supón que guardas tus objetos art en una lista, por ejemplo:
-art_mods <- list(P10 = art10$m, P26 = art26$m)
-
-# Definimos el término a evaluar (ej. la interacción "Grupo:Aut" o un efecto principal)
-ter_interes <- "Grupo:Aut"
-
-par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
-
-# Arriba: QQ-plots de los residuos del modelo ART
-for (v in names(art_mods)) {
-  m_term <- artlm(art_mods[[v]], ter_interes)
-  qqnorm(resid(m_term), main = paste("QQ-plot ART (", v, ")", sep=""), pch = 16, col = rgb(0, 0, 0, 0.4))
-  qqline(resid(m_term), col = "firebrick", lwd = 2)
-}
-
-# Abajo: Residuos vs. ajustados del modelo ART
-for (v in names(art_mods)) {
-  m_term <- artlm(art_mods[[v]], ter_interes)
-  plot(fitted(m_term), resid(m_term), main = paste("Residuos vs. ajust. ART (", v, ")", sep=""),
-       xlab = "Ajustados", ylab = "Residuos", pch = 16, col = rgb(0, 0, 0, 0.4))
-  abline(h = 0, lty = 2)
-}
-
-par(mfrow = c(1, 1))
-```
-
+<!-- Escribe aquí las limitaciones. -->
