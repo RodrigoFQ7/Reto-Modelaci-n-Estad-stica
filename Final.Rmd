@@ -34,6 +34,11 @@ header-includes:
 - \AtBeginEnvironment{table}{\footnotesize}
 ---
  
+% ---------------------------------------------------------------
+% CARÁTULA. Debe llevar: título acorde a la pregunta rectora, nombre del bloque,
+% número de equipo, nombres y matrículas de los integrantes y fecha de entrega.
+% Falta agregar: título (pregunta rectora), nombre del bloque y número de equipo.
+% ---------------------------------------------------------------
 \begin{titlepage}
 		\centering
 		
@@ -93,7 +98,6 @@ si         <- "Se percibe lector"                   # categoría de interés de 
 # ===============================================================
 # 2. CARGA, CALIDAD Y PREPARACIÓN DE LOS DATOS
 # ===============================================================
-pct <- function(x, n) round(100 * x / n, 1)   # porcentaje con 1 decimal
 
 # --- Carga y validación del archivo ---
 stopifnot(file.exists(ruta_datos))
@@ -158,32 +162,22 @@ A <- droplevels(subset(U, H_LEC %in% c(1, 3)))
 L <- droplevels(subset(A, P10 > 0))
 ```
 
-```{r helpers}
+```{r helpers-calculo}
 # ===============================================================
-# 3. FUNCIONES AUXILIARES
+# 3A. FUNCIONES DE CÁLCULO
+#     (producen números: porcentajes, estadísticos, intervalos y pruebas)
 # ===============================================================
 
-# fmt: número con d decimales como texto
-fmt <- function(x, d = 2) formatC(x, format = "f", digits = d)
-
-# fp: valor p con 4 decimales ("< 0.0001" si es muy pequeño)
-fp  <- function(p) ifelse(p < 0.0001, "< 0.0001", formatC(p, format = "f", digits = 4))
+# pct: porcentaje con 1 decimal
+pct <- function(x, n) round(100 * x / n, 1)
 
 # dec: decisión de la prueba con el nivel de significancia alpha_val
 dec <- function(p) ifelse(p < alpha_val, "Rechaza H0", "No rechaza H0")
 
-# tab_ancha: tabla que en PDF se reduce para caber en el ancho de la página
-tab_ancha <- function(df, caption, digits = 3) {
-  if (knitr::is_latex_output()) {
-    kable(df, format = "latex", booktabs = TRUE, digits = digits, row.names = FALSE,
-          caption = caption) %>%
-      kable_styling(latex_options = c("scale_down", "hold_position"))
-  } else {
-    kable(df, digits = digits, row.names = FALSE, caption = caption)
-  }
-}
-
-# ---------------- Descriptivos (base L) ----------------
+# Las tres comparaciones entre grupos (grupo 1 - grupo 2)
+pares <- list(c("Mujer hogar", "Mujer trabaja"),
+              c("Mujer hogar", "Hombre trabaja"),
+              c("Hombre trabaja", "Mujer trabaja"))
 
 # desc_tabla: estadísticos descriptivos de v (P10 o P26) en L por grupo y autopercepción
 desc_tabla <- function(v) {
@@ -199,27 +193,6 @@ desc_tabla <- function(v) {
              as.data.frame(r$x),
              check.names = FALSE, row.names = NULL)
 }
-
-# cajas: diagramas de caja de v por autopercepción, un panel por grupo (base L)
-cajas <- function(v, ylim, ylab) {
-  par(mfrow = c(1, 3), mar = c(5, 4, 3, 1), mgp = c(3, 2, 0))
-  for (g in levels(L$Grupo)) {
-    d <- subset(L, Grupo == g)
-    nombres <- paste0(c("Se percibe\nlector", "No se percibe\nlector"), "\n(N=", table(d$Aut), ")")
-    boxplot(d[[v]] ~ d$Aut, names = nombres, ylim = ylim, outline = FALSE,
-            col = c("#F8766D80", "#00BFC480"), main = g, xlab = "", ylab = ylab, cex.axis = 0.8)
-    stripchart(d[[v]] ~ d$Aut, vertical = TRUE, method = "jitter", jitter = 0.15,
-               pch = 16, cex = 0.4, col = rgb(0, 0, 0, 0.25), add = TRUE)
-  }
-  par(mfrow = c(1, 1))
-}
-
-# ---------------- Inferencia (base L) ----------------
-
-# Las tres comparaciones entre grupos (grupo 1 - grupo 2)
-pares <- list(c("Mujer hogar", "Mujer trabaja"),
-              c("Mujer hogar", "Hombre trabaja"),
-              c("Hombre trabaja", "Mujer trabaja"))
 
 # obtener_datos_intervalo: IC para la diferencia de medias (muestras grandes, varianzas
 #   desconocidas: z.test con las desviaciones estándar muestrales)
@@ -269,9 +242,57 @@ chi_fila <- function(r, etiqueta) {
 }
 ```
 
-# Datos y métodos
+```{r helpers-formato}
+# ===============================================================
+# 3B. FUNCIONES DE FORMATO
+#     (solo cambian la presentación: texto, tablas y gráficos base)
+# ===============================================================
 
-Se utilizan los microdatos de la MOLEC 2022-2024 (archivo `DatosEquipo6_v2.csv`). Los valores no identificados de sexo y condición de actividad se tratan como faltantes. Se trabaja con tres grupos (mujer dedicada al hogar, mujer que trabaja y hombre que trabaja); quedan fuera estudiantes, jubilados, personas en otras condiciones y hombres dedicados al hogar. Todas las pruebas usan $\alpha = 0.04$ (intervalos al 96 %).
+# fmt: número con d decimales como texto
+fmt <- function(x, d = 2) formatC(x, format = "f", digits = d)
+
+# fp: valor p con 4 decimales ("< 0.0001" si es muy pequeño)
+fp  <- function(p) ifelse(p < 0.0001, "< 0.0001", formatC(p, format = "f", digits = 4))
+
+# tab_ancha: tabla que en PDF se reduce para caber en el ancho de la página
+tab_ancha <- function(df, caption, digits = 3) {
+  if (knitr::is_latex_output()) {
+    kable(df, format = "latex", booktabs = TRUE, digits = digits, row.names = FALSE,
+          caption = caption) %>%
+      kable_styling(latex_options = c("scale_down", "hold_position"))
+  } else {
+    kable(df, digits = digits, row.names = FALSE, caption = caption)
+  }
+}
+
+# cajas: diagramas de caja de v por autopercepción, un panel por grupo (base L)
+cajas <- function(v, ylim, ylab) {
+  par(mfrow = c(1, 3), mar = c(5, 4, 3, 1), mgp = c(3, 2, 0))
+  for (g in levels(L$Grupo)) {
+    d <- subset(L, Grupo == g)
+    nombres <- paste0(c("Se percibe\nlector", "No se percibe\nlector"), "\n(N=", table(d$Aut), ")")
+    boxplot(d[[v]] ~ d$Aut, names = nombres, ylim = ylim, outline = FALSE,
+            col = c("#F8766D80", "#00BFC480"), main = g, xlab = "", ylab = ylab, cex.axis = 0.8)
+    stripchart(d[[v]] ~ d$Aut, vertical = TRUE, method = "jitter", jitter = 0.15,
+               pch = 16, cex = 0.4, col = rgb(0, 0, 0, 0.25), add = TRUE)
+  }
+  par(mfrow = c(1, 1))
+}
+```
+
+# Resumen
+
+<!-- Máximo 1 página. Debe incluir: (1) la problemática, muy brevemente; (2) cómo se abordó (métodos y técnicas estadísticas); (3) los principales resultados y conclusiones. -->
+
+# Introducción y justificación
+
+<!-- Máximo 2 páginas. Se aborda la problemática general y se concluye con el problema que se estudiará (pregunta rectora) y su justificación. Debe tener al menos cuatro citas de autores en formato APA que aborden el tema, junto con comentarios y reflexiones propias. -->
+
+# Metodología
+
+<!-- Máximo 1 página. Debe incluir: (1) cómo se abordará la pregunta rectora, es decir, qué variables o preguntas secundarias se analizarán; (2) fuente de datos, población objetivo y dimensión de los datos; (3) elección de la muestra y tipo de muestreo; (4) limpieza de datos; (5) los análisis estadísticos y por qué son útiles para responder la pregunta; (6) el nivel de significación. -->
+
+Se utilizan los microdatos de la MOLEC 2022-2024 (archivo `DatosEquipo6_v2.csv`, `r nrow(raw)` registros). Los valores no identificados de sexo y condición de actividad se tratan como faltantes. Se trabaja con tres grupos (mujer dedicada al hogar, mujer que trabaja y hombre que trabaja); quedan fuera estudiantes, jubilados, personas en otras condiciones y hombres dedicados al hogar. Todas las pruebas usan un nivel de significancia $\alpha = 0.04$ (intervalos al 96 %).
 
 Cada tabla, figura y prueba indica la **base** sobre la que se calculó:
 
@@ -295,12 +316,6 @@ tab_bases <- data.frame(
   check.names = FALSE)
 kable(tab_bases, caption = "Bases de análisis utilizadas")
 ```
-
-La estrategia analítica tiene tres partes, todas sobre la base L:
-
-1. **Intervalos de confianza para la diferencia de medias** de los minutos continuos de lectura ($P26$) y del número de revistas ($P10$) entre los tres grupos.
-2. **Pruebas de hipótesis para dos proporciones**, para comparar la proporción de personas que se perciben lectoras entre grupos y entre sexos.
-3. **Pruebas ji cuadrada de independencia** (`chisq.test`) entre la autopercepción lectora y el sexo, y entre la autopercepción lectora y la condición laboral.
 
 ```{r tab-variables}
 # Tabla de las variables utilizadas y calidad de los datos (sobre todos los registros)
@@ -337,9 +352,17 @@ if (knitr::is_latex_output()) {
 }
 ```
 
-# Resultados descriptivos
+La estrategia analítica tiene tres partes, todas sobre la base L:
 
-## Condición lectora por grupo (base U: universo)
+1. **Intervalos de confianza para la diferencia de medias** de los minutos continuos de lectura ($P26$) y del número de revistas ($P10$) entre los tres grupos.
+2. **Pruebas de hipótesis para dos proporciones**, para comparar la proporción de personas que se perciben lectoras entre grupos y entre sexos.
+3. **Pruebas ji cuadrada de independencia** (`chisq.test`) entre la autopercepción lectora y el sexo, y entre la autopercepción lectora y la condición laboral.
+
+# Resultados
+
+## Análisis descriptivo: variables cualitativas
+
+### Condición lectora por grupo (base U: universo)
 
 ```{r tab-hlec-grupo}
 # Distribución porcentual de H_LEC dentro de cada grupo (base U)
@@ -352,11 +375,11 @@ t4[["% de 3 entre 3 y 4"]] <- pct(tb[, 3], tb[, 3] + tb[, 4])
 kable(t4, caption = "Condición lectora (H_LEC) dentro de cada grupo (base U: universo). 1 = habitual; 2 = otros materiales; 3 = leyó sin percibirse lector; 4 = no lector")
 ```
 
-### Interpretación
+#### Interpretación {-}
 
 <!-- Escribe aquí tu interpretación de la condición lectora por grupo. -->
 
-## Cobertura de revistas por grupo y autopercepción (base A: universo con autopercepción)
+### Cobertura de revistas por grupo y autopercepción (base A: universo con autopercepción)
 
 ```{r tab-cob}
 # Personas del universo A que leyeron revistas en los últimos tres meses (P10 > 0);
@@ -376,11 +399,11 @@ kable(cob, row.names = FALSE,
       caption = "Personas que leyeron revistas en los últimos tres meses (P10 > 0), por grupo y autopercepción (base A: universo con autopercepción). N = personas de la base A")
 ```
 
-### Interpretación
+#### Interpretación {-}
 
 <!-- Escribe aquí tu interpretación de la proporción de lectores de revistas. -->
 
-## Número de revistas (`P10`) y minutos continuos (`P26`) (base L: lectores de revistas)
+## Análisis descriptivo: variables cuantitativas (base L: lectores de revistas)
 
 ```{r fig-hist, fig.height=2.6, fig.cap=paste0("Distribución de P10 y P26 (base L: lectores de revistas; se omiten ", sum(L$P10 > 15), " casos con P10 > 15 y ", sum(L$P26 > 180, na.rm = TRUE), " con P26 > 180 minutos)"), fig.pos = "H"}
 op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
@@ -407,17 +430,26 @@ cajas("P10", ylim = c(0, 15), ylab = "Revistas (últimos 3 meses)")
 cajas("P26", ylim = c(0, 120), ylab = "Minutos continuos")
 ```
 
-### Interpretación
+#### Interpretación {-}
 
 <!-- Escribe aquí tu interpretación de la distribución, la tabla y los diagramas de caja de P10 y P26. -->
 
-# Resultados inferenciales (base L: lectores de revistas)
+## Análisis inferencial (base L: lectores de revistas)
 
-## Intervalos de confianza para la diferencia de medias entre grupos
+Todas las pruebas de esta sección usan la base L y un nivel de significancia $\alpha = 0.04$. En la notación de las hipótesis, $MH$ = mujer dedicada al hogar, $MT$ = mujer que trabaja y $HT$ = hombre que trabaja.
+
+### Intervalos de confianza para la diferencia de medias entre grupos
 
 Se comparan los tres grupos de dos en dos, tanto en minutos continuos de lectura ($P26$) como en número de revistas ($P10$). Como cada grupo tiene más de 40 casos y las varianzas poblacionales son desconocidas, el intervalo para $\mu_1-\mu_2$ usa la distribución normal estándar con las varianzas muestrales:
 $$(\bar{x}_1-\bar{x}_2) \pm z_{1-\alpha/2}\sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}}, \qquad z_{0.98} = `r fmt(qnorm(1 - alpha_val / 2), 3)`.$$
-Si el intervalo no incluye el 0, hay evidencia de que las medias difieren.
+
+Aunque un intervalo no es en sí una prueba, su decisión equivale a contrastar, para cada variable $X$ ($P10$ y $P26$) y con $\mu$ como la media de $X$ en cada grupo:
+
+- **Mujer hogar vs. mujer que trabaja:** $H_0: \mu_{MH} = \mu_{MT}$ frente a $H_1: \mu_{MH} \neq \mu_{MT}$.
+- **Mujer hogar vs. hombre que trabaja:** $H_0: \mu_{MH} = \mu_{HT}$ frente a $H_1: \mu_{MH} \neq \mu_{HT}$.
+- **Hombre que trabaja vs. mujer que trabaja:** $H_0: \mu_{HT} = \mu_{MT}$ frente a $H_1: \mu_{HT} \neq \mu_{MT}$.
+
+Se rechaza $H_0$ si el intervalo no incluye el 0.
 
 ```{r tabla-ic}
 # Intervalos de confianza para la diferencia de medias (grupo 1 - grupo 2), en L
@@ -451,15 +483,22 @@ ggplot(fd, aes(x = Dif, y = Comparacion, color = Incluye)) +
         axis.text.x = element_text(size = 7.5), strip.text = element_text(size = 9, face = "bold"))
 ```
 
-### Interpretación
+#### Interpretación {-}
 
 <!-- Escribe aquí tu interpretación. Recuerda que mujer hogar vs hombre trabaja difiere a la vez en sexo y en actividad. -->
 
-## Diferencia de proporciones en la autopercepción lectora
+### Prueba de hipótesis para la diferencia de proporciones en la autopercepción lectora
 
-Se evalúa si la proporción de personas que se perciben lectoras difiere entre grupos y entre sexos. Para cada par se plantea $H_0: p_1 = p_2$ frente a $H_1: p_1 \neq p_2$ con el estadístico
+Sea $p$ la proporción de personas que se perciben lectoras entre los lectores de revistas. Se plantean las siguientes hipótesis:
+
+- **Mujer hogar vs. mujer que trabaja:** $H_0: p_{MH} = p_{MT}$ frente a $H_1: p_{MH} \neq p_{MT}$.
+- **Mujer hogar vs. hombre que trabaja:** $H_0: p_{MH} = p_{HT}$ frente a $H_1: p_{MH} \neq p_{HT}$.
+- **Hombre que trabaja vs. mujer que trabaja:** $H_0: p_{HT} = p_{MT}$ frente a $H_1: p_{HT} \neq p_{MT}$.
+- **Mujeres vs. hombres:** $H_0: p_{M} = p_{H}$ frente a $H_1: p_{M} \neq p_{H}$.
+
+El estadístico de prueba es
 $$Z = \frac{\hat{p}_1-\hat{p}_2}{\sqrt{\hat{p}(1-\hat{p})\left(\frac{1}{n_1}+\frac{1}{n_2}\right)}}, \qquad \hat{p}=\frac{x_1+x_2}{n_1+n_2},$$
-y se rechaza $H_0$ si $p \le \alpha = 0.04$. La proporción de quienes no se perciben lectores es el complemento, por lo que da exactamente el mismo valor $p$ y no se repite. Como las tres comparaciones entre grupos se hacen a la vez, se reporta además el valor $p$ ajustado por Holm.
+y con $\alpha = 0.04$ se rechaza $H_0$ si $|Z| > z_{0.98} = `r fmt(qnorm(1 - alpha_val / 2), 3)`$ (equivalente a $p \le 0.04$). La proporción de quienes no se perciben lectores es el complemento, por lo que da exactamente el mismo valor $p$ y no se repite. Las pruebas se hacen con `prop.test(c(x1, x2), c(n1, n2), alternative = "two.sided", correct = FALSE)`.
 
 ```{r tabla-prop}
 # Tablas de contingencia en L (también se usan en la ji cuadrada)
@@ -468,35 +507,42 @@ t_sexo <- table(L$Sexo, L$Aut)        # sexo x autopercepción
 t_cond <- table(L$Cond_lab, L$Aut)    # condición laboral x autopercepción
 
 # Proporción que SE PERCIBE LECTOR en cada grupo (3 comparaciones) y por sexo
+# prueba_prop usa prop.test(c(x1, x2), c(n1, n2), alternative = "two.sided", correct = FALSE)
+# (con conf.level = conf_val para que el IC de la diferencia sea al 96 %)
 pp_grupos <- do.call(rbind, lapply(pares, function(p)
   prueba_prop(c(t_aut[p[1], si], t_aut[p[2], si]),
               c(sum(t_aut[p[1], ]), sum(t_aut[p[2], ])),
               paste(p[1], "-", p[2]))))
-pp_grupos$p_Holm <- p.adjust(pp_grupos$p, method = "holm")   # 3 pruebas a la vez
 
 pp_sexo <- prueba_prop(c(t_sexo["Mujer", si], t_sexo["Hombre", si]),
                        c(sum(t_sexo["Mujer", ]), sum(t_sexo["Hombre", ])),
                        "Mujer - Hombre")
-pp_sexo$p_Holm <- NA
 
 tp <- rbind(pp_grupos, pp_sexo)
-tp$Decision <- ifelse(is.na(tp$p_Holm), dec(tp$p), dec(tp$p_Holm))
+tp$Zcrit <- paste0("±", fmt(qnorm(1 - alpha_val / 2), 3))
+tp$Decision <- dec(tp$p)
 tp$p <- fp(tp$p)
-tp$p_Holm <- ifelse(is.na(tp$p_Holm), "", fp(tp$p_Holm))
+tp <- tp[, c("Comparacion", "n1", "n2", "p1", "p2", "Dif", "LI", "LS",
+             "Z", "Zcrit", "p", "Decision")]
 names(tp) <- c("Comparación", "n1", "n2", "% 1", "% 2", "Dif (pp)", "LI (pp)", "LS (pp)",
-               "Z", "p", "p Holm", "Decisión")
-tab_ancha(tp, paste0("Pruebas de dos proporciones: % que se percibe lector (base L: lectores de revistas). % 1 y % 2 = porcentaje en el grupo 1 y 2; Dif, LI y LS = diferencia e IC al ", ic_txt,
-                     " en puntos porcentuales (pp). La decisión entre grupos usa p Holm; la de sexo usa p"),
+               "Z", "Z crít.", "p", "Decisión")
+tab_ancha(tp, paste0("Pruebas de dos proporciones: % que se percibe lector (base L: lectores de revistas; alpha = 0.04). % 1 y % 2 = porcentaje en el grupo 1 y 2; Dif, LI y LS = diferencia e IC al ", ic_txt,
+                     " en puntos porcentuales (pp); Z crít. = valor crítico"),
           digits = 2)
 ```
 
-### Interpretación
+#### Interpretación {-}
 
 <!-- Escribe aquí tu interpretación de las proporciones. -->
 
-## Independencia entre la autopercepción y el sexo, y entre la autopercepción y la condición laboral
+### Prueba de hipótesis de independencia (ji cuadrada) entre la autopercepción y el sexo, y entre la autopercepción y la condición laboral
 
-Con la ji cuadrada de independencia (`chisq.test`, sin corrección de continuidad) se contrasta $H_0$: la autopercepción lectora es independiente de la variable, frente a $H_1$: existe asociación. Las frecuencias esperadas son $E_{ij}=\frac{(\text{total fila } i)(\text{total columna } j)}{n}$, el estadístico es $Q=\sum\frac{(O_{ij}-E_{ij})^2}{E_{ij}}\sim\chi^2_{(r-1)(c-1)}$ y se rechaza $H_0$ si $Q>\chi^2_{0.96,\,gl}$ (equivalente a $p \le 0.04$). Se agrega la V de Cramér como medida del tamaño de la asociación.
+Se plantean dos pruebas:
+
+- **Autopercepción lectora y sexo:** $H_0$: la autopercepción lectora y el sexo son independientes, frente a $H_1$: la autopercepción lectora y el sexo no son independientes (están asociados).
+- **Autopercepción lectora y condición laboral (trabaja u hogar):** $H_0$: la autopercepción lectora y la condición laboral son independientes, frente a $H_1$: la autopercepción lectora y la condición laboral no son independientes (están asociadas).
+
+Con `chisq.test` (sin corrección de continuidad), las frecuencias esperadas son $E_{ij}=\frac{(\text{total fila } i)(\text{total columna } j)}{n}$, el estadístico es $Q=\sum\frac{(O_{ij}-E_{ij})^2}{E_{ij}}\sim\chi^2_{(r-1)(c-1)}$ y con $\alpha = 0.04$ se rechaza $H_0$ si $Q>\chi^2_{0.96,\,gl}$ (equivalente a $p \le 0.04$). Se agrega la V de Cramér como medida del tamaño de la asociación.
 
 ```{r tablas-chi}
 # Frecuencias observadas (base L)
@@ -524,14 +570,44 @@ tab_ancha(res_chi, "Pruebas ji cuadrada de independencia con la autopercepción 
           digits = 3)
 ```
 
-### Interpretación
+#### Interpretación {-}
 
 <!-- Escribe aquí tu interpretación de las pruebas de independencia. Recuerda que "hogar" solo incluye mujeres, mientras que "trabaja" mezcla hombres y mujeres. -->
 
-# Conclusiones
+## Verificación de supuestos
 
-<!-- Escribe aquí tus conclusiones. -->
+<!-- Se verifican los supuestos de los modelos probabilísticos usados: normalidad (o tamaño de muestra suficiente) para los intervalos de confianza de medias, independencia de las observaciones, homogeneidad de varianzas si aplica, y número de observaciones esperadas por casilla (mayor a 5) en la ji cuadrada y en las pruebas de proporciones. -->
 
-## Limitaciones {.unnumbered}
+# Discusión y conclusiones
 
-<!-- Escribe aquí las limitaciones. -->
+## Integración de los resultados
+
+<!-- Integra la información obtenida en el análisis de datos (descriptivo e inferencial). -->
+
+## Limitaciones del análisis
+
+<!-- Incluye las limitaciones del análisis y los supuestos de las pruebas realizadas. -->
+
+## Nuevas preguntas de investigación
+
+<!-- Plantea nuevas preguntas de investigación que surgieron a partir del análisis. -->
+
+## Qué se pudo y qué no se pudo responder
+
+<!-- Indica qué de la pregunta rectora sí se pudo responder con el análisis y qué no fue posible. -->
+
+## Recomendaciones
+
+<!-- Recomendaciones fundamentadas en el estudio y consecuencias de no atenderlas. Las conclusiones deben sustentarse en el análisis de los datos o en referencias bibliográficas citadas. -->
+
+## Recomendaciones hacia nosotros mismos
+
+<!-- Recomendaciones hacia el propio equipo que se derivan de la investigación, si las hay. -->
+
+# Referencias
+
+<!-- Formato APA. Incluye: la referencia completa de la base de datos; al menos 2 artículos o libros; a lo más 2 páginas web (aparte de la base de datos), con autor e información del autor. Todas las referencias deben estar citadas en el texto. -->
+
+# Anexos
+
+<!-- Liga web a una carpeta (Drive o notebook en web) con los documentos de análisis (R, Python o ambos) y el archivo de la base de datos. Incluye los anexos necesarios para información extensa que se menciona en el cuerpo del reporte; no deben incluirse tablas o gráficos que no se mencionen o justifiquen en el cuerpo. -->
