@@ -163,7 +163,7 @@ dec <- function(p) ifelse(p < alpha_val, "Rechaza H0", "No rechaza H0")
 tab_ancha <- function(df, caption, digits = 3) {
   if (knitr::is_latex_output()) {
     kable(df, format = "latex", booktabs = TRUE, digits = digits, row.names = FALSE,
-          caption = caption) %>%
+          caption = gsub("%", "\\\\%", caption)) %>%
       kable_styling(latex_options = c("scale_down", "hold_position"))
   } else {
     kable(df, digits = digits, row.names = FALSE, caption = caption)
