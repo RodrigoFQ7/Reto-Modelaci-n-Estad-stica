@@ -66,43 +66,35 @@ header-includes:
  
 
 ```{r opciones, include=FALSE}
-# Opciones generales de los chunks: no mostrar código ni mensajes
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
                       fig.align = "center", fig.width = 6.5, fig.height = 3.8)
 options(knitr.kable.NA = "")
 ```
 
 ```{r setup}
-# ===============================================================
-# 1. PAQUETES Y PARÁMETROS
-# ===============================================================
-# (instalar una vez si faltan: install.packages("BSDA"))
+# Paquetes y parámetros
 library(ggplot2)
 library(knitr)
 library(kableExtra)
-library(BSDA)      # z.test para los intervalos de confianza
+library(BSDA)
 
-alpha_val  <- 0.04                                  # nivel de significancia
-conf_val   <- 1 - alpha_val                         # nivel de confianza
-ic_txt     <- paste0(round(100 * conf_val), " %")   # "96 %" para títulos
+alpha_val  <- 0.04
+conf_val   <- 1 - alpha_val
+ic_txt     <- paste0(round(100 * conf_val), " %") 
 ruta_datos <- "datos/DatosEquipo6_v2.csv"
-si         <- "Se percibe lector"                   # categoría de interés de la autopercepción
+si         <- "Se percibe lector"
 ```
 
 ```{r datos}
-# ===============================================================
-# 2. CARGA, CALIDAD Y PREPARACIÓN DE LOS DATOS
-# ===============================================================
-pct <- function(x, n) round(100 * x / n, 1)   # porcentaje con 1 decimal
+# Preparación de los datos
+pct <- function(x, n) round(100 * x / n, 1)
 
-# --- Carga y validación del archivo ---
 stopifnot(file.exists(ruta_datos))
 raw <- read.csv(ruta_datos)
 stopifnot(ncol(raw) == 7)
 names(raw) <- c("anio", "H_LEC", "SEXO", "COND_ACT", "P10", "P11", "P26")
-vars5 <- c("H_LEC", "SEXO", "COND_ACT", "P10", "P26")   # variables analizadas
+vars5 <- c("H_LEC", "SEXO", "COND_ACT", "P10", "P26")
 
-# --- Calidad de los datos (sobre todos los registros) ---
 calidad <- data.frame(
   Variable = vars5,
   Vacios = colSums(is.na(raw[, vars5])),
@@ -113,13 +105,13 @@ calidad <- data.frame(
             sum(raw$P26 < 2 | raw$P26 > 360, na.rm = TRUE)),
   row.names = NULL)
 
-# --- Limpieza: valores no identificados pasan a NA ---
+# Valores no identificados pasan a NA
 datos <- raw
 datos$H_LEC[!(datos$H_LEC %in% 1:4)]        <- NA
 datos$SEXO[!(datos$SEXO %in% 1:2)]          <- NA
 datos$COND_ACT[!(datos$COND_ACT %in% 1:10)] <- NA
 
-# --- Variables construidas ---
+# Variables construidas
 datos$H_LEC_lbl <- factor(datos$H_LEC, levels = 1:4,
                           labels = c("1. Habitual", "2. Otros materiales",
                                      "3. Leyó sin percibirse lector", "4. No lector"))
@@ -133,15 +125,13 @@ datos$Aut <- factor(datos$Aut, levels = c("Se percibe lector", "No se percibe le
 # Sexo con etiquetas
 datos$Sexo <- factor(datos$SEXO, levels = 1:2, labels = c("Hombre", "Mujer"))
 
-# Condición laboral: trabaja (hombres y mujeres) vs hogar (solo mujeres;
-# los hombres dedicados al hogar quedan fuera)
+# Condición laboral: trabaja (hombres y mujeres) vs hogar (solo mujeres, los hombres dedicados al hogar quedan fuera)
 datos$Cond_lab <- NA
 datos$Cond_lab[datos$COND_ACT %in% 1:3] <- "Trabaja"
 datos$Cond_lab[datos$COND_ACT %in% 7 & datos$SEXO %in% 2] <- "Hogar"
 datos$Cond_lab <- factor(datos$Cond_lab, levels = c("Trabaja", "Hogar"))
 
-# Grupo ocupacional (sexo + condición de actividad); quedan fuera estudiantes,
-# jubilados, otras condiciones y hombres dedicados al hogar
+# Grupo ocupacional (sexo + condición de actividad), quedan fuera estudiantes, jubilados, otras condiciones y hombres dedicados al hogar
 datos$Grupo <- NA
 datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 7]   <- "Mujer hogar"
 datos$Grupo[datos$SEXO %in% 2 & datos$COND_ACT %in% 1:3] <- "Mujer trabaja"
@@ -149,7 +139,7 @@ datos$Grupo[datos$SEXO %in% 1 & datos$COND_ACT %in% 1:3] <- "Hombre trabaja"
 datos$Grupo <- factor(datos$Grupo,
                       levels = c("Mujer hogar", "Mujer trabaja", "Hombre trabaja"))
 
-# --- Bases de análisis (cada sección indica cuál usa) ---
+# Bases de análisis
 # U: UNIVERSO = personas de los 3 grupos con H_LEC válido
 # A: UNIVERSO con autopercepción definida (H_LEC = 1 o 3)
 # L: LECTORES DE REVISTAS = personas de A con P10 > 0 (base de todas las pruebas)
@@ -159,20 +149,17 @@ L <- droplevels(subset(A, P10 > 0))
 ```
 
 ```{r helpers}
-# ===============================================================
-# 3. FUNCIONES AUXILIARES
-# ===============================================================
-
-# fmt: número con d decimales como texto
+# Funciones auxiliares
+# número con d decimales como texto
 fmt <- function(x, d = 2) formatC(x, format = "f", digits = d)
 
-# fp: valor p con 4 decimales ("< 0.0001" si es muy pequeño)
+# valor p con 4 decimales
 fp  <- function(p) ifelse(p < 0.0001, "< 0.0001", formatC(p, format = "f", digits = 4))
 
-# dec: decisión de la prueba con el nivel de significancia alpha_val
+# decisión de la prueba con el nivel de significancia
 dec <- function(p) ifelse(p < alpha_val, "Rechaza H0", "No rechaza H0")
 
-# tab_ancha: tabla que en PDF se reduce para caber en el ancho de la página
+# tabla que en PDF se reduce para caber en el ancho de la página
 tab_ancha <- function(df, caption, digits = 3) {
   if (knitr::is_latex_output()) {
     kable(df, format = "latex", booktabs = TRUE, digits = digits, row.names = FALSE,
@@ -183,9 +170,9 @@ tab_ancha <- function(df, caption, digits = 3) {
   }
 }
 
-# ---------------- Descriptivos (base L) ----------------
+# Descriptivos
 
-# desc_tabla: estadísticos descriptivos de v (P10 o P26) en L por grupo y autopercepción
+# estadísticos descriptivos de v (P10 o P26) en L por grupo y autopercepción
 desc_tabla <- function(v) {
   r <- aggregate(L[[v]], by = list(Aut = L$Aut, Grupo = L$Grupo), FUN = function(x) {
     x <- x[!is.na(x)]
@@ -200,7 +187,7 @@ desc_tabla <- function(v) {
              check.names = FALSE, row.names = NULL)
 }
 
-# cajas: diagramas de caja de v por autopercepción, un panel por grupo (base L)
+# diagramas de caja de v por autopercepción, un panel por grupo (base L)
 cajas <- function(v, ylim, ylab) {
   par(mfrow = c(1, 3), mar = c(5, 4, 3, 1), mgp = c(3, 2, 0))
   for (g in levels(L$Grupo)) {
@@ -214,15 +201,14 @@ cajas <- function(v, ylim, ylab) {
   par(mfrow = c(1, 1))
 }
 
-# ---------------- Inferencia (base L) ----------------
+# Inferencia
 
-# Las tres comparaciones entre grupos (grupo 1 - grupo 2)
+# Las tres comparaciones entre grupos (grupo 1 y grupo 2)
 pares <- list(c("Mujer hogar", "Mujer trabaja"),
               c("Mujer hogar", "Hombre trabaja"),
               c("Hombre trabaja", "Mujer trabaja"))
 
-# obtener_datos_intervalo: IC para la diferencia de medias (muestras grandes, varianzas
-#   desconocidas: z.test con las desviaciones estándar muestrales)
+# IC para la diferencia de medias
 obtener_datos_intervalo <- function(x, y, comparacion, variable) {
   x <- x[!is.na(x)]
   y <- y[!is.na(y)]
@@ -235,7 +221,7 @@ obtener_datos_intervalo <- function(x, y, comparacion, variable) {
              stringsAsFactors = FALSE)
 }
 
-# ic_variable: los 3 intervalos entre grupos para la variable v (en L)
+# 3 intervalos entre grupos para la variable v en L
 ic_variable <- function(v, etiqueta) {
   do.call(rbind, lapply(pares, function(p)
     obtener_datos_intervalo(L[[v]][L$Grupo == p[1]], L[[v]][L$Grupo == p[2]],
@@ -256,7 +242,7 @@ prueba_prop <- function(x, n, etiqueta) {
              stringsAsFactors = FALSE)
 }
 
-# chi_fila: resume un objeto de chisq.test (r) en una fila
+# resumir un objeto de chisq.test (r) en una fila
 #   V = V de Cramér (tamaño del efecto); Esp_min = menor frecuencia esperada
 chi_fila <- function(r, etiqueta) {
   n  <- sum(r$observed)
@@ -303,7 +289,7 @@ La estrategia analítica tiene tres partes, todas sobre la base L:
 3. **Pruebas ji cuadrada de independencia** (`chisq.test`) entre la autopercepción lectora y el sexo, y entre la autopercepción lectora y la condición laboral.
 
 ```{r tab-variables}
-# Tabla de las variables utilizadas y calidad de los datos (sobre todos los registros)
+# Tabla de las variables utilizadas y calidad de los datos
 tab_var <- data.frame(
   Variable = vars5,
   Descripción = c("Condición lectora (INEGI)",
@@ -466,14 +452,13 @@ $$Z = \frac{\hat{p}_1-\hat{p}_2}{\sqrt{\hat{p}(1-\hat{p})\left(\frac{1}{n_1}+\fr
 y se rechaza $H_0$ si $p \le \alpha = 0.04$. La proporción de quienes no se perciben lectores es el complemento, por lo que da exactamente el mismo valor $p$ y no se repite. Las pruebas se hacen con `prop.test(c(x1, x2), c(n1, n2), alternative = "two.sided", correct = FALSE)`.
 
 ```{r tabla-prop}
-# Tablas de contingencia en L (también se usan en la ji cuadrada)
-t_aut  <- table(L$Grupo, L$Aut)       # grupo x autopercepción
-t_sexo <- table(L$Sexo, L$Aut)        # sexo x autopercepción
-t_cond <- table(L$Cond_lab, L$Aut)    # condición laboral x autopercepción
+# Tablas de contingencia en L
+t_aut  <- table(L$Grupo, L$Aut)
+t_sexo <- table(L$Sexo, L$Aut)
+t_cond <- table(L$Cond_lab, L$Aut)
 
 # Proporción que SE PERCIBE LECTOR en cada grupo (3 comparaciones) y por sexo
 # prueba_prop usa prop.test(c(x1, x2), c(n1, n2), alternative = "two.sided", correct = FALSE)
-# (con conf.level = conf_val para que el IC de la diferencia sea al 96 %)
 pp_grupos <- do.call(rbind, lapply(pares, function(p)
   prueba_prop(c(t_aut[p[1], si], t_aut[p[2], si]),
               c(sum(t_aut[p[1], ]), sum(t_aut[p[2], ])),
