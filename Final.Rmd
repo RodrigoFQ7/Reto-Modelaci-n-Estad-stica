@@ -324,6 +324,30 @@ t4[["% de 3 entre 3 y 4"]] <- pct(tb[, 3], tb[, 3] + tb[, 4])
 kable(t4, caption = "Condición lectora (H_LEC) dentro de cada grupo (base U: universo). 1 = habitual; 2 = otros materiales; 3 = leyó sin percibirse lector; 4 = no lector")
 ```
 
+```{r fig-hlec, fig.height=2.3, fig.pos="H", fig.cap="Distribución de la condición lectora (H\\_LEC) dentro de cada grupo (base U: universo)"}
+# Porcentaje de cada categoría de H_LEC dentro de cada grupo (base U)
+d_hlec <- as.data.frame(prop.table(table(U$Grupo, U$H_LEC_lbl), 1))
+names(d_hlec) <- c("Grupo", "H_LEC", "Prop")
+d_hlec$Pct <- 100 * d_hlec$Prop
+d_hlec$Grupo <- factor(d_hlec$Grupo, levels = rev(levels(U$Grupo)))   # mujer hogar arriba
+
+colores <- c("1. Habitual" = "#2a78d6", "2. Otros materiales" = "#d3d2cc",
+             "3. Leyó sin percibirse lector" = "#eb6834", "4. No lector" = "#8a8984")
+texto   <- c("1. Habitual" = "white", "2. Otros materiales" = "black",
+             "3. Leyó sin percibirse lector" = "black", "4. No lector" = "white")
+
+ggplot(d_hlec, aes(x = Pct, y = Grupo, fill = H_LEC)) +
+  geom_col(width = 0.7, color = "white", linewidth = 0.6, position = position_stack(reverse = TRUE)) +
+  geom_text(aes(label = ifelse(Pct >= 5, paste0(fmt(Pct, 1), " %"), ""), color = H_LEC),
+            position = position_stack(vjust = 0.5, reverse = TRUE), size = 3) +
+  scale_fill_manual(values = colores) +
+  scale_color_manual(values = texto, guide = "none") +
+  labs(x = "% dentro del grupo", y = NULL, fill = NULL) +
+  theme_minimal() +
+  theme(legend.position = "bottom", panel.grid.major.y = element_blank(),
+        panel.grid.minor = element_blank())
+```
+
 #### Interpretación {-}
 
 El hábito lector declarado es menor en las mujeres del hogar: el 49.1 % acostumbra leer, contra el 54.8 % de las mujeres que trabajan y el 56.6 % de los hombres que trabajan; ellas también tienen el mayor porcentaje de no lectores (35.8 %). Entre quienes no acostumbran leer, la proporción que leyó algo recientemente es de 25.5 % en mujeres del hogar, 32.1 % en mujeres que trabajan y 38.3 % en hombres que trabajan.
@@ -346,6 +370,7 @@ cob <- data.frame(Grupo = cob$Grupo,
 kable(cob, row.names = FALSE,
       caption = "Personas que leyeron revistas en los últimos tres meses (P10 > 0), por grupo y autopercepción (base A: universo con autopercepción). N = personas de la base A")
 ```
+
 
 #### Interpretación {-}
 
@@ -453,6 +478,26 @@ names(tp) <- c("Comparación", "n1", "n2", "% 1", "% 2", "Dif (pp)", "LI (pp)", 
 tab_ancha(tp, paste0("Pruebas de dos proporciones: % que se percibe lector (base L: lectores de revistas; alpha = 0.04). % 1 y % 2 = porcentaje en el grupo 1 y 2; Dif, LI y LS = diferencia e IC al ", ic_txt,
                      " en puntos porcentuales (pp); Z crít. = valor crítico. La última fila usa la base A como referencia"),
           digits = 2)
+```
+
+```{r fig-aut-L, fig.height=2.3, fig.pos="H", fig.cap="Porcentaje que acostumbra leer y que no acostumbra leer, aunque leyó, por grupo (base L: lectores de revistas)"}
+# Porcentaje de cada categoría de autopercepción dentro de cada grupo (base L)
+d_aut <- as.data.frame(prop.table(table(L$Grupo, L$Aut), 1))
+names(d_aut) <- c("Grupo", "Aut", "Prop")
+d_aut$Pct <- 100 * d_aut$Prop
+d_aut$Grupo <- factor(d_aut$Grupo, levels = rev(levels(L$Grupo)))   # mujer hogar arriba
+
+ggplot(d_aut, aes(x = Pct, y = Grupo, fill = Aut)) +
+  geom_col(width = 0.7, color = "white", linewidth = 0.6, position = position_stack(reverse = TRUE)) +
+  geom_text(aes(label = paste0(fmt(Pct, 1), " %"), color = Aut),
+            position = position_stack(vjust = 0.5, reverse = TRUE), size = 3) +
+  scale_fill_manual(values = c("Se percibe lector" = "#2a78d6", "No se percibe lector" = "#eb6834"),
+                    labels = c("Acostumbra leer (H_LEC = 1)", "No acostumbra, pero leyó (H_LEC = 3)")) +
+  scale_color_manual(values = c("Se percibe lector" = "white", "No se percibe lector" = "black"), guide = "none") +
+  labs(x = "% dentro del grupo", y = NULL, fill = NULL) +
+  theme_minimal() +
+  theme(legend.position = "bottom", panel.grid.major.y = element_blank(),
+        panel.grid.minor = element_blank())
 ```
 
 #### Interpretación {-}
