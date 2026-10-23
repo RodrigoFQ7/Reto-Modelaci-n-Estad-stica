@@ -34,11 +34,6 @@ header-includes:
 - \AtBeginEnvironment{table}{\footnotesize}
 ---
  
-% ---------------------------------------------------------------
-% CARÁTULA. Debe llevar: título acorde a la pregunta rectora, nombre del bloque,
-% número de equipo, nombres y matrículas de los integrantes y fecha de entrega.
-% Falta agregar: título (pregunta rectora), nombre del bloque y número de equipo.
-% ---------------------------------------------------------------
 \begin{titlepage}
 		\centering
 		
@@ -48,11 +43,11 @@ header-includes:
 		
 		\vspace{2cm}
 		
-		{\LARGE\bfseries Final final\par}
+		{\LARGE\bfseries Sexo, condición laboral y autopercepción lectora: práctica de lectura de revistas en México (MOLEC 2022-2024)\par}
 		
 		\vspace{0.5cm}
 		
-		{\LARGE\bfseries Modelación estadística para la toma de decisiones \par}
+		{\Large\bfseries Modelación estadística para la toma de decisiones (MA1001B)\par}
 		
 		\vspace{3cm}
 		
@@ -62,6 +57,8 @@ header-includes:
 		{\Large Rodrigo Fuentes Quintana A00843675\par}
 		
 		\vspace{0.5cm}
+		
+		{\Large Equipo 6\par}
 		
 		\vfill
 		
@@ -262,19 +259,39 @@ cajas <- function(v, ylim, ylab) {
 }
 ```
 
-# Resumen
+# Resumen {-}
 
-<!-- Máximo 1 página. Debe incluir: (1) la problemática, muy brevemente; (2) cómo se abordó (métodos y técnicas estadísticas); (3) los principales resultados y conclusiones. -->
+Las encuestas de lectura distinguen entre quienes acostumbran leer y quienes no, pero parte de quienes no se reconocen como lectores sí lee. Este trabajo analiza cómo se relacionan el sexo y la condición laboral con la autopercepción lectora y las prácticas de lectura de revistas en tres grupos: mujeres dedicadas al hogar, mujeres que trabajan y hombres que trabajan.
+
+Se usaron los microdatos del Módulo sobre Lectura (MOLEC) del INEGI de 2022 a 2024. La autopercepción se midió con la condición lectora ($H\_LEC$): acostumbra leer (1) o no acostumbra leer, aunque ha leído en los últimos meses (3). El análisis inferencial se hizo con 1,146 personas que leyeron revistas, mediante intervalos de confianza para la diferencia de medias del número de revistas ($P10$) y de los minutos continuos de lectura ($P26$), pruebas de dos proporciones y pruebas ji cuadrada de independencia, con un nivel de significancia de 0.04.
+
+Entre quienes leen revistas, los tres grupos leen un número similar de revistas (alrededor de 3), pero difieren en minutos continuos: las mujeres del hogar leen 4.6 minutos menos que las mujeres que trabajan y 10.9 menos que los hombres que trabajan. Los hombres que trabajan acostumbran leer con mayor frecuencia que las mujeres que trabajan (87.5 % frente a 80.7 %), aunque esta diferencia parece deberse a que pocos hombres que no acostumbran leer leen revistas (18.0 %, frente a 33.1 % de las mujeres). Se concluye que las revistas funcionan como una puerta de entrada a la lectura para quienes no acostumbran leer, sobre todo para las mujeres, y que los resultados son asociaciones que no prueban causalidad.
+
+\newpage
 
 # Introducción y justificación
 
-<!-- Máximo 2 páginas. Se aborda la problemática general y se concluye con el problema que se estudiará (pregunta rectora) y su justificación. Debe tener al menos cuatro citas de autores en formato APA que aborden el tema, junto con comentarios y reflexiones propias. -->
+Abordar la problemática del estado de la lectura en México más allá de cifras superficiales es fundamental para el desarrollo intelectual y social del país. A través de la charla introductoria *Leer menos hoy, rezagos del mañana*, impartida por el Dr. Marco Antonio Fernández Martínez (Cursos Estadística, 2025), se indagó en las diferentes causas y consecuencias del rezago en la lectura en la población mexicana a nivel nacional. Como punto de partida, se entiende que el hábito de leer está directamente relacionado con la calidad del pensamiento crítico, la capacidad de discernir entre información de calidad en los medios que nos rodean y una mejora en el léxico y las habilidades comunicativas. Por ello, es importante comprender las razones detrás del decaimiento de la lectura en los distintos sectores de la población mexicana, para promover acciones que complementen su desarrollo frente al rezago causado por el encierro durante la pandemia por COVID-19.
+
+Para profundizar en estas dinámicas, la lectura suele observarse mediante dos indicadores que no siempre coinciden: lo que las personas dicen de sí mismas, es decir, si se consideran lectoras, y lo que en realidad hacen. La autopercepción como lector no solo depende de lo que cada uno entienda por leer, sino también de los textos que prefiere consumir y de si desea o no proyectar esa imagen ante los demás. Este proyecto parte de la hipótesis de que el sexo y la condición de ocupación influyen en dicha brecha.
+
+En la tradición de Bourdieu (1979, citado en Lahire, 2007), las prácticas culturales se ordenan en una jerarquía de legitimidad que mantiene a ciertos grupos a distancia de la "alta cultura". Por ejemplo, Lahire (2007) señala que tras jornadas largas se recurre a lecturas fáciles para relajarse, aunque quien las practica las juzgue poco valiosas. A esto se suma que la lectura femenina ha sido históricamente infravalorada. Como explican Cortés y Daniel (2024), el acceso a la cultura escrita fue negado a diversos sectores, con especial énfasis en las mujeres, lo que genera una profunda desigualdad entre quienes participan de la lectura y la escritura y quienes quedan excluidos de ellas (Petrucci, 2002, citado en Cortés y Daniel, 2024).
+
+El primer elemento para entender esa variación es la desigual distribución del trabajo no remunerado. García y Pacheco (2014) recuerdan que el trabajo doméstico no se reconoce como un trabajo, ni siquiera por quienes lo realizan. Con datos de la Encuesta Nacional sobre Uso del Tiempo (ENUT) 2009, las mujeres dedicaban en promedio más del doble de tiempo que los hombres al trabajo no remunerado del hogar, y su carga total de trabajo, remunerado y no remunerado, superaba a la de los hombres en al menos 15 horas semanales (García y Pacheco, 2014). Esta carga condiciona la lectura porque leer requiere tiempo propio. García Sainz (2017) retoma la idea de que el tiempo libre es lo que queda tras restar el cuidado personal, el empleo y el trabajo del hogar, y destaca que el trabajo doméstico compromete la formación y el tiempo libre. Así pues, como el sexo y la condición de ocupación están estrechamente vinculados al trabajo doméstico, es necesario aislar el efecto de cada variable (García y Pacheco, 2014). Los estudios citados se apoyan en la ENUT 2009 y en contextos distintos, por lo que se usan como marco conceptual y no como evidencia del periodo analizado.
+
+De esto se desprende la hipótesis que este proyecto pone a prueba: si "ser lector" se asocia con la lectura legítima (de acuerdo con la "alta cultura" de Bourdieu) y con disponer de tiempo continuo, es probable que la lectura fragmentada, propia de quienes organizan su día en torno al hogar, no se reconozca como tal. Para abordarla, se plantea la siguiente pregunta rectora:
+
+**¿Cómo se relacionan el sexo y la condición laboral con la autopercepción lectora y las prácticas de lectura de revistas?**
+
+Esta investigación es clave para evitar que las propuestas ante el problema de la lectura en México busquen tratar a todos por igual. Por ello, a través de un análisis estadístico de la MOLEC (2022-2024) se buscan soluciones que no impongan un canon hegemónico que desvalorice las prácticas de otros grupos, como las mujeres dedicadas al hogar. Siguiendo la teoría del capital cultural (Bourdieu, 1979, citado en Lahire, 2007), se busca revalorizar textos que comúnmente son minimizados y verlos como un área de oportunidad para que se siga leyendo, garantizando alternativas viables para redistribuir el derecho a la educación y a la lectura acorde con lo que cada persona y grupo social requiere (Ocampo y López, 2020).
 
 # Metodología
 
-<!-- Máximo 1 página. Debe incluir: (1) cómo se abordará la pregunta rectora, es decir, qué variables o preguntas secundarias se analizarán; (2) fuente de datos, población objetivo y dimensión de los datos; (3) elección de la muestra y tipo de muestreo; (4) limpieza de datos; (5) los análisis estadísticos y por qué son útiles para responder la pregunta; (6) el nivel de significación. -->
+El análisis se fundamenta en los datos del Módulo sobre Lectura (MOLEC) del INEGI, el cual desde 2015 recopila información sobre el comportamiento lector de la población mexicana en distintos materiales como libros, revistas, periódicos y medios digitales. Para delimitar la investigación a la época postpandemia, se utilizan los levantamientos de febrero de 2022, 2023 y 2024 (INEGI, 2022, 2023, 2024), que suman `r nrow(raw)` registros. La MOLEC se aplica como módulo de la Encuesta Nacional sobre Confianza del Consumidor; su población objetivo son las personas de 18 años y más que saben leer y residen en viviendas particulares de 32 áreas urbanas, una por entidad federativa, y su muestreo es probabilístico, trietápico, estratificado y por conglomerados, con una persona seleccionada al azar en cada vivienda. No se usó el factor de expansión, por lo que los resultados describen la muestra y no a la población. La limpieza de la base se describe en el Anexo 2.
 
-Se utilizan los microdatos de la MOLEC 2022-2024 (archivo `DatosEquipo6_v2.csv`, `r nrow(raw)` registros). Los valores no identificados de sexo y condición de actividad se tratan como faltantes. Se trabaja con tres grupos (mujer dedicada al hogar, mujer que trabaja y hombre que trabaja); quedan fuera estudiantes, jubilados, personas en otras condiciones y hombres dedicados al hogar. Todas las pruebas usan un nivel de significancia $\alpha = 0.04$ (intervalos al 96 %).
+La condición lectora ($H\_LEC$) se construye a partir de si la persona declara acostumbrar leer materiales considerados por la MOLEC (código 1) o declara no acostumbrar leer, aunque ha leído alguno en los últimos meses (código 3). En este trabajo se usa como indicador de autopercepción lectora. Se excluyen los códigos 2 y 4.
+
+Para responder la pregunta, el sexo y la condición de actividad se cruzan en tres grupos: mujeres dedicadas al hogar (MH), mujeres que trabajan (MT) y hombres que trabajan (HT); quedan fuera estudiantes, jubilados, personas en otras condiciones y hombres dedicados al hogar. La práctica de lectura se mide con el número de revistas leídas en los últimos tres meses ($P10$) y los minutos continuos de lectura ($P26$).
 
 Cada tabla, figura y prueba indica la **base** sobre la que se calculó:
 
@@ -282,22 +299,268 @@ Cada tabla, figura y prueba indica la **base** sobre la que se calculó:
 - **Base A (universo con autopercepción definida):** personas de U con $H\_LEC = 1$ o $3$, $n = `r nrow(A)`$.
 - **Base L (lectores de revistas):** personas de A con $P10 > 0$, $n = `r nrow(L)`$.
 
-Los descriptivos de contexto usan las bases U y A; **todas las pruebas inferenciales usan solo la base L**, porque $P10$ solo existe para quienes leen revistas.
+Los descriptivos de contexto usan las bases U y A; **todas las pruebas inferenciales usan solo la base L**, porque $P10$ solo existe para quienes leen revistas. Así, en la base L, el grupo que no se percibe lector está formado por personas que leen revistas pero no acostumbran leer.
 
-```{r tab-bases}
-# Resumen de las bases de análisis
-tab_bases <- data.frame(
-  Base = c("U", "A", "L"),
-  Definición = c("Universo: 3 grupos con H_LEC válido",
-                 "Universo con autopercepción definida (H_LEC = 1 o 3)",
-                 "Lectores de revistas: personas de A con P10 > 0"),
-  n = c(nrow(U), nrow(A), nrow(L)),
-  "Se usa en" = c("Descriptivo de H_LEC",
-                  "Descriptivo de cobertura de revistas",
-                  "Descriptivos de P10 y P26 y todas las pruebas"),
-  check.names = FALSE)
-kable(tab_bases, caption = "Bases de análisis utilizadas")
+Para evaluar las diferencias entre grupos se emplearon las siguientes técnicas de estadística inferencial, todas con un nivel de significancia de $\alpha = 0.04$ (confianza del 96 %):
+
+1. **Intervalos de confianza para la diferencia de medias** de $P26$ y $P10$ entre los tres grupos. Al tratarse de muestras grandes con varianzas poblacionales desconocidas, se aplicó la distribución normal estándar; los intervalos estiman cuánto difiere la práctica de lectura de un grupo a otro.
+2. **Pruebas de hipótesis para dos proporciones**, que comparan la proporción de personas que se perciben lectoras entre grupos y entre sexos.
+3. **Pruebas de independencia ji cuadrada**, que evalúan si la autopercepción lectora está asociada con el sexo, la condición laboral y el grupo; la V de Cramér indica qué tan fuerte es esa asociación.
+
+# Resultados
+
+## Análisis descriptivo: variables cualitativas
+
+### Condición lectora por grupo (base U: universo)
+
+```{r tab-hlec-grupo}
+# Distribución porcentual de H_LEC dentro de cada grupo (base U)
+tb <- table(U$Grupo, U$H_LEC_lbl)
+pc <- round(100 * prop.table(tb, 1), 1)
+t4 <- data.frame(Grupo = rownames(tb), N = as.vector(rowSums(tb)),
+                 as.data.frame.matrix(pc), check.names = FALSE, row.names = NULL)
+names(t4)[3:6] <- c("1 Habitual (%)", "2 Otros (%)", "3 Leyó (%)", "4 No lector (%)")
+t4[["% de 3 entre 3 y 4"]] <- pct(tb[, 3], tb[, 3] + tb[, 4])
+kable(t4, caption = "Condición lectora (H_LEC) dentro de cada grupo (base U: universo). 1 = habitual; 2 = otros materiales; 3 = leyó sin percibirse lector; 4 = no lector")
 ```
+
+#### Interpretación {-}
+
+El hábito lector declarado es menor en las mujeres del hogar: el 49.1 % acostumbra leer, contra el 54.8 % de las mujeres que trabajan y el 56.6 % de los hombres que trabajan; ellas también tienen el mayor porcentaje de no lectores (35.8 %). Entre quienes no acostumbran leer, la proporción que leyó algo recientemente es de 25.5 % en mujeres del hogar, 32.1 % en mujeres que trabajan y 38.3 % en hombres que trabajan.
+
+### Cobertura de revistas por grupo y autopercepción (base A: universo con autopercepción)
+
+```{r tab-cob}
+# Personas del universo A que leyeron revistas en los últimos tres meses (P10 > 0)
+Ac <- A
+Ac$Leyo <- !is.na(Ac$P10) & Ac$P10 > 0
+cob <- aggregate(Ac$Leyo, by = list(Grupo = Ac$Grupo, Aut = Ac$Aut),
+                 FUN = function(x) c(N = length(x), n = sum(x)))
+cob <- cbind(cob[, 1:2], as.data.frame(cob$x))
+cob <- cob[order(cob$Grupo, cob$Aut), ]
+cob <- data.frame(Grupo = cob$Grupo,
+                  `Se percibe lector` = ifelse(cob$Aut == si, "Sí", "No"),
+                  N = cob$N, `Leyó revistas` = cob$n,
+                  `% leyó revistas` = pct(cob$n, cob$N),
+                  check.names = FALSE)
+kable(cob, row.names = FALSE,
+      caption = "Personas que leyeron revistas en los últimos tres meses (P10 > 0), por grupo y autopercepción (base A: universo con autopercepción). N = personas de la base A")
+```
+
+#### Interpretación {-}
+
+Entre quienes acostumbran leer, la cobertura de revistas es casi idéntica en los tres grupos (35.4 %, 35.8 % y 35.8 %). La diferencia aparece entre quienes no acostumbran leer: 31.2 % en mujeres del hogar, 34.3 % en mujeres que trabajan y solo 18.0 % en hombres que trabajan. Por sexo, el 33.1 % de las mujeres no habituales leyó revistas, contra el 18.0 % de los hombres. Esto importa para la base L: los hombres que no acostumbran leer quedan subrepresentados (58 personas).
+
+## Análisis descriptivo: variables cuantitativas (base L: lectores de revistas)
+
+
+```{r tab-desc-p10}
+# Descriptivos de P10 por grupo y autopercepción (base L)
+tab_ancha(desc_tabla("P10")[, -1],
+          "Estadísticos descriptivos del número de revistas (P10) por grupo y autopercepción (base L: lectores de revistas). DE = desviación estándar; Q1 y Q3 = cuartiles",
+          digits = 1)
+```
+
+```{r tab-desc-p26}
+# Descriptivos de P26 por grupo y autopercepción (base L)
+tab_ancha(desc_tabla("P26")[, -1],
+          "Estadísticos descriptivos de los minutos continuos de lectura (P26) por grupo y autopercepción (base L: lectores de revistas). DE = desviación estándar; Q1 y Q3 = cuartiles",
+          digits = 1)
+```
+
+```{r fig-p10, fig.height=2.2, fig.pos="H", fig.cap="Número de revistas leídas (P10) según autopercepción y grupo (base L: lectores de revistas; se omiten del eje los valores mayores a 15; los puntos son personas)"}
+cajas("P10", ylim = c(0, 15), ylab = "Revistas (últimos 3 meses)")
+```
+
+```{r fig-p26, fig.height=2.2, fig.pos="H", fig.cap="Minutos continuos de lectura (P26) según autopercepción y grupo (base L: lectores de revistas; se omiten del eje los valores mayores a 120 minutos)"}
+cajas("P26", ylim = c(0, 120), ylab = "Minutos continuos")
+```
+
+#### Interpretación {-}
+
+El número de revistas es asimétrico: la mediana es de 2 en todas las celdas, las medias van de 2.3 a 3.6 y los máximos llegan a 70 (los histogramas están en el Anexo 3). Los minutos continuos también lo son: la mediana es de 30 minutos entre quienes acostumbran leer y de 20 a 25 entre quienes no, y las medias van de 23.5 a 46.8. Así, quienes no acostumbran leer leen un número de revistas parecido, pero en sesiones más cortas. La dispersión es mayor en los hombres que trabajan, sobre todo entre quienes acostumbran leer (desviación estándar de 5.6 revistas y 40.2 minutos).
+
+## Análisis inferencial (base L: lectores de revistas)
+
+Todas las pruebas de esta sección usan la base L y un nivel de significancia $\alpha = 0.04$. En la notación de las hipótesis, $MH$ = mujer dedicada al hogar, $MT$ = mujer que trabaja y $HT$ = hombre que trabaja.
+
+### Intervalos de confianza para la diferencia de medias entre grupos
+
+Se comparan los tres grupos de dos en dos, tanto en minutos continuos de lectura ($P26$) como en número de revistas ($P10$). Como cada grupo tiene más de 40 casos y las varianzas poblacionales son desconocidas, el intervalo para $\mu_1-\mu_2$ usa la distribución normal estándar con las varianzas muestrales:
+$$(\bar{x}_1-\bar{x}_2) \pm z_{1-\alpha/2}\sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}}, \qquad z_{0.98} = `r fmt(qnorm(1 - alpha_val / 2), 3)`.$$
+
+Aunque un intervalo no es en sí una prueba, su decisión equivale a contrastar, para cada variable ($P10$ y $P26$) y cada par de grupos (MH vs. MT, MH vs. HT y HT vs. MT), $H_0: \mu_1 = \mu_2$ frente a $H_1: \mu_1 \neq \mu_2$; se rechaza $H_0$ si el intervalo no incluye el 0.
+
+```{r tabla-ic}
+# Intervalos de confianza para la diferencia de medias (grupo 1 - grupo 2), en L
+df_ic <- rbind(ic_variable("P26", "P26 (minutos)"),
+               ic_variable("P10", "P10 (revistas)"))
+df_ic$Variable <- factor(df_ic$Variable, levels = unique(df_ic$Variable))
+rownames(df_ic) <- NULL
+
+vis <- df_ic
+vis$`¿Incluye 0?` <- ifelse(vis$Incluye_0, "Sí", "No")
+vis <- vis[, c("Variable", "Comparacion", "n1", "n2", "Dif", "LI", "LS", "¿Incluye 0?")]
+names(vis) <- c("Variable", "Comparación", "n1", "n2", "Dif", "LI", "LS", "¿Incluye 0?")
+tab_ancha(vis, paste0("Intervalos de confianza al ", ic_txt,
+                      " para la diferencia de medias, grupo 1 - grupo 2 (base L: lectores de revistas). Dif = diferencia de medias; LI y LS = límites inferior y superior"),
+          digits = 3)
+```
+
+
+#### Interpretación {-}
+
+En minutos, los tres intervalos excluyen el 0 (la figura del Anexo 4 los muestra gráficamente) y el orden es hogar < mujer trabaja < hombre trabaja: las mujeres del hogar leen 4.6 minutos menos que las mujeres que trabajan (IC 96 %: -8.5 a -0.7) y 10.9 menos que los hombres que trabajan (-15.5 a -6.3), y los hombres que trabajan leen 6.3 minutos más que las mujeres que trabajan (1.6 a 11.0). En revistas, los tres intervalos incluyen el 0: no hay evidencia de que los grupos lean un número distinto (alrededor de 3). Esto no prueba que sean iguales, solo que los intervalos son anchos por la cola derecha. Hay que recordar que $P26$ mide la lectura de algún material, no solo de revistas, y que la comparación mujer hogar - hombre trabaja mezcla sexo y actividad.
+
+### Prueba de hipótesis para la diferencia de proporciones en la autopercepción lectora
+
+Sea $p$ la proporción de personas que se perciben lectoras entre los lectores de revistas. Para cada par (MH vs. MT, MH vs. HT, HT vs. MT y mujeres vs. hombres) se contrasta $H_0: p_1 = p_2$ frente a $H_1: p_1 \neq p_2$.
+
+El estadístico de prueba es
+$$Z = \frac{\hat{p}_1-\hat{p}_2}{\sqrt{\hat{p}(1-\hat{p})\left(\frac{1}{n_1}+\frac{1}{n_2}\right)}}, \qquad \hat{p}=\frac{x_1+x_2}{n_1+n_2},$$
+y con $\alpha = 0.04$ se rechaza $H_0$ si $|Z| > z_{0.98} = `r fmt(qnorm(1 - alpha_val / 2), 3)`$ (equivalente a $p \le 0.04$). La proporción de quienes no se perciben lectores es el complemento, por lo que da el mismo valor $p$ y no se repite.
+
+```{r tabla-prop}
+# Tablas de contingencia en L
+t_aut  <- table(L$Grupo, L$Aut)
+t_sexo <- table(L$Sexo, L$Aut)
+t_cond <- table(L$Cond_lab, L$Aut)
+
+# Proporción que SE PERCIBE LECTOR en cada grupo (3 comparaciones) y por sexo
+pp_grupos <- do.call(rbind, lapply(pares, function(p)
+  prueba_prop(c(t_aut[p[1], si], t_aut[p[2], si]),
+              c(sum(t_aut[p[1], ]), sum(t_aut[p[2], ])),
+              paste(p[1], "-", p[2]))))
+
+pp_sexo <- prueba_prop(c(t_sexo["Mujer", si], t_sexo["Hombre", si]),
+                       c(sum(t_sexo["Mujer", ]), sum(t_sexo["Hombre", ])),
+                       "Mujer - Hombre")
+
+# Referencia: la misma comparación por sexo en la base A (sin restringir a lectores de revistas)
+t_sexo_A  <- table(A$Sexo, A$Aut)
+pp_sexo_A <- prueba_prop(c(t_sexo_A["Mujer", si], t_sexo_A["Hombre", si]),
+                         c(sum(t_sexo_A["Mujer", ]), sum(t_sexo_A["Hombre", ])),
+                         "Mujer - Hombre (base A)")
+
+tp <- rbind(pp_grupos, pp_sexo, pp_sexo_A)
+tp$Zcrit <- paste0("±", fmt(qnorm(1 - alpha_val / 2), 3))
+tp$Decision <- dec(tp$p)
+tp$p <- fp(tp$p)
+tp <- tp[, c("Comparacion", "n1", "n2", "p1", "p2", "Dif", "LI", "LS",
+             "Z", "Zcrit", "p", "Decision")]
+names(tp) <- c("Comparación", "n1", "n2", "% 1", "% 2", "Dif (pp)", "LI (pp)", "LS (pp)",
+               "Z", "Z crít.", "p", "Decisión")
+tab_ancha(tp, paste0("Pruebas de dos proporciones: % que se percibe lector (base L: lectores de revistas; alpha = 0.04). % 1 y % 2 = porcentaje en el grupo 1 y 2; Dif, LI y LS = diferencia e IC al ", ic_txt,
+                     " en puntos porcentuales (pp); Z crít. = valor crítico. La última fila usa la base A como referencia"),
+          digits = 2)
+```
+
+#### Interpretación {-}
+
+Entre los lectores de revistas, los hombres que trabajan se perciben lectores más a menudo (87.5 %) que las mujeres que trabajan (80.7 %): la diferencia de 6.8 pp es significativa ($Z = 2.76 > 2.054$, $p = 0.0058$). Entre las mujeres del hogar (82.0 %) y las mujeres que trabajan no hay diferencia ($Z = 0.42$, $p = 0.6714$). La comparación mujer hogar - hombre trabaja queda en el límite: $|Z| = 2.03$ no alcanza el valor crítico ($p = 0.0428$) y el IC llega a +0.3 pp. Por sexo, las mujeres se perciben lectoras 6.3 pp menos que los hombres ($p = 0.0047$). En cambio, en la base A, sin restringir a lectores de revistas, la diferencia por sexo se invierte y no es significativa: acostumbra leer el 80.1 % de las mujeres y el 77.9 % de los hombres ($Z = 1.56$, $p = 0.1176$; última fila de la tabla).
+
+### Prueba de hipótesis de independencia (ji cuadrada) entre la autopercepción y el sexo, la condición laboral y el grupo
+
+Se plantean tres pruebas, una para cada variable (sexo, condición laboral y grupo): $H_0$: la autopercepción lectora y la variable son independientes, frente a $H_1$: la autopercepción lectora y la variable están asociadas.
+
+Con `chisq.test` (sin corrección de continuidad), las frecuencias esperadas son $E_{ij}=\frac{(\text{total fila } i)(\text{total columna } j)}{n}$, el estadístico es $Q=\sum\frac{(O_{ij}-E_{ij})^2}{E_{ij}}\sim\chi^2_{(r-1)(c-1)}$ y con $\alpha = 0.04$ se rechaza $H_0$ si $Q>\chi^2_{0.96,\,gl}$ (equivalente a $p \le 0.04$). Se agrega la V de Cramér como medida del tamaño de la asociación.
+
+
+```{r resumen-chi}
+# Pruebas con chisq.test (base L)
+chi_sexo  <- chisq.test(t_sexo, correct = FALSE)
+chi_cond  <- chisq.test(t_cond, correct = FALSE)
+chi_grupo <- chisq.test(t_aut,  correct = FALSE)
+
+chi_aut <- rbind(chi_fila(chi_sexo,  "Sexo x autopercepción"),
+                 chi_fila(chi_cond,  "Condición laboral x autopercepción"),
+                 chi_fila(chi_grupo, "Grupo x autopercepción"))
+
+res_chi <- data.frame(Prueba = chi_aut$Prueba, n = chi_aut$n, gl = chi_aut$gl,
+                      Crítico = round(chi_aut$crit, 3), Q = round(chi_aut$q, 3),
+                      p = fp(chi_aut$p), V = round(chi_aut$V, 3),
+                      `Esp. mín.` = round(chi_aut$Esp_min, 1),
+                      Decisión = dec(chi_aut$p),
+                      check.names = FALSE, stringsAsFactors = FALSE)
+tab_ancha(res_chi, "Pruebas ji cuadrada de independencia con la autopercepción lectora (base L: lectores de revistas; alpha = 0.04). Crítico = valor crítico; Q = estadístico; V = V de Cramér; Esp. mín. = menor frecuencia esperada",
+          digits = 3)
+```
+
+#### Interpretación {-}
+
+La autopercepción está asociada con el sexo ($Q = 7.980 > 4.218$, $p = 0.0047$, V = 0.083): hay asociación, pero pequeña. Con la condición laboral no hay evidencia de asociación ($Q = 0.782 < 4.218$, $p = 0.3767$), resultado que debe leerse con cuidado porque "hogar" solo tiene mujeres. Con el grupo, que combina sexo y condición, sí hay asociación ($Q = 8.182 > 6.438$, $gl = 2$, $p = 0.0167$, V = 0.084), y las comparaciones por pares muestran que viene de los hombres que trabajan. Las frecuencias observadas están en el Anexo 5.
+
+Estas asociaciones podrían ser un efecto de selección. Como solo el 18.0 % de los hombres que no acostumbran leer lee revistas (contra el 33.1 % de las mujeres), al restringir a lectores de revistas quedan pocos hombres no habituales, y la diferencia por sexo pasa de 2.2 pp a favor de las mujeres en la base A a 6.3 pp a favor de los hombres en la base L. Por eso, este resultado se presenta como un patrón exploratorio.
+
+## Verificación de supuestos
+
+- **Independencia.** En cada vivienda se selecciona a una sola persona, por lo que las observaciones se consideran independientes, aunque el muestreo por conglomerados puede generar cierta dependencia dentro de una misma zona.
+- **Intervalos para la diferencia de medias.** Todos los grupos tienen más de 40 casos (267, 415 y 464), así que, por el teorema central del límite, la diferencia de medias es aproximadamente normal aunque $P10$ y $P26$ son muy asimétricas. No se suponen varianzas iguales, lo cual es adecuado: en $P26$ la desviación estándar de los hombres que trabajan (39.1) casi duplica la de las mujeres del hogar (21.3).
+- **Proporciones y ji cuadrada.** Se requieren al menos 5 casos en cada categoría y frecuencias esperadas mayores que 5; la menor frecuencia observada es de 48 y la menor esperada de 43.3, por lo que ambos supuestos se cumplen.
+
+# Discusión y conclusiones
+
+## Integración de los resultados
+
+Los resultados permiten responder la pregunta rectora en tres puntos:
+
+- **Prácticas de lectura.** Entre quienes leen revistas, los grupos leen un número similar de revistas, pero los hombres que trabajan leen más minutos seguidos y las mujeres del hogar, menos. Este orden es consistente con la carga de trabajo no remunerado, que recae sobre todo en las mujeres y reduce el tiempo propio para leer (García y Pacheco, 2014; García Sainz, 2017).
+- **Autopercepción.** Entre los lectores de revistas, la proporción que acostumbra leer es mayor en los hombres que trabajan que en las mujeres que trabajan. Sin embargo, la diferencia por sexo se invierte y deja de ser significativa cuando no se restringe a lectores de revistas, por lo que parece deberse a un efecto de selección.
+- **Las revistas como puerta de entrada.** Las revistas parecen ser una puerta de entrada a la lectura para quienes no acostumbran leer, sobre todo mujeres: un tercio de las mujeres no habituales lee revistas, casi lo mismo que quienes sí acostumbran leer. Esto coincide con la idea de que muchas lecturas cotidianas no se reconocen como lectura legítima, aunque se practiquen (Bourdieu, 1979, citado en Lahire, 2007).
+
+Los resultados son asociaciones y no prueban que la ocupación o el sexo causen las diferencias.
+
+## Limitaciones del análisis
+
+- Solo incluye lectores de revistas (base L), por lo que las conclusiones no aplican a quienes leen otros materiales.
+- Se excluyen las categorías 2 y 4 de $H\_LEC$.
+- No hay factores de expansión, así que los resultados describen la muestra y no a la población.
+- "Hogar" incluye solo mujeres y los hombres dedicados al hogar quedan fuera, por lo que el sexo y la ocupación no pueden separarse por completo.
+- $P26$ mide minutos continuos de lectura de cualquier material, no solo de revistas.
+- No se ajustó por múltiples pruebas: cada intervalo y prueba tiene 96 % de confianza por separado.
+- Hay asimetría fuerte y valores extremos (7 valores de $P10$ superan el máximo del diccionario); los intervalos con z dependen del teorema central del límite y son aproximados.
+- Los resultados son observacionales.
+
+## Nuevas preguntas de investigación
+
+- ¿Se mantienen estos patrones al usar los factores de expansión de la MOLEC?
+- ¿La diferencia en minutos entre quienes acostumbran leer y quienes no es distinta en cada grupo?
+- ¿Por qué los hombres que no acostumbran leer leen menos revistas que las mujeres en la misma situación?
+- ¿Qué tanto de la diferencia en minutos de lectura se relaciona con las horas de trabajo doméstico, por ejemplo al combinar con datos de uso del tiempo?
+
+## Qué se pudo y qué no se pudo responder
+
+Se pudo responder cómo se relacionan el sexo y la condición laboral con las prácticas de lectura de revistas: se asocian con los minutos continuos de lectura, pero no con el número de revistas. También se encontró una relación entre el sexo y la autopercepción entre los lectores de revistas, aunque no es posible afirmar que exista en la población, porque parece deberse a un efecto de selección y porque no se usaron factores de expansión. Tampoco es posible establecer causas, ya que el estudio es observacional, ni separar por completo el efecto del sexo y el de la ocupación, porque no hay hombres dedicados al hogar en el análisis.
+
+## Recomendaciones
+
+Las campañas de fomento a la lectura deberían reconocer de forma explícita materiales como las revistas, que funcionan como puerta de entrada para quienes no acostumbran leer, y ofrecer formatos breves o flexibles para quienes tienen menos tiempo continuo, como las mujeres dedicadas al hogar. Si no se atiende, las encuestas seguirán subestimando la lectura de estos grupos y las políticas tratarán a todos por igual, sin responder a lo que cada persona y grupo social requiere (Ocampo y López, 2020).
+
+## Recomendaciones hacia nosotros mismos
+
+Como estudiantes, el análisis nos invita a no medir nuestra lectura solo por los libros, a reconocer también nuestras lecturas no académicas y a reservar tiempo continuo para leer. Como equipo, en un siguiente análisis convendría usar los factores de expansión de la MOLEC y revisar cómo la forma de elegir la base (en este caso, solo lectores de revistas) puede cambiar los resultados.
+
+# Referencias {-}
+
+\begin{list}{}{\setlength{\leftmargin}{1.27cm}\setlength{\itemindent}{-1.27cm}\setlength{\itemsep}{0.6em}}
+\item Cortés, A. M., y Daniel Bello, S. A. (2024). Mujeres y cultura escrita: Hacia una participación política en México. \textit{Raudem, Revista de Estudios de las Mujeres, 12}, 192--212. \url{https://doi.org/10.25115/raudem.v12i1.10001}
+\item Cursos Estadística. (2025). \textit{Leer menos hoy, rezagos del mañana} [Video]. YouTube. \url{https://www.youtube.com/watch?v=M1cLGNh-19U}
+\item García, B., y Pacheco, E. (2014). Reflexiones sobre el estudio del uso del tiempo. En B. García y E. Pacheco (Coords.), \textit{Uso del tiempo y trabajo no remunerado en México} (pp. 17--50). El Colegio de México, CEDUA / ONU Mujeres / Instituto Nacional de las Mujeres. \url{https://books.google.com.mx/books?id=eAsqDwAAQBAJ}
+\item García Sainz, C. (2017). El impacto de la crisis económica en la pobreza de tiempo y la desigualdad de género. \textit{Arbor, 193}(784), a382. \url{https://doi.org/10.3989/arbor.2017.784n2005}
+\item Instituto Nacional de Estadística y Geografía. (2022). \textit{Módulo sobre Lectura (MOLEC) 2022: Microdatos, cuestionario y diccionario de datos} [Conjunto de datos]. \url{https://www.inegi.org.mx/programas/molec/2022/}
+\item Instituto Nacional de Estadística y Geografía. (2023). \textit{Módulo sobre Lectura (MOLEC) 2023: Microdatos y documento metodológico} [Conjunto de datos]. \url{https://www.inegi.org.mx/rnm/index.php/catalog/860}
+\item Instituto Nacional de Estadística y Geografía. (2024). \textit{Módulo sobre Lectura (MOLEC) 2024: Microdatos y diseño muestral} [Conjunto de datos]. \url{https://www.inegi.org.mx/rnm/index.php/catalog/970}
+\item Lahire, B. (2007). Indivíduo e mistura de gêneros: Dissonâncias culturais e distinção de si (E. Abreu, Trad.). \textit{Dados, 50}(4), 795--825. \url{https://www.scielo.br/j/dados/a/qMSXY3hGdQxwSJSgwvRCwML/?lang=pt}
+\item Ocampo, A., y López, C. (2020). Transformando los espacios de lectura. Una perspectiva crítica e inclusiva de las prácticas lectoras contemporáneas. \textit{Revista Electrónica Educare, 24}(1), 1--21. \url{https://doi.org/10.15359/ree.24-1.11}
+\end{list}
+
+\newpage
+
+# Anexos {-}
+
+**Anexo 1. Código y base de datos.** El código en R (archivos `.Rmd`) y las bases de datos utilizadas están disponibles en: \url{https://github.com/RodrigoFQ7/Reto-Modelaci-n-Estad-stica}
+
+**Anexo 2. Limpieza y calidad de los datos.** La limpieza se hizo en un archivo aparte (`preparacion_datos_molec.Rmd`). Se leyeron las bases de 2022, 2023 y 2024 y, como las columnas cambian de posición entre años, las seis variables se seleccionaron por nombre. Como el 0 nunca es un valor válido en estas variables, se recodificó como NA para que no se confunda con una respuesta; así, los NA de $P10$, $P11$ y $P26$ son blancos por pase de pregunta. Después se unieron los tres años en un solo archivo (`DatosEquipo6_v2.csv`). En este reporte, además, los valores no identificados de sexo y condición de actividad se tratan como faltantes. La siguiente tabla resume las variables utilizadas y su calidad.
 
 ```{r tab-variables}
 # Tabla de las variables utilizadas y calidad de los datos
@@ -334,57 +597,7 @@ if (knitr::is_latex_output()) {
 }
 ```
 
-La estrategia analítica tiene tres partes, todas sobre la base L:
-
-1. **Intervalos de confianza para la diferencia de medias** de los minutos continuos de lectura ($P26$) y del número de revistas ($P10$) entre los tres grupos.
-2. **Pruebas de hipótesis para dos proporciones**, para comparar la proporción de personas que se perciben lectoras entre grupos y entre sexos.
-3. **Pruebas ji cuadrada de independencia** (`chisq.test`) entre la autopercepción lectora y el sexo, y entre la autopercepción lectora y la condición laboral.
-
-# Resultados
-
-## Análisis descriptivo: variables cualitativas
-
-### Condición lectora por grupo (base U: universo)
-
-```{r tab-hlec-grupo}
-# Distribución porcentual de H_LEC dentro de cada grupo (base U)
-tb <- table(U$Grupo, U$H_LEC_lbl)
-pc <- round(100 * prop.table(tb, 1), 1)
-t4 <- data.frame(Grupo = rownames(tb), N = as.vector(rowSums(tb)),
-                 as.data.frame.matrix(pc), check.names = FALSE, row.names = NULL)
-names(t4)[3:6] <- c("1 Habitual (%)", "2 Otros (%)", "3 Leyó (%)", "4 No lector (%)")
-t4[["% de 3 entre 3 y 4"]] <- pct(tb[, 3], tb[, 3] + tb[, 4])
-kable(t4, caption = "Condición lectora (H_LEC) dentro de cada grupo (base U: universo). 1 = habitual; 2 = otros materiales; 3 = leyó sin percibirse lector; 4 = no lector")
-```
-
-#### Interpretación {-}
-
-<!-- Escribe aquí tu interpretación de la condición lectora por grupo. -->
-
-### Cobertura de revistas por grupo y autopercepción (base A: universo con autopercepción)
-
-```{r tab-cob}
-# Personas del universo A que leyeron revistas en los últimos tres meses (P10 > 0)
-Ac <- A
-Ac$Leyo <- !is.na(Ac$P10) & Ac$P10 > 0
-cob <- aggregate(Ac$Leyo, by = list(Grupo = Ac$Grupo, Aut = Ac$Aut),
-                 FUN = function(x) c(N = length(x), n = sum(x)))
-cob <- cbind(cob[, 1:2], as.data.frame(cob$x))
-cob <- cob[order(cob$Grupo, cob$Aut), ]
-cob <- data.frame(Grupo = cob$Grupo,
-                  `Se percibe lector` = ifelse(cob$Aut == si, "Sí", "No"),
-                  N = cob$N, `Leyó revistas` = cob$n,
-                  `% leyó revistas` = pct(cob$n, cob$N),
-                  check.names = FALSE)
-kable(cob, row.names = FALSE,
-      caption = "Personas que leyeron revistas en los últimos tres meses (P10 > 0), por grupo y autopercepción (base A: universo con autopercepción). N = personas de la base A")
-```
-
-#### Interpretación {-}
-
-<!-- Escribe aquí tu interpretación de la proporción de lectores de revistas. -->
-
-## Análisis descriptivo: variables cuantitativas (base L: lectores de revistas)
+**Anexo 3. Distribución del número de revistas (P10) y de los minutos continuos (P26).**
 
 ```{r fig-hist, fig.height=2.6, fig.cap=paste0("Distribución de P10 y P26 (base L: lectores de revistas; se omiten ", sum(L$P10 > 15), " casos con P10 > 15 y ", sum(L$P26 > 180, na.rm = TRUE), " con P26 > 180 minutos)"), fig.pos = "H"}
 op <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
@@ -395,60 +608,9 @@ hist(L$P26[L$P26 <= 180], breaks = seq(0, 180, 10), col = "#00BFC480",
 par(op)
 ```
 
-```{r tab-desc}
-# Descriptivos de P10 y P26 por grupo y autopercepción en una sola tabla (base L)
-tab_desc <- rbind(desc_tabla("P10"), desc_tabla("P26"))
-tab_ancha(tab_desc,
-          "Estadísticos descriptivos de P10 y P26 por grupo y autopercepción (base L: lectores de revistas). DE = desviación estándar; Q1 y Q3 = cuartiles",
-          digits = 1)
-```
+**Anexo 4. Intervalos de confianza para la diferencia de medias entre grupos.**
 
-```{r fig-p10, fig.height=2.4, fig.cap="Número de revistas leídas (P10) según autopercepción y grupo (base L: lectores de revistas; se omiten del eje los valores mayores a 15; los puntos son personas)"}
-cajas("P10", ylim = c(0, 15), ylab = "Revistas (últimos 3 meses)")
-```
-
-```{r fig-p26, fig.height=2.4, fig.cap="Minutos continuos de lectura (P26) según autopercepción y grupo (base L: lectores de revistas; se omiten del eje los valores mayores a 120 minutos)"}
-cajas("P26", ylim = c(0, 120), ylab = "Minutos continuos")
-```
-
-#### Interpretación {-}
-
-<!-- Escribe aquí tu interpretación de la distribución, la tabla y los diagramas de caja de P10 y P26. -->
-
-## Análisis inferencial (base L: lectores de revistas)
-
-Todas las pruebas de esta sección usan la base L y un nivel de significancia $\alpha = 0.04$. En la notación de las hipótesis, $MH$ = mujer dedicada al hogar, $MT$ = mujer que trabaja y $HT$ = hombre que trabaja.
-
-### Intervalos de confianza para la diferencia de medias entre grupos
-
-Se comparan los tres grupos de dos en dos, tanto en minutos continuos de lectura ($P26$) como en número de revistas ($P10$). Como cada grupo tiene más de 40 casos y las varianzas poblacionales son desconocidas, el intervalo para $\mu_1-\mu_2$ usa la distribución normal estándar con las varianzas muestrales:
-$$(\bar{x}_1-\bar{x}_2) \pm z_{1-\alpha/2}\sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}}, \qquad z_{0.98} = `r fmt(qnorm(1 - alpha_val / 2), 3)`.$$
-
-Aunque un intervalo no es en sí una prueba, su decisión equivale a contrastar, para cada variable $X$ ($P10$ y $P26$) y con $\mu$ como la media de $X$ en cada grupo:
-
-- **Mujer hogar vs. mujer que trabaja:** $H_0: \mu_{MH} = \mu_{MT}$ frente a $H_1: \mu_{MH} \neq \mu_{MT}$.
-- **Mujer hogar vs. hombre que trabaja:** $H_0: \mu_{MH} = \mu_{HT}$ frente a $H_1: \mu_{MH} \neq \mu_{HT}$.
-- **Hombre que trabaja vs. mujer que trabaja:** $H_0: \mu_{HT} = \mu_{MT}$ frente a $H_1: \mu_{HT} \neq \mu_{MT}$.
-
-Se rechaza $H_0$ si el intervalo no incluye el 0.
-
-```{r tabla-ic}
-# Intervalos de confianza para la diferencia de medias (grupo 1 - grupo 2), en L
-df_ic <- rbind(ic_variable("P26", "P26 (minutos)"),
-               ic_variable("P10", "P10 (revistas)"))
-df_ic$Variable <- factor(df_ic$Variable, levels = unique(df_ic$Variable))
-rownames(df_ic) <- NULL
-
-vis <- df_ic
-vis$`¿Incluye 0?` <- ifelse(vis$Incluye_0, "Sí", "No")
-vis <- vis[, c("Variable", "Comparacion", "n1", "n2", "Dif", "LI", "LS", "¿Incluye 0?")]
-names(vis) <- c("Variable", "Comparación", "n1", "n2", "Dif", "LI", "LS", "¿Incluye 0?")
-tab_ancha(vis, paste0("Intervalos de confianza al ", ic_txt,
-                      " para la diferencia de medias, grupo 1 - grupo 2 (base L: lectores de revistas). Dif = diferencia de medias; LI y LS = límites inferior y superior"),
-          digits = 3)
-```
-
-```{r fig-ic, fig.height=2.8, out.width="100%", fig.pos="H", fig.cap=paste0("Diferencias de medias con IC al ", ic_txt, " (base L: lectores de revistas). En rojo, los intervalos que no incluyen el 0.")}
+```{r fig-ic, fig.height=2.5, out.width="100%", fig.pos="H", fig.cap=paste0("Diferencias de medias con IC al ", ic_txt, " (base L: lectores de revistas). En rojo, los intervalos que no incluyen el 0.")}
 fd <- df_ic
 fd$Comparacion <- factor(fd$Comparacion, levels = rev(unique(fd$Comparacion)))
 fd$Incluye <- ifelse(fd$Incluye_0, "Incluye 0", "No incluye 0")
@@ -464,64 +626,7 @@ ggplot(fd, aes(x = Dif, y = Comparacion, color = Incluye)) +
         axis.text.x = element_text(size = 7.5), strip.text = element_text(size = 9, face = "bold"))
 ```
 
-#### Interpretación {-}
-
-<!-- Escribe aquí tu interpretación. Recuerda que mujer hogar vs hombre trabaja difiere a la vez en sexo y en actividad. -->
-
-### Prueba de hipótesis para la diferencia de proporciones en la autopercepción lectora
-
-Sea $p$ la proporción de personas que se perciben lectoras entre los lectores de revistas. Se plantean las siguientes hipótesis:
-
-- **Mujer hogar vs. mujer que trabaja:** $H_0: p_{MH} = p_{MT}$ frente a $H_1: p_{MH} \neq p_{MT}$.
-- **Mujer hogar vs. hombre que trabaja:** $H_0: p_{MH} = p_{HT}$ frente a $H_1: p_{MH} \neq p_{HT}$.
-- **Hombre que trabaja vs. mujer que trabaja:** $H_0: p_{HT} = p_{MT}$ frente a $H_1: p_{HT} \neq p_{MT}$.
-- **Mujeres vs. hombres:** $H_0: p_{M} = p_{H}$ frente a $H_1: p_{M} \neq p_{H}$.
-
-El estadístico de prueba es
-$$Z = \frac{\hat{p}_1-\hat{p}_2}{\sqrt{\hat{p}(1-\hat{p})\left(\frac{1}{n_1}+\frac{1}{n_2}\right)}}, \qquad \hat{p}=\frac{x_1+x_2}{n_1+n_2},$$
-y con $\alpha = 0.04$ se rechaza $H_0$ si $|Z| > z_{0.98} = `r fmt(qnorm(1 - alpha_val / 2), 3)`$ (equivalente a $p \le 0.04$). La proporción de quienes no se perciben lectores es el complemento, por lo que da exactamente el mismo valor $p$ y no se repite. Las pruebas se hacen con `prop.test(c(x1, x2), c(n1, n2), alternative = "two.sided", correct = FALSE)`.
-
-```{r tabla-prop}
-# Tablas de contingencia en L
-t_aut  <- table(L$Grupo, L$Aut)
-t_sexo <- table(L$Sexo, L$Aut)
-t_cond <- table(L$Cond_lab, L$Aut)
-
-# Proporción que SE PERCIBE LECTOR en cada grupo (3 comparaciones) y por sexo
-pp_grupos <- do.call(rbind, lapply(pares, function(p)
-  prueba_prop(c(t_aut[p[1], si], t_aut[p[2], si]),
-              c(sum(t_aut[p[1], ]), sum(t_aut[p[2], ])),
-              paste(p[1], "-", p[2]))))
-
-pp_sexo <- prueba_prop(c(t_sexo["Mujer", si], t_sexo["Hombre", si]),
-                       c(sum(t_sexo["Mujer", ]), sum(t_sexo["Hombre", ])),
-                       "Mujer - Hombre")
-
-tp <- rbind(pp_grupos, pp_sexo)
-tp$Zcrit <- paste0("±", fmt(qnorm(1 - alpha_val / 2), 3))
-tp$Decision <- dec(tp$p)
-tp$p <- fp(tp$p)
-tp <- tp[, c("Comparacion", "n1", "n2", "p1", "p2", "Dif", "LI", "LS",
-             "Z", "Zcrit", "p", "Decision")]
-names(tp) <- c("Comparación", "n1", "n2", "% 1", "% 2", "Dif (pp)", "LI (pp)", "LS (pp)",
-               "Z", "Z crít.", "p", "Decisión")
-tab_ancha(tp, paste0("Pruebas de dos proporciones: % que se percibe lector (base L: lectores de revistas; alpha = 0.04). % 1 y % 2 = porcentaje en el grupo 1 y 2; Dif, LI y LS = diferencia e IC al ", ic_txt,
-                     " en puntos porcentuales (pp); Z crít. = valor crítico"),
-          digits = 2)
-```
-
-#### Interpretación {-}
-
-<!-- Escribe aquí tu interpretación de las proporciones. -->
-
-### Prueba de hipótesis de independencia (ji cuadrada) entre la autopercepción y el sexo, y entre la autopercepción y la condición laboral
-
-Se plantean dos pruebas:
-
-- **Autopercepción lectora y sexo:** $H_0$: la autopercepción lectora y el sexo son independientes, frente a $H_1$: la autopercepción lectora y el sexo no son independientes (están asociados).
-- **Autopercepción lectora y condición laboral (trabaja u hogar):** $H_0$: la autopercepción lectora y la condición laboral son independientes, frente a $H_1$: la autopercepción lectora y la condición laboral no son independientes (están asociadas).
-
-Con `chisq.test` (sin corrección de continuidad), las frecuencias esperadas son $E_{ij}=\frac{(\text{total fila } i)(\text{total columna } j)}{n}$, el estadístico es $Q=\sum\frac{(O_{ij}-E_{ij})^2}{E_{ij}}\sim\chi^2_{(r-1)(c-1)}$ y con $\alpha = 0.04$ se rechaza $H_0$ si $Q>\chi^2_{0.96,\,gl}$ (equivalente a $p \le 0.04$). Se agrega la V de Cramér como medida del tamaño de la asociación.
+**Anexo 5. Frecuencias observadas de las pruebas ji cuadrada.**
 
 ```{r tablas-chi}
 # Frecuencias observadas (base L)
@@ -529,64 +634,6 @@ kable(as.data.frame.matrix(t_sexo),
       caption = "Frecuencias observadas: sexo x autopercepción lectora (base L: lectores de revistas)")
 kable(as.data.frame.matrix(t_cond),
       caption = "Frecuencias observadas: condición laboral x autopercepción lectora (base L: lectores de revistas)")
+kable(as.data.frame.matrix(t_aut),
+      caption = "Frecuencias observadas: grupo x autopercepción lectora (base L: lectores de revistas)")
 ```
-
-```{r resumen-chi}
-# Pruebas con chisq.test (base L)
-chi_sexo <- chisq.test(t_sexo, correct = FALSE)
-chi_cond <- chisq.test(t_cond, correct = FALSE)
-
-chi_aut <- rbind(chi_fila(chi_sexo, "Sexo x autopercepción"),
-                 chi_fila(chi_cond, "Condición laboral x autopercepción"))
-
-res_chi <- data.frame(Prueba = chi_aut$Prueba, n = chi_aut$n, gl = chi_aut$gl,
-                      Crítico = round(chi_aut$crit, 3), Q = round(chi_aut$q, 3),
-                      p = fp(chi_aut$p), V = round(chi_aut$V, 3),
-                      `Esp. mín.` = round(chi_aut$Esp_min, 1),
-                      Decisión = dec(chi_aut$p),
-                      check.names = FALSE, stringsAsFactors = FALSE)
-tab_ancha(res_chi, "Pruebas ji cuadrada de independencia con la autopercepción lectora (base L: lectores de revistas; alpha = 0.04). Crítico = valor crítico; Q = estadístico; V = V de Cramér; Esp. mín. = menor frecuencia esperada",
-          digits = 3)
-```
-
-#### Interpretación {-}
-
-<!-- Escribe aquí tu interpretación de las pruebas de independencia. Recuerda que "hogar" solo incluye mujeres, mientras que "trabaja" mezcla hombres y mujeres. -->
-
-## Verificación de supuestos
-
-<!-- Se verifican los supuestos de los modelos probabilísticos usados: normalidad (o tamaño de muestra suficiente) para los intervalos de confianza de medias, independencia de las observaciones, homogeneidad de varianzas si aplica, y número de observaciones esperadas por casilla (mayor a 5) en la ji cuadrada y en las pruebas de proporciones. -->
-
-# Discusión y conclusiones
-
-## Integración de los resultados
-
-<!-- Integra la información obtenida en el análisis de datos (descriptivo e inferencial). -->
-
-## Limitaciones del análisis
-
-<!-- Incluye las limitaciones del análisis y los supuestos de las pruebas realizadas. -->
-
-## Nuevas preguntas de investigación
-
-<!-- Plantea nuevas preguntas de investigación que surgieron a partir del análisis. -->
-
-## Qué se pudo y qué no se pudo responder
-
-<!-- Indica qué de la pregunta rectora sí se pudo responder con el análisis y qué no fue posible. -->
-
-## Recomendaciones
-
-<!-- Recomendaciones fundamentadas en el estudio y consecuencias de no atenderlas. Las conclusiones deben sustentarse en el análisis de los datos o en referencias bibliográficas citadas. -->
-
-## Recomendaciones hacia nosotros mismos
-
-<!-- Recomendaciones hacia el propio equipo que se derivan de la investigación, si las hay. -->
-
-# Referencias
-
-<!-- Formato APA. Incluye: la referencia completa de la base de datos; al menos 2 artículos o libros; a lo más 2 páginas web (aparte de la base de datos), con autor e información del autor. Todas las referencias deben estar citadas en el texto. -->
-
-# Anexos
-
-<!-- Liga web a una carpeta (Drive o notebook en web) con los documentos de análisis (R, Python o ambos) y el archivo de la base de datos. Incluye los anexos necesarios para información extensa que se menciona en el cuerpo del reporte; no deben incluirse tablas o gráficos que no se mencionen o justifiquen en el cuerpo. -->
