@@ -594,7 +594,9 @@ Con base en estos resultados, se propone:
 2. **Facilitar el acceso a materiales diversos y espacios de lectura.**
 3. **Diseñar actividades flexibles que consideren distintas disponibilidades de tiempo**, pues los grupos difieren en los minutos continuos que dedican a leer y las mujeres dedicadas al hogar son quienes leen menos minutos seguidos.
 
-La propuesta busca ampliar las oportunidades de lectura y su reconocimiento, y deberá evaluarse para conocer sus resultados. Así se evita que las políticas traten a todos por igual, sin responder a lo que cada persona y grupo social requiere (Ocampo y López, 2020).
+De manera complementaria, cabe añadir que también se acudió a la FIL Monterrey 2026 que se celebró desde el sábado 10 de octubre hasta el domingo 18 , y se observaron varias estrategias implementadas por dos grupos expositores: TEC de Monterrey y CONARTE. el Tec de Monterrey fomentó el hábito de lectura mediante la impartición de diálogos y conferencias con expertos en diversas disciplinas académicas, logrando acercar a las juventudes al conocimiento académico de manera presencial. A su vez, el gobierno de Nuevo León por medio del grupo CONARTE se encargó de fomentar sus grupos de lectura semanales ubicados en el centro de Monterrey para difundir la lectura entre las juventudes y adultos.
+La propuesta busca ampliar las oportunidades de lectura y su reconocimiento, y deberá evaluarse para conocer sus resultados. Así se evita que las políticas traten a todos por igual, sin responder a lo que cada persona y grupo social requiere.
+
 
 ## Recomendaciones hacia nosotros mismos
 
@@ -670,3 +672,23 @@ tab_ancha(emb_tab,
                  " registros del archivo. El porcentaje es sobre el total de registros"),
           digits = 1)
 ```
+
+\newpage
+
+# Declaratoria de uso de IA 
+
+\textbf{(1) Herramienta utilizada:} Claude y Gemini.
+
+\textbf{(2) Uso realizado:}
+\begin{itemize}
+  \item Búsqueda de artículos para el marco teórico.
+  \item Formato y diseño visual de tablas y gráficos.
+  \item Optimización de código: Primero se evaluaron los supuestos estadísticos y se eligió, mediante el propio criterio y el formulario del curso, la ecuación, el tipo de prueba y la línea de código exacta a aplicar (por ejemplo, \texttt{z.test} o \texttt{prop.test} de la librería \texttt{BSDA}). Una vez tomada esa decisión, se le compartía esa línea de código a la IA únicamente para que la convirtiera en una función y evitar así repetir código al extraer los datos hacia las tablas de resumen. La IA no eligió el método ni ideó los cálculos, solamente estructuró las funciones en código según las decisiones y líneas proporcionadas.
+  
+\end{itemize}
+
+\textbf{(3) Secciones donde se utilizó:} Marco teórico, bloques de código y visualización (tablas y gráficos).
+
+\textbf{(4) Validación realizada por los estudiantes:} Se verificó que cada función mantuviera la lógica estadística seleccionada, se comprobaron manualmente los resultados en las tablas y se revisó la pertinencia de las fuentes teóricas.
+
+\textbf{(5) Confirmación de revisión, verificación y responsabilidad:} Se confirma la revisión, verificación y validación de todo el trabajo, asumiendo la total responsabilidad del contenido final entregado.
