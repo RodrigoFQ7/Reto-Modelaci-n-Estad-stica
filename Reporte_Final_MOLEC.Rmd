@@ -409,6 +409,8 @@ hist(L$P26[L$P26 <= 180], breaks = seq(0, 180, 10), col = "#00BFC480",
 par(op)
 ```
 
+La Figura \ref{fig:fig-hist} muestra que las dos variables son asimétricas, con una cola larga hacia la derecha. En $P10$, la mayoría leyó pocas revistas: el valor más común es 2 y el 74 % leyó entre 1 y 3 revistas en los últimos tres meses. Aun así, hay algunos casos muy altos, con un máximo de 70, que elevan la media a 3.3 mientras la mediana se queda en 2. En $P26$ pasa algo parecido, ya que la mediana es de 30 minutos y el 92 % lee 60 minutos seguidos o menos, pero hay respuestas de hasta 300 minutos. Además, las respuestas se concentran en números redondos como 20, 30 y 60 minutos, lo que indica que las personas contestan de forma aproximada, tal como lo pide la pregunta.
+
 ```{r tab-desc-p10}
 # Descriptivos de P10 por grupo y autopercepción (base L)
 tab_ancha(desc_tabla("P10")[, -1],
@@ -419,6 +421,8 @@ tab_ancha(desc_tabla("P10")[, -1],
 ```{r fig-p10, fig.height=2.2, fig.pos="H", fig.cap="Número de revistas leídas (P10) según autopercepción y grupo (lectores de revistas; se omiten del eje los valores mayores a 15; los puntos son personas)"}
 cajas("P10", ylim = c(0, 15), ylab = "Revistas (últimos 3 meses)")
 ```
+
+La Tabla \ref{tab:tab-desc-p10} y la Figura \ref{fig:fig-p10} comparan el número de revistas por grupo y autopercepción. La mediana es de 2 revistas en las seis combinaciones y las cajas de los tres grupos son muy parecidas, así que la persona típica lee casi lo mismo sin importar su grupo. Las diferencias aparecen en la media y en la dispersión. Quienes acostumbran leer tienen medias de 3.3 a 3.6 revistas, y quienes no, de 2.3 a 3.1, pero esa distancia se debe sobre todo a unos pocos lectores con valores muy altos, de hasta 60 o 70 revistas. Por eso también tienen una desviación estándar mayor, que llega a 5.6 revistas en los hombres que trabajan. A simple vista, los grupos no se distinguen en cuántas revistas leen, y esto se revisa con los intervalos de confianza de la sección siguiente.
 
 ```{r tab-desc-p26}
 # Descriptivos de P26 por grupo y autopercepción (base L)
@@ -432,7 +436,7 @@ cajas("P26", ylim = c(0, 120), ylab = "Minutos continuos")
 ```
 
 
-El número de revistas es asimétrico: la mediana es de 2 en todas las celdas, las medias van de 2.3 a 3.6 y los máximos llegan a 70 (ver los histogramas). Los minutos continuos también lo son: la mediana es de 30 minutos entre quienes acostumbran leer y de 20 a 25 entre quienes no, y las medias van de 23.5 a 46.8. Así, quienes no acostumbran leer leen un número de revistas parecido, pero en sesiones más cortas. La dispersión es mayor en los hombres que trabajan, sobre todo entre quienes acostumbran leer (desviación estándar de 5.6 revistas y 40.2 minutos).
+La Tabla \ref{tab:tab-desc-p26} y la Figura \ref{fig:fig-p26} comparan los minutos continuos de lectura, y aquí sí se ven diferencias. Quienes acostumbran leer tienen una mediana de 30 minutos en los tres grupos, mientras que quienes no acostumbran leer tienen una mediana de 20 a 25 minutos. Es decir, leen un número de revistas parecido, pero en sesiones más cortas. Entre quienes acostumbran leer, la caja de las mujeres del hogar llega a 40 minutos y la de los otros dos grupos llega a 60, y las medias siguen el mismo orden, pues son 35.7 minutos en las mujeres del hogar, 40.9 en las mujeres que trabajan y 46.8 en los hombres que trabajan. Este último grupo es también el más disperso, con una desviación estándar de 40.2 minutos y un máximo de 300. Estas diferencias son descriptivas, y su significancia se evalúa en la sección siguiente.
 
 ### Intervalos de confianza para la diferencia de medias entre grupos
 
@@ -481,7 +485,7 @@ En minutos, los tres intervalos excluyen el 0 (la figura los muestra gráficamen
 
 ### Análisis descriptivo (proporciones en la autopercepción lectora)
 
-```{r fig-aut-L, fig.height=2, fig.pos="H", fig.cap="Porcentaje que Se percibe lector y que no Se percibe lector, por grupo (lectores de revistas)"}
+```{r fig-aut-L, fig.height=2, fig.pos="H", fig.cap="Porcentaje que Se percibe lector y que No se percibe lector, por grupo (lectores de revistas)"}
 # Porcentaje de cada categoría de autopercepción dentro de cada grupo (base L)
 d_aut <- as.data.frame(prop.table(table(L$Grupo, L$Aut), 1))
 names(d_aut) <- c("Grupo", "Aut", "Prop")
@@ -493,7 +497,7 @@ ggplot(d_aut, aes(x = Pct, y = Grupo, fill = Aut)) +
   geom_text(aes(label = paste0(fmt(Pct, 1), " %"), color = Aut),
             position = position_stack(vjust = 0.5, reverse = TRUE), size = 3) +
   scale_fill_manual(values = c("Se percibe lector" = "#2a78d6", "No se percibe lector" = "#eb6834"),
-                    labels = c("Se percibe lector (H_LEC = 1)", "No e percibe lector (H_LEC = 3)")) +
+                    labels = c("Se percibe lector (H_LEC = 1)", "No se percibe lector (H_LEC = 3)")) +
   scale_color_manual(values = c("Se percibe lector" = "white", "No se percibe lector" = "black"), guide = "none") +
   labs(x = "% dentro del grupo", y = NULL, fill = NULL) +
   theme_minimal() +
@@ -501,6 +505,7 @@ ggplot(d_aut, aes(x = Pct, y = Grupo, fill = Aut)) +
         panel.grid.minor = element_blank())
 ```
 
+La Figura \ref{fig:fig-aut-L} es parte del análisis descriptivo, porque solo muestra los porcentajes observados entre los lectores de revistas. En los tres grupos la mayoría dice que acostumbra leer. El porcentaje es parecido entre las mujeres del hogar, con 82.0 %, y las mujeres que trabajan, con 80.7 %, y es más alto en los hombres que trabajan, con 87.5 %. Visto al revés, entre el 12.5 % y el 19.3 % de quienes leyeron revistas no se reconoce como lector. Para saber si estas diferencias son significativas se usa la prueba de la sección siguiente.
 
 ### Prueba de hipótesis para la diferencia de proporciones en la autopercepción lectora
 
@@ -537,6 +542,7 @@ tab_ancha(tp, paste0("Pruebas de dos proporciones: % que se percibe lector (lect
           digits = 2)
 ```
 
+En la Tabla \ref{tab:tabla-prop} hay una parte descriptiva y una inferencial. Las columnas % 1, % 2 y Dif son descriptivas, porque solo resumen lo que pasó en la muestra, igual que la Figura \ref{fig:fig-aut-L}. La parte inferencial está en los límites inferior y superior, LI y LS, que forman el intervalo de confianza de 96 % para la diferencia, y en el valor p, que junto con Z indica si se rechaza $H_0$. Cuando el intervalo incluye el 0 y el valor p es mayor que 0.04, no hay evidencia de que las proporciones sean distintas.
 
 Entre los lectores de revistas, los hombres que trabajan se perciben lectores más a menudo (87.5 %) que las mujeres que trabajan (80.7 %): la diferencia de 6.8 pp es significativa ($Z = 2.76 > 2.054$, $p = 0.0058$). Entre las mujeres del hogar (82.0 %) y las mujeres que trabajan no hay diferencia ($Z = 0.42$, $p = 0.6714$). La comparación mujer hogar - hombre trabaja queda en el límite: $|Z| = 2.03$ no alcanza el valor crítico ($p = 0.0428$) y el IC llega a +0.3 pp. Por sexo, las mujeres se perciben lectoras 6.3 pp menos que los hombres ($p = 0.0047$). Entre quienes no acostumbran leer, los hombres que trabajan son pocos (58), por lo que su porcentaje es menos preciso.
 
@@ -569,17 +575,9 @@ Tampoco es posible determinar causalidad, ya que el estudio es observacional, ni
 
 ## Limitaciones del análisis
 
-Este análisis tiene varias limitaciones. Primero, solo incluye a quienes leyeron revistas (base L), por lo que las conclusiones no aplican a quienes leen otros materiales. Además, se excluyeron las personas con $H\_LEC$ igual a 2 y 4, de modo que la autopercepción lectora es una variable construida a partir de esa clasificación.
+Este análisis tiene limitaciones de alcance y de método. En cuanto al alcance, solo se estudió a quienes leyeron revistas, así que las conclusiones no aplican a quienes solo leen libros, periódicos u otros materiales. Al restringir el análisis a este grupo también puede haber un efecto de selección, porque quienes leen revistas no necesariamente se parecen al resto de las personas de su grupo. Además, se dejaron fuera las categorías 2 y 4 de $H\_LEC$, es decir, a quienes solo leen materiales que la MOLEC no considera y a quienes no leen. Los hombres dedicados al hogar eran muy pocos para analizarse, solo 34 personas, y quedaron fuera. Por eso el grupo de hogar solo incluye mujeres y no es posible separar por completo el efecto del sexo y el de la ocupación. Tampoco se tomaron en cuenta la edad ni la escolaridad, que podrían influir en la lectura, y hay que recordar que $P26$ mide los minutos continuos de lectura de cualquier material y no solo de revistas.
 
-Segundo, no se usaron los factores de expansión de la MOLEC. Así que los resultados describen la muestra y no a la población.
-
-Tercero, el grupo "hogar" solo contiene mujeres, porque los hombres dedicados al hogar eran una cifra muy pequeña (34 personas) para analizar y quedaron fuera. Por ello el efecto del sexo y el de la ocupación no pueden separarse por completo.
-
-Cuarto, la variable $P26$ mide minutos continuos de lectura de cualquier material, no solo de revistas.
-
-Quinto, hay asimetría fuerte y valores extremos, ya que 7 valores de $P10$ superan el máximo del diccionario. Por lo que los intervalos con $z$ son aproximados y dependen del teorema central del límite. Tampoco se ajustó por pruebas múltiples, pues cada intervalo y prueba tiene 96 % de confianza por separado.
-
-Finalmente, al restringir a lectores de revistas quedan pocos hombres que no se perciben lectores (58 personas), lo que pudo generar un efecto de selección. Al ser un estudio observacional, los resultados son asociaciones y no se busca determinar causalidad.
+En cuanto al método, no se usaron los factores de expansión, así que los resultados describen la muestra y no a la población. Tampoco se hizo un ajuste por comparaciones múltiples, por lo que cada intervalo y cada prueba tiene 96 % de confianza por separado. Además, los datos son muy asimétricos y tienen valores extremos, como los 7 valores de $P10$ que superan el máximo del diccionario, así que los intervalos con z dependen del teorema central del límite y son aproximados. Algunos grupos también son pequeños, como los 58 hombres que trabajan y no se perciben lectores, por lo que sus porcentajes son menos precisos. Por último, el estudio es observacional, por lo que sus resultados muestran asociaciones y no causas.
 
 ## Nuevas preguntas de investigación
 
