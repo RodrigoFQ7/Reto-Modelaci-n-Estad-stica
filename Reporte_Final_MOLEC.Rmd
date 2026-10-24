@@ -480,11 +480,7 @@ En minutos, los tres intervalos excluyen el 0 (la figura los muestra gráficamen
 
 **¿Cómo difiere la autopercepción lectora entre los tres grupos?** Se compara la proporción de lectores de revistas que acostumbra leer ($H\_LEC = 1$) frente a quienes no acostumbran leer, aunque han leído ($H\_LEC = 3$).
 
-### Prueba de hipótesis para la diferencia de proporciones en la autopercepción lectora
-
-Sea $p$ la proporción de personas que se perciben lectoras entre los lectores de revistas. Para cada par (MH vs. MT, MH vs. HT, HT vs. MT y mujeres vs. hombres) se contrasta $H_0: p_1 = p_2$ frente a $H_1: p_1 \neq p_2$.
-
-Con $\alpha = 0.04$ y el estadístico $Z$ de la Metodología, se rechaza $H_0$ si $|Z| > z_{0.98} = `r fmt(qnorm(1 - alpha_val / 2), 3)`$ (equivalente a $p \le 0.04$). La proporción de quienes no se perciben lectores es el complemento, por lo que da el mismo valor $p$ y no se repite.
+### Análisis descriptivo (proporciones en la autopercepción lectora)
 
 ```{r fig-aut-L, fig.height=2, fig.pos="H", fig.cap="Porcentaje que Se percibe lector y que no Se percibe lector, por grupo (lectores de revistas)"}
 # Porcentaje de cada categoría de autopercepción dentro de cada grupo (base L)
@@ -505,6 +501,13 @@ ggplot(d_aut, aes(x = Pct, y = Grupo, fill = Aut)) +
   theme(legend.position = "bottom", panel.grid.major.y = element_blank(),
         panel.grid.minor = element_blank())
 ```
+
+
+### Prueba de hipótesis para la diferencia de proporciones en la autopercepción lectora
+
+Sea $p$ la proporción de personas que se perciben lectoras entre los lectores de revistas. Para cada par (MH vs. MT, MH vs. HT, HT vs. MT y mujeres vs. hombres) se contrasta $H_0: p_1 = p_2$ frente a $H_1: p_1 \neq p_2$.
+
+Con $\alpha = 0.04$ y el estadístico $Z$ de la Metodología, se rechaza $H_0$ si $|Z| > z_{0.98} = `r fmt(qnorm(1 - alpha_val / 2), 3)`$ (equivalente a $p \le 0.04$). La proporción de quienes no se perciben lectores es el complemento, por lo que da el mismo valor $p$ y no se repite.
 
 
 ```{r tabla-prop}
