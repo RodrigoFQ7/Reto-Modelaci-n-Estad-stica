@@ -557,25 +557,19 @@ Los resultados son asociaciones y no prueban que la ocupación o el sexo causen 
 
 ## Limitaciones del análisis
 
-- Solo incluye lectores de revistas (base L), por lo que las conclusiones no aplican a quienes leen otros materiales.
-- Se excluyen las categorías 2 y 4 de $H\_LEC$.
-- No hay factores de expansión, así que los resultados describen la muestra y no a la población.
-- "Hogar" incluye solo mujeres y los hombres dedicados al hogar quedan fuera, por lo que el sexo y la ocupación no pueden separarse por completo.
-- $P26$ mide minutos continuos de lectura de cualquier material, no solo de revistas.
-- No se ajustó por múltiples pruebas: cada intervalo y prueba tiene 96 % de confianza por separado.
-- Hay asimetría fuerte y valores extremos (7 valores de $P10$ superan el máximo del diccionario); los intervalos con z dependen del teorema central del límite y son aproximados.
-- Los resultados son observacionales.
+Este análisis tiene varias limitaciones: primero, solo incluye a quienes leyeron revistas (base L), por lo que las conclusiones no aplican a quienes leen otros materiales, y se excluyeron las personas con $H\_LEC$ igual a 2 y 4, de modo que la autopercepción lectora es una variable construida por nosotros a partir de esa clasificación. Segundo, no se usaron los factores de expansión de la MOLEC, así que los resultados describen la muestra y no a la población. Tercero, el grupo "hogar" solo contiene mujeres, porque los hombres dedicados al hogar eran una cifra muy pequeña (34 personas) para analizar, así que quedaron fuera; y por ello el efecto del sexo y el de la ocupación no pueden separarse por completo. Además, $P26$ mide minutos continuos de lectura de cualquier material, no solo de revistas. Cuarto, hay asimetría fuerte y valores extremos (7 valores de $P10$ superan el máximo del diccionario), por lo que los intervalos con $z$ son aproximados y dependen del teorema central del límite, y no se ajustó por pruebas múltiples, pues cada intervalo y prueba tiene 96 % de confianza por separado. Finalmente, al restringir a lectores de revistas quedan pocos hombres que no se perciben lectores (58 personas), lo que pudo generar un efecto de selección, y al ser un estudio observacional los resultados son asociaciones y no se busca determinar causalidad.
 
 ## Nuevas preguntas de investigación
 
+- ¿Cambian los patrones entre 2022, 2023 y 2024? La variable `anio` ya está en la base, y con levantamientos anteriores de la MOLEC se podría comparar la etapa pandémica con la postpandémica (como hicieron otros compañeros).
+- ¿Se mantienen las diferencias entre grupos al considerar la edad y la escolaridad, que pueden explicar parte de la brecha en minutos de lectura?
+- ¿Cambian los resultados al incluir a lectores de otros materiales (libros, periódicos o medios digitales) y no solo de revistas?
 - ¿Se mantienen estos patrones al usar los factores de expansión de la MOLEC?
-- ¿La diferencia en minutos entre quienes acostumbran leer y quienes no es distinta en cada grupo?
-- ¿Por qué los hombres que no acostumbran leer leen menos revistas que las mujeres en la misma situación?
-- ¿Qué tanto de la diferencia en minutos de lectura se relaciona con las horas de trabajo doméstico, por ejemplo al combinar con datos de uso del tiempo?
+- ¿Por qué los hombres que no se perciben lectores leen menos revistas que las mujeres en la misma situación?
 
 ## Qué se pudo y qué no se pudo responder
 
-Se pudo responder cómo se relacionan el sexo y la condición laboral con las prácticas de lectura de revistas: se asocian con los minutos continuos de lectura, pero no con el número de revistas. También se encontró una relación entre el sexo y la autopercepción entre los lectores de revistas, aunque no es posible afirmar que exista en la población, porque parece deberse a un efecto de selección y porque no se usaron factores de expansión. Tampoco es posible establecer causas, ya que el estudio es observacional, ni separar por completo el efecto del sexo y el de la ocupación, porque no hay hombres dedicados al hogar en el análisis.
+Se pudo responder cómo se relacionan el sexo y la condición laboral con las prácticas de lectura de revistas: se asocian con los minutos continuos de lectura, pero no con el número de revistas. También se encontró una relación entre el sexo y la autopercepción entre los lectores de revistas, aunque no es posible afirmar que exista en la población, porque parece deberse a un efecto de selección y porque no se usaron factores de expansión. Tampoco es posible determinar causalidad, ya que el estudio es observacional, ni separar por completo el efecto del sexo y el de la ocupación, porque no hay hombres dedicados al hogar en el análisis.
 
 ## Recomendaciones
 
