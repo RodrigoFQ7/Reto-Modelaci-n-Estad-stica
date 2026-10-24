@@ -409,7 +409,7 @@ hist(L$P26[L$P26 <= 180], breaks = seq(0, 180, 10), col = "#00BFC480",
 par(op)
 ```
 
-La Figura \ref{fig:fig-hist} muestra que las dos variables son asimétricas, con una cola larga hacia la derecha. En $P10$, la mayoría leyó pocas revistas: el valor más común es 2 y el 74 % leyó entre 1 y 3 revistas en los últimos tres meses. Aun así, hay algunos casos muy altos, con un máximo de 70, que elevan la media a 3.3 mientras la mediana se queda en 2. En $P26$ pasa algo parecido, ya que la mediana es de 30 minutos y el 92 % lee 60 minutos seguidos o menos, pero hay respuestas de hasta 300 minutos. Además, las respuestas se concentran en números redondos como 20, 30 y 60 minutos, lo que indica que las personas contestan de forma aproximada, tal como lo pide la pregunta.
+La Figura 1 muestra que las dos variables son asimétricas, con una cola larga hacia la derecha. En $P10$, la mayoría leyó pocas revistas: el valor más común es 2 y el 74 % leyó entre 1 y 3 revistas en los últimos tres meses. Aun así, hay algunos casos muy altos, con un máximo de 70, que elevan la media a 3.3 mientras la mediana se queda en 2. En $P26$ pasa algo parecido, ya que la mediana es de 30 minutos y el 92 % lee 60 minutos seguidos o menos, pero hay respuestas de hasta 300 minutos. Además, las respuestas se concentran en números redondos como 20, 30 y 60 minutos, lo que indica que las personas contestan de forma aproximada, tal como lo pide la pregunta.
 
 ```{r tab-desc-p10}
 # Descriptivos de P10 por grupo y autopercepción (base L)
@@ -422,7 +422,7 @@ tab_ancha(desc_tabla("P10")[, -1],
 cajas("P10", ylim = c(0, 15), ylab = "Revistas (últimos 3 meses)")
 ```
 
-La Tabla \ref{tab:tab-desc-p10} y la Figura \ref{fig:fig-p10} comparan el número de revistas por grupo y autopercepción. La mediana es de 2 revistas en las seis combinaciones y las cajas de los tres grupos son muy parecidas, así que la persona típica lee casi lo mismo sin importar su grupo. Las diferencias aparecen en la media y en la dispersión. Quienes acostumbran leer tienen medias de 3.3 a 3.6 revistas, y quienes no, de 2.3 a 3.1, pero esa distancia se debe sobre todo a unos pocos lectores con valores muy altos, de hasta 60 o 70 revistas. Por eso también tienen una desviación estándar mayor, que llega a 5.6 revistas en los hombres que trabajan. A simple vista, los grupos no se distinguen en cuántas revistas leen, y esto se revisa con los intervalos de confianza de la sección siguiente.
+La Tabla 1 y la Figura 2 comparan el número de revistas por grupo y autopercepción. La mediana es de 2 revistas en las seis combinaciones y las cajas de los tres grupos son muy parecidas, así que la persona típica lee casi lo mismo sin importar su grupo. Las diferencias aparecen en la media y en la dispersión. Quienes acostumbran leer tienen medias de 3.3 a 3.6 revistas, y quienes no, de 2.3 a 3.1, pero esa distancia se debe sobre todo a unos pocos lectores con valores muy altos, de hasta 60 o 70 revistas. Por eso también tienen una desviación estándar mayor, que llega a 5.6 revistas en los hombres que trabajan. A simple vista, los grupos no se distinguen en cuántas revistas leen, y esto se revisa con los intervalos de confianza de la sección siguiente.
 
 ```{r tab-desc-p26}
 # Descriptivos de P26 por grupo y autopercepción (base L)
@@ -436,7 +436,7 @@ cajas("P26", ylim = c(0, 120), ylab = "Minutos continuos")
 ```
 
 
-La Tabla \ref{tab:tab-desc-p26} y la Figura \ref{fig:fig-p26} comparan los minutos continuos de lectura, y aquí sí se ven diferencias. Quienes acostumbran leer tienen una mediana de 30 minutos en los tres grupos, mientras que quienes no acostumbran leer tienen una mediana de 20 a 25 minutos. Es decir, leen un número de revistas parecido, pero en sesiones más cortas. Entre quienes acostumbran leer, la caja de las mujeres del hogar llega a 40 minutos y la de los otros dos grupos llega a 60, y las medias siguen el mismo orden, pues son 35.7 minutos en las mujeres del hogar, 40.9 en las mujeres que trabajan y 46.8 en los hombres que trabajan. Este último grupo es también el más disperso, con una desviación estándar de 40.2 minutos y un máximo de 300. Estas diferencias son descriptivas, y su significancia se evalúa en la sección siguiente.
+La Tabla 2 y la Figura 3 comparan los minutos continuos de lectura, y aquí sí se ven diferencias. Quienes acostumbran leer tienen una mediana de 30 minutos en los tres grupos, mientras que quienes no acostumbran leer tienen una mediana de 20 a 25 minutos. Es decir, leen un número de revistas parecido, pero en sesiones más cortas. Entre quienes acostumbran leer, la caja de las mujeres del hogar llega a 40 minutos y la de los otros dos grupos llega a 60, y las medias siguen el mismo orden, pues son 35.7 minutos en las mujeres del hogar, 40.9 en las mujeres que trabajan y 46.8 en los hombres que trabajan. Este último grupo es también el más disperso, con una desviación estándar de 40.2 minutos y un máximo de 300. Estas diferencias son descriptivas, y su significancia se evalúa en la sección siguiente.
 
 ### Intervalos de confianza para la diferencia de medias entre grupos
 
@@ -505,7 +505,7 @@ ggplot(d_aut, aes(x = Pct, y = Grupo, fill = Aut)) +
         panel.grid.minor = element_blank())
 ```
 
-La Figura \ref{fig:fig-aut-L} es parte del análisis descriptivo, porque solo muestra los porcentajes observados entre los lectores de revistas. En los tres grupos la mayoría dice que acostumbra leer. El porcentaje es parecido entre las mujeres del hogar, con 82.0 %, y las mujeres que trabajan, con 80.7 %, y es más alto en los hombres que trabajan, con 87.5 %. Visto al revés, entre el 12.5 % y el 19.3 % de quienes leyeron revistas no se reconoce como lector. Para saber si estas diferencias son significativas se usa la prueba de la sección siguiente.
+La Figura 5 es parte del análisis descriptivo, porque solo muestra los porcentajes observados entre los lectores de revistas. En los tres grupos la mayoría dice que acostumbra leer. El porcentaje es parecido entre las mujeres del hogar, con 82.0 %, y las mujeres que trabajan, con 80.7 %, y es más alto en los hombres que trabajan, con 87.5 %. Visto al revés, entre el 12.5 % y el 19.3 % de quienes leyeron revistas no se reconoce como lector. Para saber si estas diferencias son significativas se usa la prueba de la sección siguiente.
 
 ### Prueba de hipótesis para la diferencia de proporciones en la autopercepción lectora
 
@@ -542,7 +542,7 @@ tab_ancha(tp, paste0("Pruebas de dos proporciones: % que se percibe lector (lect
           digits = 2)
 ```
 
-En la Tabla \ref{tab:tabla-prop} hay una parte descriptiva y una inferencial. Las columnas % 1, % 2 y Dif son descriptivas, porque solo resumen lo que pasó en la muestra, igual que la Figura \ref{fig:fig-aut-L}. La parte inferencial está en los límites inferior y superior, LI y LS, que forman el intervalo de confianza de 96 % para la diferencia, y en el valor p, que junto con Z indica si se rechaza $H_0$. Cuando el intervalo incluye el 0 y el valor p es mayor que 0.04, no hay evidencia de que las proporciones sean distintas.
+En la Tabla 4 hay una parte descriptiva y una inferencial. Las columnas % 1, % 2 y Dif son descriptivas, porque solo resumen lo que pasó en la muestra, igual que la Figura \ref{fig:fig-aut-L}. La parte inferencial está en los límites inferior y superior, LI y LS, que forman el intervalo de confianza de 96 % para la diferencia, y en el valor p, que junto con Z indica si se rechaza $H_0$. Cuando el intervalo incluye el 0 y el valor p es mayor que 0.04, no hay evidencia de que las proporciones sean distintas.
 
 Entre los lectores de revistas, los hombres que trabajan se perciben lectores más a menudo (87.5 %) que las mujeres que trabajan (80.7 %): la diferencia de 6.8 pp es significativa ($Z = 2.76 > 2.054$, $p = 0.0058$). Entre las mujeres del hogar (82.0 %) y las mujeres que trabajan no hay diferencia ($Z = 0.42$, $p = 0.6714$). La comparación mujer hogar - hombre trabaja queda en el límite: $|Z| = 2.03$ no alcanza el valor crítico ($p = 0.0428$) y el IC llega a +0.3 pp. Por sexo, las mujeres se perciben lectoras 6.3 pp menos que los hombres ($p = 0.0047$). Entre quienes no acostumbran leer, los hombres que trabajan son pocos (58), por lo que su porcentaje es menos preciso.
 
